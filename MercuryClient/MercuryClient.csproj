@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\Generic\Collection.cs" />
     <Compile Include="Windows\Controls\ControlExtension.cs" />
     <Compile Include="Collections\Generic\EventedList.cs" />
     <Compile Include="Windows\VisualStyles\GlassExtenderProvider.cs">
