@@ -19,6 +19,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Security.Permissions;
 using System.Windows.Forms;
 
 namespace DotNetApi.Windows.Controls.AeroWizard
@@ -252,6 +253,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// <returns>A <see cref="T:System.Windows.Forms.CreateParams" /> that contains the required creation parameters when the handle to the control is created.</returns>
 		protected override CreateParams CreateParams
 		{
+			[SecurityPermission(SecurityAction.LinkDemand, Flags=SecurityPermissionFlag.UnmanagedCode)]
 			get
 			{
 				CreateParams createParams = base.CreateParams;
@@ -360,7 +362,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		private void UpdateOwner()
 		{
 			if (Owner != null && this == Owner.SelectedPage)
-				Owner.UpdateButtons();
+				Owner.OnUpdateButtons();
 		}
 	}
 

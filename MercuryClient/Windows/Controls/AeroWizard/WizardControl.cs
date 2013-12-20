@@ -22,9 +22,9 @@ using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing;
 using System.Drawing.Design;
+using System.Security.Permissions;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using DotNetApi.Collections.Generic;
 using DotNetApi.Windows.Native;
 using DotNetApi.Windows.VisualStyles;
 
@@ -84,16 +84,18 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			OnRightToLeftChanged(EventArgs.Empty);
 
 			if (!Application.RenderWithVisualStyles)
-				titleBar.BackColor = System.Drawing.SystemColors.Control;
-			titleBar.SetTheme(VisualStyleElementEx.AeroWizard.TitleBar.Active);
-			header.SetTheme(VisualStyleElementEx.AeroWizard.HeaderArea.Normal);
-			contentArea.SetTheme(VisualStyleElementEx.AeroWizard.ContentArea.Normal);
-			commandArea.SetTheme(VisualStyleElementEx.AeroWizard.CommandArea.Normal);
+			{
+				this.titleBar.BackColor = SystemColors.Control;
+			}
+			this.titleBar.SetTheme(VisualStyleElementEx.AeroWizard.TitleBar.Active);
+			this.header.SetTheme(VisualStyleElementEx.AeroWizard.HeaderArea.Normal);
+			this.contentArea.SetTheme(VisualStyleElementEx.AeroWizard.ContentArea.Normal);
+			this.commandArea.SetTheme(VisualStyleElementEx.AeroWizard.CommandArea.Normal);
 
 			// Get localized defaults for button text
-			ResetBackButtonToolTipText();
-			ResetTitle();
-			ResetTitleIcon();
+			this.ResetBackButtonToolTipText();
+			this.ResetTitle();
+			this.ResetTitleIcon();
 
 			// Connect to page add and remove events to track property changes
 			this.Pages.BeforeCleared += this.OnPagesCleared;
@@ -101,6 +103,8 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			this.Pages.AfterItemRemoved += this.OnPagesItemRemoved;
 			this.Pages.AfterItemSet += this.OnPagesItemSet;
 		}
+
+		// Public properties.
 
 		/// <summary>
 		/// Occurs when the Cancel button has been clicked and the form is closing.
@@ -313,15 +317,27 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			}
 		}
 
+		// Internal properties.
+
+		/// <summary>
+		/// Gets the index of the selected page.
+		/// </summary>
 		internal int SelectedPageIndex
 		{
 			get { return this.pageContainer.SelectedPageIndex; }
 		}
 
+		// Private properties.
+
+		/// <summary>
+		/// Indicates whether the wizard uses the Aero style.
+		/// </summary>
 		private bool UseAeroStyle
 		{
 			get { return classicStyle == WizardClassicStyle.AeroStyle || (classicStyle == WizardClassicStyle.Automatic && DesktopWindowManager.CompositionSupported && Application.RenderWithVisualStyles); }
 		}
+
+		// Public methods.
 
 		/// <summary>
 		/// Signals the object that initialization is starting.
@@ -342,7 +358,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// </summary>
 		public void NextPage()
 		{
-			NextPage(null);
+			this.NextPage(null);
 		}
 
 		/// <summary>
@@ -444,9 +460,9 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// Raises the <see cref="E:System.Windows.Forms.Control.HandleCreated"/> event.
 		/// </summary>
 		/// <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
+		[EnvironmentPermission(SecurityAction.Demand)]
 		protected override void OnHandleCreated(EventArgs e)
 		{
-			System.Diagnostics.Debug.WriteLine("OnHandleCreated");
 			base.OnHandleCreated(e);
 			this.SetLayout();
 			if (isMin6 && !ControlExtensions.IsDesignMode(this))
@@ -532,7 +548,6 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 
 		private void ConfigureWindowFrame()
 		{
-			System.Diagnostics.Debug.WriteLine(string.Format("ConfigureWindowFrame: hasGlass={0},parentForm={1}", HasGlass(), parentForm == null ? "null" : parentForm.Name));
 			if (HasGlass())
 			{
 				titleBar.BackColor = Color.Black;
@@ -628,6 +643,11 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			OnSelectedPageChanged();
 		}
 
+		/// <summary>
+		/// An event handler called before the collection of pages has been cleared.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
 		private void OnPagesCleared(object sender, EventArgs e)
 		{
 			foreach (WizardPage page in this.Pages)
@@ -636,17 +656,32 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			}
 		}
 
-		private void OnPagesItemInserted(object sender, Collection<WizardPage>.ItemChangedEventArgs e)
+		/// <summary>
+		/// An event handler called after a page was inserted in the collection.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnPagesItemInserted(object sender, WizardPageCollection.ItemChangedEventArgs e)
 		{
 			e.Item.TextChanged += this.OnPageTextChanged;
 		}
 
-		private void OnPagesItemRemoved(object sender, Collection<WizardPage>.ItemChangedEventArgs e)
+		/// <summary>
+		/// An event handler called after a page was removed from the collection.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnPagesItemRemoved(object sender, WizardPageCollection.ItemChangedEventArgs e)
 		{
 			e.Item.TextChanged -= this.OnPageTextChanged;
 		}
 
-		private void OnPagesItemSet(object sender, Collection<WizardPage>.ItemSetEventArgs e)
+		/// <summary>
+		/// An event handler called when a page was set in the collection.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnPagesItemSet(object sender, WizardPageCollection.ItemSetEventArgs e)
 		{
 			if (null != e.OldItem) e.OldItem.TextChanged -= this.OnPageTextChanged;
 			if (null != e.NewItem) e.NewItem.TextChanged += this.OnPageTextChanged;
@@ -698,6 +733,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			titleImageIconSet = false;
 		}
 
+		[EnvironmentPermission(SecurityAction.LinkDemand, Unrestricted = true)]
 		private void SetLayout()
 		{
 			if (isMin6 && Application.RenderWithVisualStyles)

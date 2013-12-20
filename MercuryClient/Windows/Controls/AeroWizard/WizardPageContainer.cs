@@ -24,7 +24,6 @@ using System.ComponentModel.Design;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Windows.Forms;
-using DotNetApi.Collections.Generic;
 using DotNetApi.Windows.Native;
 
 namespace DotNetApi.Windows.Controls.AeroWizard
@@ -73,9 +72,10 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		public WizardPageContainer()
 		{
 			this.pages = new WizardPageCollection(this);
+			
 			this.pages.BeforeCleared += this.OnPagesCleared;
-			this.pages.AfterItemInserted += this.OnPagesAddItem;
-			this.pages.AfterItemRemoved += this.OnPagesRemoveItem;
+			this.pages.AfterItemInserted += this.OnPagesItemInserted;
+			this.pages.AfterItemRemoved += this.OnPagesItemRemoved;
 			this.pages.AfterItemSet += this.OnPagesItemSet;
 
 			this.OnRightToLeftChanged(EventArgs.Empty);
@@ -334,8 +334,6 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 				if (value != null && !Pages.Contains(value))
 					throw new ArgumentException("WizardPage is not in the Pages collection for the control.");
 
-				System.Diagnostics.Debug.WriteLine(string.Format("SelectPage: New={0},Prev={1}",
-					value == null ? "null" : value.Name, selectedPage == null ? "null" : selectedPage.Name));
 				if (value != selectedPage)
 				{
 					WizardPage prev = selectedPage;
@@ -358,8 +356,8 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 						selectedPage.BringToFront();
 						selectedPage.Focus();
 					}
-					UpdateButtons();
-					OnSelectedPageChanged();
+					this.OnUpdateButtons();
+					this.OnSelectedPageChanged();
 				}
 			}
 		}
@@ -410,22 +408,29 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// <exception cref="ArgumentException">When specifying a value for nextPage, it must already be in the Pages collection.</exception>
 		public virtual void NextPage(WizardPage nextPage, bool skipCommit = false)
 		{
+			// When in design mode.
 			if (ControlExtensions.IsDesignMode(this))
 			{
-				int idx = SelectedPageIndex;
-				if (idx < Pages.Count - 1)
-					SelectedPage = Pages[idx + 1];
+				// Get the current page.
+				int idx = this.SelectedPageIndex;
+				// Select the next page.
+				if (idx < this.Pages.Count - 1)
+				{
+					this.SelectedPage = this.Pages[idx + 1];
+				}
 				return;
 			}
 
 			if (skipCommit || SelectedPage.CommitPage())
 			{
-				pageHistory.Push(SelectedPage);
+				this.pageHistory.Push(SelectedPage);
 
 				if (nextPage != null)
 				{
 					if (!Pages.Contains(nextPage))
+					{
 						throw new ArgumentException("When specifying a value for nextPage, it must already be in the Pages collection.", "nextPage");
+					}
 					SelectedPage = nextPage;
 				}
 				else
@@ -442,7 +447,6 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 					// Set new SelectedPage value
 					SelectedPage = selNext;
 				}
-
 			}
 		}
 
@@ -532,9 +536,8 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// <summary>
 		/// Updates the buttons according to current sequence and history.
 		/// </summary>
-		protected internal void UpdateButtons()
+		protected internal void OnUpdateButtons()
 		{
-			System.Diagnostics.Debug.WriteLine(string.Format("UpdBtn: hstCnt={0},pgIdx={1}:{2},isFin={3}", pageHistory.Count, SelectedPageIndex, Pages.Count, selectedPage == null ? false : selectedPage.IsFinishPage));
 			if (selectedPage == null)
 			{
 				CancelButtonState = ControlExtensions.IsDesignMode(this) ? WizardCommandButtonState.Disabled : WizardCommandButtonState.Enabled;
@@ -659,7 +662,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 				if (Pages.Count > 0)
 					SelectedPage = Pages[0];
 				else
-					UpdateButtons();
+					OnUpdateButtons();
 				initialized = true;
 			}
 		}
@@ -674,26 +677,24 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			this.NextPage();
 		}
 
+		/// <summary>
+		/// An event handler called before the page collection has been cleared.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
 		private void OnPagesCleared(object sender, EventArgs e)
 		{
-			WizardPage curPage = selectedPage;
-			SelectedPage = null;
+			this.SelectedPage = null;
 			this.Controls.Clear();
-			foreach (var item in Pages)
-				OnPagesAddItemHandler(item, false);
-			if (Pages.Count > 0)
-				SelectedPage = Pages.Contains(curPage) ? curPage : Pages[0];
 		}
 
-		private void OnPagesAddItem(object sender, Collection<WizardPage>.ItemChangedEventArgs e)
+		private void OnPagesItemInserted(object sender, WizardPageCollection.ItemChangedEventArgs e)
 		{
-			this.OnPagesAddItemHandler(e.Item, !initializing);
+			this.OnPagesItemInserted(e.Item, !initializing);
 		}
 
-		private void OnPagesAddItemHandler(WizardPage item, bool selectAfterAdd)
+		private void OnPagesItemInserted(WizardPage item, bool selectAfterAdd)
 		{
-			System.Diagnostics.Debug.WriteLine(string.Format("AddPage: {0},sel={1}",
-				item == null ? "null" : item.Text, selectAfterAdd));
 			item.Owner = this;
 			item.Visible = false;
 			if (!this.Contains(item))
@@ -702,16 +703,16 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 				SelectedPage = item;
 		}
 
-		private void OnPagesRemoveItem(object sender, Collection<WizardPage>.ItemChangedEventArgs e)
+		private void OnPagesItemRemoved(object sender, WizardPageCollection.ItemChangedEventArgs e)
 		{
 			this.Controls.Remove(e.Item);
 			if (e.Item == selectedPage && Pages.Count > 0)
 				SelectedPage = Pages[e.Index == Pages.Count ? e.Index - 1 : e.Index];
 			else
-				UpdateButtons();
+				OnUpdateButtons();
 		}
 
-		private void OnPagesItemSet(object sender, Collection<WizardPage>.ItemSetEventArgs e)
+		private void OnPagesItemSet(object sender, WizardPageCollection.ItemSetEventArgs e)
 		{
 			throw new NotImplementedException();
 		}

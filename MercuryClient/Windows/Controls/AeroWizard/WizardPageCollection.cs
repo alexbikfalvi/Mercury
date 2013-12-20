@@ -17,14 +17,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-using DotNetApi.Collections.Generic;
-
 namespace DotNetApi.Windows.Controls.AeroWizard
 {
 	/// <summary>
 	/// A collection of <see cref="WizardPage"/> controls.
 	/// </summary>
-	public class WizardPageCollection : Collection<WizardPage>
+	public class WizardPageCollection : ComponentCollection<WizardPage>
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="WizardPageCollection"/> class.

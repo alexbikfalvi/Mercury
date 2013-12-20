@@ -90,7 +90,14 @@ namespace DotNetApi.Windows.VisualStyles
 				{
 					lock (DesktopWindowManager.sync)
 					{
-						try { ((EventHandler)eventHandlerList[keys[idx]]).Invoke(null, EventArgs.Empty); }
+						try
+						{
+							EventHandler handler = eventHandlerList[keys[idx]] as EventHandler;
+							if (null != handler)
+							{
+								handler.Invoke(null, EventArgs.Empty);
+							}
+						}
 						catch { };
 					}
 				}

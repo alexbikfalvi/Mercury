@@ -20,6 +20,7 @@
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using DotNetApi.Windows.Native;
@@ -126,16 +127,21 @@ namespace DotNetApi.Windows.VisualStyles
 		{
 			NativeMethods.Rect rc = new NativeMethods.Rect(bounds);
 			using (SafeGDIHandle hdc = new SafeGDIHandle(dc))
+			{
 				NativeMethods.DrawThemeTextEx(rnd.Handle, hdc, rnd.Part, rnd.State, text, text.Length, (int)flags, ref rc, ref options);
+			}
 			bounds = rc;
 		}
 
-		public static System.Windows.Forms.Padding GetMargins2(VisualStyleRenderer rnd, IDeviceContext dc, MarginProperty prop)
+		[EnvironmentPermission(SecurityAction.LinkDemand, Unrestricted = true)]
+		public static Padding GetMargins2(VisualStyleRenderer rnd, IDeviceContext dc, MarginProperty prop)
 		{
 			NativeMethods.Rect rc;
 			using (SafeGDIHandle hdc = new SafeGDIHandle(dc))
+			{
 				NativeMethods.GetThemeMargins(rnd.Handle, hdc, rnd.Part, rnd.State, (int)prop, IntPtr.Zero, out rc);
-			return new System.Windows.Forms.Padding(rc.Left, rc.Top, rc.Right, rc.Bottom);
+			}
+			return new Padding(rc.Left, rc.Top, rc.Right, rc.Bottom);
 		}
 
 		/// <summary>

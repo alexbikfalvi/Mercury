@@ -29,6 +29,7 @@ namespace MercuryClient
 		[STAThread]
 		static void Main()
 		{
+			System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new FormMain());

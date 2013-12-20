@@ -20,6 +20,7 @@
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 
 namespace DotNetApi.Windows.Native
 {
@@ -88,10 +89,12 @@ namespace DotNetApi.Windows.Native
 		}
 	}
 
+	
 	internal class SafeGDIHandle : SafeHandle
 	{
 		private IDeviceContext idc;
 
+		[EnvironmentPermission(SecurityAction.LinkDemand, Unrestricted = true)]
 		public SafeGDIHandle(IDeviceContext dc)
 			: base(IntPtr.Zero, true)
 		{
@@ -107,6 +110,7 @@ namespace DotNetApi.Windows.Native
 			get { return base.handle == IntPtr.Zero; }
 		}
 
+		[EnvironmentPermission(SecurityAction.LinkDemand, Unrestricted = true)]
 		public static implicit operator IntPtr(SafeGDIHandle h)
 		{
 			return h.DangerousGetHandle();

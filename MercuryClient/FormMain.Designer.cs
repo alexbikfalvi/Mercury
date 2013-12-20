@@ -29,8 +29,9 @@
 		private void InitializeComponent()
 		{
 			this.wizardControl = new DotNetApi.Windows.Controls.AeroWizard.WizardControl();
-			this.wizardPage1 = new DotNetApi.Windows.Controls.AeroWizard.WizardPage();
-			this.wizardPage2 = new DotNetApi.Windows.Controls.AeroWizard.WizardPage();
+			this.wizardPageStart = new DotNetApi.Windows.Controls.AeroWizard.WizardPage();
+			this.wizardPageRun = new DotNetApi.Windows.Controls.AeroWizard.WizardPage();
+			this.wizardPageFinish = new DotNetApi.Windows.Controls.AeroWizard.WizardPage();
 			((System.ComponentModel.ISupportInitialize)(this.wizardControl)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -38,29 +39,37 @@
 			// 
 			this.wizardControl.Location = new System.Drawing.Point(0, 0);
 			this.wizardControl.Name = "wizardControl";
-			this.wizardControl.Pages.Add(this.wizardPage1);
-			this.wizardControl.Pages.Add(this.wizardPage2);
-			this.wizardControl.Pages.Add(this.wizardPage1);
-			this.wizardControl.Pages.Add(this.wizardPage2);
-			this.wizardControl.Pages.Add(this.wizardPage1);
-			this.wizardControl.Pages.Add(this.wizardPage2);
+			this.wizardControl.Pages.AddRange(new DotNetApi.Windows.Controls.AeroWizard.WizardPage[] {
+            this.wizardPageStart,
+            this.wizardPageRun,
+            this.wizardPageFinish});
 			this.wizardControl.Size = new System.Drawing.Size(584, 412);
 			this.wizardControl.TabIndex = 0;
 			this.wizardControl.Title = "Mercury Client";
 			// 
-			// wizardPage1
+			// wizardPageStart
 			// 
-			this.wizardPage1.Name = "wizardPage1";
-			this.wizardPage1.Size = new System.Drawing.Size(537, 257);
-			this.wizardPage1.TabIndex = 0;
-			this.wizardPage1.Text = "Page Title";
+			this.wizardPageStart.AllowBack = false;
+			this.wizardPageStart.Name = "wizardPageStart";
+			this.wizardPageStart.Size = new System.Drawing.Size(537, 257);
+			this.wizardPageStart.TabIndex = 0;
+			this.wizardPageStart.Text = "Select your language and country";
 			// 
-			// wizardPage2
+			// wizardPageRun
 			// 
-			this.wizardPage2.Name = "wizardPage2";
-			this.wizardPage2.Size = new System.Drawing.Size(537, 257);
-			this.wizardPage2.TabIndex = 1;
-			this.wizardPage2.Text = "Page Title";
+			this.wizardPageRun.Name = "wizardPageRun";
+			this.wizardPageRun.Size = new System.Drawing.Size(552, 258);
+			this.wizardPageRun.TabIndex = 1;
+			this.wizardPageRun.Text = "Measuring the Internet";
+			// 
+			// wizardPageFinish
+			// 
+			this.wizardPageFinish.HelpText = "";
+			this.wizardPageFinish.IsFinishPage = true;
+			this.wizardPageFinish.Name = "wizardPageFinish";
+			this.wizardPageFinish.Size = new System.Drawing.Size(537, 257);
+			this.wizardPageFinish.TabIndex = 2;
+			this.wizardPageFinish.Text = "Page Title";
 			// 
 			// FormMain
 			// 
@@ -78,8 +87,9 @@
 		#endregion
 
 		private DotNetApi.Windows.Controls.AeroWizard.WizardControl wizardControl;
-		private DotNetApi.Windows.Controls.AeroWizard.WizardPage wizardPage1;
-		private DotNetApi.Windows.Controls.AeroWizard.WizardPage wizardPage2;
+		private DotNetApi.Windows.Controls.AeroWizard.WizardPage wizardPageStart;
+		private DotNetApi.Windows.Controls.AeroWizard.WizardPage wizardPageRun;
+		private DotNetApi.Windows.Controls.AeroWizard.WizardPage wizardPageFinish;
 
 	}
 }

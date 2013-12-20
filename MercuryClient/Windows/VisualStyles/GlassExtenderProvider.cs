@@ -115,7 +115,7 @@ namespace DotNetApi.Windows.VisualStyles
 		/// <returns>
 		/// true if this object can provide extender properties to the specified object; otherwise, false.
 		/// </returns>
-		bool IExtenderProvider.CanExtend(object form)
+		public bool CanExtend(object form)
 		{
 			return (form != this) && (form is Form);
 		}

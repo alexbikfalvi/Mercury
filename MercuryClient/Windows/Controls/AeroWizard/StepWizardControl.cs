@@ -20,7 +20,6 @@
 using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-using DotNetApi.Collections.Generic;
 
 namespace DotNetApi.Windows.Controls.AeroWizard
 {

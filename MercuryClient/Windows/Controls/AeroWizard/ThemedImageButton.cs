@@ -301,8 +301,6 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// <param name="bounds">The bounds.</param>
 		protected virtual void PaintButton(Graphics graphics, Rectangle bounds)
 		{
-			System.Diagnostics.Debug.WriteLine(string.Format("PaintButton: desMode:{0};vsEnabled:{4};vsOnOS:{5};btnState:{1};enabled:{2};imgCt:{3}", ControlExtensions.IsDesignMode(this), this.ButtonState, Enabled, base.ImageList != null ? base.ImageList.Images.Count : 0, Application.RenderWithVisualStyles, VisualStyleInformation.IsSupportedByOS));
-
 			if (InitializeRenderer())
 			{
 				if (OnGlass)
