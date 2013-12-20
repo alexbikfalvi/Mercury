@@ -283,7 +283,7 @@ namespace DotNetApi.Windows.VisualStyles
 		/// <returns><c>true</c> if is composition enabled; otherwise, <c>false</c>.</returns>
 		public static bool IsCompositionEnabled()
 		{
-			if (!System.IO.File.Exists(System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.System), NativeMethods.DWMAPI)))
+			if (!System.IO.File.Exists(System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.System), NativeMethods.dllDwmapi)))
 				return false;
 			int res = 0;
 			NativeMethods.DwmIsCompositionEnabled(ref res);

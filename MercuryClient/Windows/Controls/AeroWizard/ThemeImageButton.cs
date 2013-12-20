@@ -1,4 +1,23 @@
-﻿using System.ComponentModel;
+﻿/*
+ * Copyright (c) 2013 David Hall
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial
+ * portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
@@ -76,7 +95,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 				try
 				{
 					VisualStyleRenderer rnd = new VisualStyleRenderer(StyleClass, StylePart, (int)ButtonState);
-					if (ControlExtension.IsDesignMode(this) || !DesktopWindowManager.IsCompositionEnabled())
+					if (ControlExtensions.IsDesignMode(this) || !DesktopWindowManager.IsCompositionEnabled())
 					{
 						rnd.DrawParentBackground(graphics, bounds, this);
 						rnd.DrawBackground(graphics, bounds);
@@ -92,24 +111,6 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			else
 			{
 				base.PaintButton(graphics, bounds);
-				/*Rectangle sr = this.ClientRectangle;
-				sr.Offset(0, sr.Height * ((int)ButtonState - 1));
-				graphics.Clear(this.Parent.BackColor);
-				if (imageStrip != null)
-				{
-					Bitmap bmp = imageStrip.Clone(sr, imageStrip.PixelFormat);
-					if (this.IsDesignMode() || !DesktopWindowManager.IsCompositionEnabled())
-					{
-						base.ImageList.Draw(graphics, bounds.X, bounds.Y, bounds.Width, bounds.Height, ((int)ButtonState - 1));
-					}
-					else
-					{
-						VisualStyleRendererExtender.DrawGlassImage(null, graphics, bounds, bmp);
-					}
-				}
-				else
-					using (Brush br = new SolidBrush(this.BackColor))
-						graphics.FillRectangle(br, sr);*/
 			}
 		}
 	}

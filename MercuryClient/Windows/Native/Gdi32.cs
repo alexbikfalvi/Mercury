@@ -27,27 +27,27 @@ namespace DotNetApi.Windows.Native
 	/// </summary>
 	internal static partial class NativeMethods
 	{
-		const string GDI32 = "gdi32.dll";
+		internal const string dllGdi32 = "gdi32.dll";
 
-		[DllImport(GDI32, ExactSpelling = true, SetLastError = true)]
+		[DllImport(NativeMethods.dllGdi32, ExactSpelling = true, SetLastError = true)]
 		public static extern IntPtr CreateCompatibleDC(IntPtr hDC);
 
-		[DllImport(GDI32, ExactSpelling = true, SetLastError = true)]
+		[DllImport(NativeMethods.dllGdi32, ExactSpelling = true, SetLastError = true)]
 		public static extern IntPtr SelectObject(IntPtr hDC, IntPtr hObject);
 
-		[DllImport(GDI32, ExactSpelling = true, SetLastError = true)]
+		[DllImport(NativeMethods.dllGdi32, ExactSpelling = true, SetLastError = true)]
 		public static extern bool DeleteObject(IntPtr hObject);
 
-		[DllImport(GDI32, ExactSpelling = true, SetLastError = true)]
+		[DllImport(NativeMethods.dllGdi32, ExactSpelling = true, SetLastError = true)]
 		public static extern bool DeleteDC(IntPtr hdc);
 
-		[DllImport(GDI32, ExactSpelling = true, SetLastError = true)]
+		[DllImport(NativeMethods.dllGdi32, ExactSpelling = true, SetLastError = true)]
 		public static extern bool BitBlt(IntPtr hdc, int nXDest, int nYDest, int nWidth, int nHeight, IntPtr hdcSrc, int nXSrc, int nYSrc, uint dwRop);
 
-		[DllImport(GDI32, ExactSpelling = true, SetLastError = true)]
+		[DllImport(NativeMethods.dllGdi32, ExactSpelling = true, SetLastError = true)]
 		public static extern IntPtr CreateDIBSection(IntPtr hdc, ref NativeMethods.BitmapInfo pbmi, uint iUsage, IntPtr ppvBits, IntPtr hSection, uint dwOffset);
 
-		[DllImport(GDI32, ExactSpelling = true, SetLastError = true)]
+		[DllImport(NativeMethods.dllGdi32, ExactSpelling = true, SetLastError = true)]
 		public static extern uint SetLayout(IntPtr hdc, uint dwLayout);
 	}
 }

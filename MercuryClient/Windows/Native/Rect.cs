@@ -21,6 +21,9 @@ using System.Runtime.InteropServices;
 
 namespace DotNetApi.Windows.Native
 {
+	/// <summary>
+	/// A class with native methods.
+	/// </summary>
 	internal static partial class NativeMethods
 	{
 		[StructLayout(LayoutKind.Sequential)]

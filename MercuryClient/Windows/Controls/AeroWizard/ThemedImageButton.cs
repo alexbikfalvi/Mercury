@@ -1,4 +1,23 @@
-﻿using System;
+﻿/*
+ * Copyright (c) 2013 David Hall
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial
+ * portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -119,7 +138,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// <value><c>true</c> if on glass; otherwise, <c>false</c>.</value>
 		private bool OnGlass
 		{
-			get { return !ControlExtension.IsDesignMode(this) && DesktopWindowManager.CompositionEnabled; }
+			get { return !ControlExtensions.IsDesignMode(this) && DesktopWindowManager.CompositionEnabled; }
 		}
 
 		/// <summary>
@@ -282,7 +301,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// <param name="bounds">The bounds.</param>
 		protected virtual void PaintButton(Graphics graphics, Rectangle bounds)
 		{
-			System.Diagnostics.Debug.WriteLine(string.Format("PaintButton: desMode:{0};vsEnabled:{4};vsOnOS:{5};btnState:{1};enabled:{2};imgCt:{3}", ControlExtension.IsDesignMode(this), this.ButtonState, Enabled, base.ImageList != null ? base.ImageList.Images.Count : 0, Application.RenderWithVisualStyles, VisualStyleInformation.IsSupportedByOS));
+			System.Diagnostics.Debug.WriteLine(string.Format("PaintButton: desMode:{0};vsEnabled:{4};vsOnOS:{5};btnState:{1};enabled:{2};imgCt:{3}", ControlExtensions.IsDesignMode(this), this.ButtonState, Enabled, base.ImageList != null ? base.ImageList.Images.Count : 0, Application.RenderWithVisualStyles, VisualStyleInformation.IsSupportedByOS));
 
 			if (InitializeRenderer())
 			{

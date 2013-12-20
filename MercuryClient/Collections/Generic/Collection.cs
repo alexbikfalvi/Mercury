@@ -18,13 +18,14 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace DotNetApi.Collections.Generic
 {
 	/// <summary>
 	/// A class representing a non-generic collection.
 	/// </summary>
-	public class Collection : IList, ICollection, IEnumerable
+	public class Collection<T> : CollectionBase, IList<T>, ICollection<T>, IEnumerable<T>
 	{
 		// Public delegates.
 
@@ -51,7 +52,7 @@ namespace DotNetApi.Collections.Generic
 			/// </summary>
 			/// <param name="index">The changed index.</param>
 			/// <param name="item">The changed item.</param>
-			public ItemChangedEventArgs(int index, object item)
+			public ItemChangedEventArgs(int index, T item)
 			{
 				this.Index = index;
 				this.Item = item;
@@ -66,7 +67,7 @@ namespace DotNetApi.Collections.Generic
 			/// <summary>
 			/// Gets the changed item.
 			/// </summary>
-			public object Item { get; private set; }
+			public T Item { get; private set; }
 		}
 
 		/// <summary>
@@ -80,7 +81,7 @@ namespace DotNetApi.Collections.Generic
 			/// <param name="index">The set index.</param>
 			/// <param name="oldItem">The old item.</param>
 			/// <param name="newItem">The new item.</param>
-			public ItemSetEventArgs(int index, object oldItem, object newItem)
+			public ItemSetEventArgs(int index, T oldItem, T newItem)
 			{
 				this.Index = index;
 				this.OldItem = oldItem;
@@ -96,22 +97,21 @@ namespace DotNetApi.Collections.Generic
 			/// <summary>
 			/// Gets the old item.
 			/// </summary>
-			public object OldItem { get; private set; }
+			public T OldItem { get; private set; }
 			/// <summary>
 			/// Gets the new item.
 			/// </summary>
-			public object NewItem { get; private set; }
+			public T NewItem { get; private set; }
 		}
 
-		private readonly ArrayList list;
 		private readonly object sync = new object();
 
 		/// <summary>
 		/// Creates a new collection with the default capacity.
 		/// </summary>
 		public Collection()
+			: base()
 		{
-			this.list = new ArrayList();
 		}
 
 		/// <summary>
@@ -119,8 +119,8 @@ namespace DotNetApi.Collections.Generic
 		/// </summary>
 		/// <param name="capacity">The capacity.</param>
 		public Collection(int capacity)
+			: base(capacity)
 		{
-			this.list = new ArrayList(capacity);
 		}
 
 		// Public events.
@@ -161,34 +161,18 @@ namespace DotNetApi.Collections.Generic
 		// Public properties.
 
 		/// <summary>
-		/// Gets the number of elements contained in the <see cref="T:System.Collections.ICollection"/>.
-		/// </summary>
-		int Count { get { return this.list.Count; } }
-		/// <summary>
-		/// Gets a value indicating whether access to the <see cref="T:System.Collections.ICollection"/> is synchronized (thread safe).
-		/// </summary>
-		bool IsSynchronized { get { return false; } }
-		/// <summary>
-		/// Gets an object that can be used to synchronize access to the <see cref="T:System.Collections.ICollection"/>.
-		/// </summary>
-		object SyncRoot { get { return this.sync; } }
-		/// <summary>
-		/// Gets a value indicating whether the <see cref="T:System.Collections.IList"/> has a fixed size.
-		/// </summary>
-		bool IsFixedSize { get { return false; } }
-		/// <summary>
 		/// Gets a value indicating whether the <see cref="T:System.Collections.IList"/> is read-only.
 		/// </summary>
-		bool IsReadOnly { get { return false; } }
+		public bool IsReadOnly { get { return false; } }
 		/// <summary>
 		/// Gets or sets the element at the specified index.
 		/// </summary>
 		/// <param name="index">The zero-based index of the element to get or set.</param>
 		/// <returns>The element at the specified index.</returns>
-		public object this[int index]
+		public T this[int index]
 		{
-			get { return this.list[index]; }
-			set { this.OnItemSet(index, value); }
+			get { return (T)this.List[index]; }
+			set { this.List[index] = value; }
 		}
 
 		// Public methods.
@@ -196,135 +180,178 @@ namespace DotNetApi.Collections.Generic
 		/// <summary>
 		/// Returns an enumerator that iterates through a collection.
 		/// </summary>
-		/// <returns> An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.</returns>
-		public IEnumerator GetEnumerator()
+		/// <returns> An <see cref="T:System.Collections.IEnumerator<T>"/> object that can be used to iterate through the collection.</returns>
+		public new IEnumerator<T> GetEnumerator()
 		{
-			return this.list.GetEnumerator();
+			return this.List.GetEnumerator() as IEnumerator<T>;
 		}
 
 		/// <summary>
-		/// Copies the elements of the <see cref="T:System.Collections.ICollection"/> to an <see cref="T:System.Array"/>, starting at a particular <see cref="T:System.Array"/> index.
+		/// Adds an item to the <see cref="T:System.Collections.Generic.ICollection<T>"/>.
 		/// </summary>
-		/// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of the elements copied from <see cref="T:System.Collections.ICollection"/>. <see cref="T:The System.Array"/> must have zero-based indexing.</param>
+		/// <param name="item">The object to add to the <see cref="T:System.Collections.Generic.ICollection<T>"/>.</param>
+		public void Add(T item)
+		{
+			this.List.Add(item);
+		}
+
+		/// <summary>
+		/// Determines whether the <see cref="T:System.Collections.Generic.ICollection<T>"/> contains a specific value.
+		/// </summary>
+		/// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.ICollection<T>"/>.</param>
+		/// <returns>True if item is found in the <see cref="T:System.Collections.Generic.ICollection<T>"/>; otherwise, false.</returns>
+		public bool Contains(T item)
+		{
+			return this.List.Contains(item);
+		}
+
+		/// <summary>
+		/// Copies the elements of the <see cref="T:System.Collections.Generic.ICollection<T>"/> to an System.Array, starting at a particular <see cref="T:System.Array"/> index.
+		/// </summary>
+		/// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of the elements copied.</param>
 		/// <param name="index">The zero-based index in array at which copying begins.</param>
-		public void CopyTo(Array array, int index)
+		public void CopyTo(T[] array, int index)
 		{
-			this.list.CopyTo(array, index);
+			this.List.CopyTo(array, index);
 		}
 
 		/// <summary>
-		/// Adds an item to the <see cref="T:System.Collections.IList"/>.
+		/// Removes the first occurrence of a specific object from the <see cref="T:System.Collections.Generic.ICollection<T>"/>.
 		/// </summary>
-		/// <param name="value">The <see cref="T:System.Object"/> to add to the <see cref="T:System.Collections.IList"/></param>
-		/// <returns>The position into which the new element was inserted.</returns>
-		public int Add(object value)
+		/// <param name="item">The object to remove from the <see cref="T:System.Collections.Generic.ICollection<T>"/>.</param>
+		/// <returns>true if item was successfully removed from the <see cref="T:System.Collections.Generic.ICollection<T>"/>, otherwise, false.</returns>
+		public bool Remove(T item)
 		{
-			// Raise the event.
-			if (null != this.BeforeItemInserted) this.BeforeItemInserted(this, new ItemChangedEventArgs())
-			int index = this.list.Add(value);
+			if (this.List.Contains(item))
+			{
+				this.List.Remove(item);
+				return true;
+			}
+			else return false;
 		}
 
-		//
-		// Summary:
-		//     Removes all items from the System.Collections.IList.
-		//
-		// Exceptions:
-		//   System.NotSupportedException:
-		//     The System.Collections.IList is read-only.
-		void Clear();
-		//
-		// Summary:
-		//     Determines whether the System.Collections.IList contains a specific value.
-		//
-		// Parameters:
-		//   value:
-		//     The System.Object to locate in the System.Collections.IList.
-		//
-		// Returns:
-		//     true if the System.Object is found in the System.Collections.IList; otherwise,
-		//     false.
-		bool Contains(object value);
-		//
-		// Summary:
-		//     Determines the index of a specific item in the System.Collections.IList.
-		//
-		// Parameters:
-		//   value:
-		//     The System.Object to locate in the System.Collections.IList.
-		//
-		// Returns:
-		//     The index of value if found in the list; otherwise, -1.
-		int IndexOf(object value);
-		//
-		// Summary:
-		//     Inserts an item to the System.Collections.IList at the specified index.
-		//
-		// Parameters:
-		//   index:
-		//     The zero-based index at which value should be inserted.
-		//
-		//   value:
-		//     The System.Object to insert into the System.Collections.IList.
-		//
-		// Exceptions:
-		//   System.ArgumentOutOfRangeException:
-		//     index is not a valid index in the System.Collections.IList.
-		//
-		//   System.NotSupportedException:
-		//     The System.Collections.IList is read-only.  -or- The System.Collections.IList
-		//     has a fixed size.
-		//
-		//   System.NullReferenceException:
-		//     value is null reference in the System.Collections.IList.
-		void Insert(int index, object value);
-		//
-		// Summary:
-		//     Removes the first occurrence of a specific object from the System.Collections.IList.
-		//
-		// Parameters:
-		//   value:
-		//     The System.Object to remove from the System.Collections.IList.
-		//
-		// Exceptions:
-		//   System.NotSupportedException:
-		//     The System.Collections.IList is read-only.  -or- The System.Collections.IList
-		//     has a fixed size.
-		void Remove(object value);
-		//
-		// Summary:
-		//     Removes the System.Collections.IList item at the specified index.
-		//
-		// Parameters:
-		//   index:
-		//     The zero-based index of the item to remove.
-		//
-		// Exceptions:
-		//   System.ArgumentOutOfRangeException:
-		//     index is not a valid index in the System.Collections.IList.
-		//
-		//   System.NotSupportedException:
-		//     The System.Collections.IList is read-only.  -or- The System.Collections.IList
-		//     has a fixed size.
-		void RemoveAt(int index);
+		/// <summary>
+		/// Determines the index of a specific item in the <see cref="T:System.Collections.Generic.IList<T>"/>
+		/// </summary>
+		/// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.IList<T>"/>.</param>
+		/// <returns>The index of item if found in the list; otherwise, -1.</returns>
+		public int IndexOf(T item)
+		{
+			return this.List.IndexOf(item);
+		}
 
+		/// <summary>
+		/// Inserts an item to the <see cref="T:System.Collections.Generic.IList<T>"/> at the specified index.
+		/// </summary>
+		/// <param name="index">The zero-based index at which item should be inserted.</param>
+		/// <param name="item">The object to insert into the <see cref="T:System.Collections.Generic.IList<T>"/>.</param>
+		public void Insert(int index, T item)
+		{
+			this.List.Insert(index, item);
+		}
 
 		// Protected methods.
 
 		/// <summary>
-		/// Sets the item at the specified index.
+		/// Performs additional custom processes when clearing the contents of the collection.
 		/// </summary>
-		/// <param name="index">The index.</param>
-		/// <param name="value">The value.</param>
-		protected virtual void OnItemSet(int index, object value)
+		protected override void OnClear()
 		{
-			// Save the old value.
-			object old = this.list[index];
-			// Call the event handler.
-			if (null != this.BeforeItemSet) this.BeforeItemSet(this, new ItemSetEventArgs(index, old, value));
-			// Set the item.
-			this.list[index] = value;
-			// Call the event handler.
-			if (null != this.AfterItemSet) this.AfterItemSet(this, new ItemSetEventArgs(index, old, value));
+			// Raise the event.
+			if (this.BeforeCleared != null) this.BeforeCleared(this, EventArgs.Empty);
+			// Call the base class method.
+			base.OnClear();
+		}
+
+		/// <summary>
+		/// Performs additional custom processes after clearing the contents of the collection.
+		/// </summary>
+		protected override void OnClearComplete()
+		{
+			// Raise the event.
+			if (this.AfterCleared != null) this.AfterCleared(this, EventArgs.Empty);
+			// Call the base class method.
+			base.OnClearComplete();
+		}
+
+		/// <summary>
+		/// Performs additional custom processes before inserting a new element into the collection.
+		/// </summary>
+		/// <param name="index">The zero-based index at which to insert value.</param>
+		/// <param name="value">The new value of the element at index.</param>
+		protected override void OnInsert(int index, object value)
+		{
+			// Raise the event.
+			if (this.BeforeItemInserted != null) this.BeforeItemInserted(this, new ItemChangedEventArgs(index, (T)value));
+			// Call the base class method.
+			base.OnInsert(index, value);
+		}
+
+		/// <summary>
+		/// Performs additional custom processes after inserting a new element into the collection.
+		/// </summary>
+		/// <param name="index">The zero-based index at which to insert value.</param>
+		/// <param name="value">The new value of the element at index.</param>
+		protected override void OnInsertComplete(int index, object value)
+		{
+			// Raise the event.
+			if (this.AfterItemInserted != null) this.AfterItemInserted(this, new ItemChangedEventArgs(index, (T)value));
+			// Call the base class method.
+			base.OnInsertComplete(index, value);
+		}
+
+		/// <summary>
+		/// Performs additional custom processes when removing an element from the collection.
+		/// </summary>
+		/// <param name="index">The zero-based index at which value can be found.</param>
+		/// <param name="value">The value of the element to remove from index.</param>
+		protected override void OnRemove(int index, object value)
+		{
+			// Raise the event.
+			if (this.BeforeItemRemoved != null) this.BeforeItemRemoved(this, new ItemChangedEventArgs(index, (T)value));
+			// Call the base class method.
+			base.OnRemove(index, value);
+		}
+
+		/// <summary>
+		/// Performs additional custom processes after removing an element from the collection.
+		/// </summary>
+		/// <param name="index">The zero-based index at which value can be found.</param>
+		/// <param name="value">The value of the element to remove from index.</param>
+		protected override void OnRemoveComplete(int index, object value)
+		{
+			// Raise the event.
+			if (this.AfterItemRemoved != null) this.AfterItemRemoved(this, new ItemChangedEventArgs(index, (T)value));
+			// Call the base class method.
+			base.OnRemoveComplete(index, value);
+		}
+
+		/// <summary>
+		/// Performs additional custom processes before setting a value in the collection.
+		/// </summary>
+		/// <param name="index">The zero-based index at which oldValue can be found.</param>
+		/// <param name="oldValue">The value to replace with newValue.</param>
+		/// <param name="newValue">The new value of the element at index.</param>
+		protected override void OnSet(int index, object oldValue, object newValue)
+		{
+			// Raise the event.
+			if (this.BeforeItemSet != null) this.BeforeItemSet(this, new ItemSetEventArgs(index, (T)oldValue, (T)newValue));
+			// Call the base class method.
+			base.OnSet(index, oldValue, newValue);
+		}
+
+		/// <summary>
+		/// Performs additional custom processes after setting a value in the collection.
+		/// </summary>
+		/// <param name="index">The zero-based index at which oldValue can be found.</param>
+		/// <param name="oldValue">The value to replace with newValue.</param>
+		/// <param name="newValue">The new value of the element at index.</param>
+		protected override void OnSetComplete(int index, object oldValue, object newValue)
+		{
+			// Raise the event.
+			if (this.AfterItemSet != null) this.AfterItemSet(this, new ItemSetEventArgs(index, (T)oldValue, (T)newValue));
+			// Call the base class method.
+			base.OnSetComplete(index, oldValue, newValue);
 		}
 	}
 }

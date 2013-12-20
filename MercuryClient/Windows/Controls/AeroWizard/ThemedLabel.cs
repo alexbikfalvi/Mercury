@@ -1,4 +1,23 @@
-﻿using System;
+﻿/*
+ * Copyright (c) 2013 David Hall
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial
+ * portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
@@ -10,7 +29,6 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 	/// <summary>
 	/// A Label containing some text that will be drawn with glowing border on top of the Glass Sheet effect.
 	/// </summary>
-	//[Designer("AeroWizard.Design.ThemedLabelDesigner")]
 	[DefaultProperty("Text")]
 	internal class ThemedLabel : Label
 	{
@@ -121,14 +139,14 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 					Rectangle ir = CalcImageRenderBounds(this.Image, r, base.RtlTranslateAlignment(this.ImageAlign));
 					if (this.ImageList != null && this.ImageIndex == 0)
 					{
-						if (vs != null && !ControlExtension.IsDesignMode(this) && DesktopWindowManager.IsCompositionEnabled())
+						if (vs != null && !ControlExtensions.IsDesignMode(this) && DesktopWindowManager.IsCompositionEnabled())
 							VisualStyleRendererExtension.DrawGlassIcon(vs, e.Graphics, r, this.ImageList, this.ImageIndex);
 						else
 							this.ImageList.Draw(e.Graphics, r.X, r.Y, r.Width, r.Height, this.ImageIndex);
 					}
 					else
 					{
-						if (vs != null && !ControlExtension.IsDesignMode(this) && DesktopWindowManager.IsCompositionEnabled())
+						if (vs != null && !ControlExtensions.IsDesignMode(this) && DesktopWindowManager.IsCompositionEnabled())
 							VisualStyleRendererExtension.DrawGlassImage(vs, e.Graphics, r, this.Image);
 						else
 							e.Graphics.DrawImage(this.Image, r);
@@ -138,11 +156,11 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 				// Draw text
 				if (this.Text.Length > 0)
 				{
-					if (ControlExtension.IsDesignMode(this) || vs == null || !DesktopWindowManager.IsCompositionEnabled())
+					if (ControlExtensions.IsDesignMode(this) || vs == null || !DesktopWindowManager.IsCompositionEnabled())
 					{
 						Brush br = DesktopWindowManager.IsCompositionEnabled() ? SystemBrushes.ActiveCaptionText : SystemBrushes.ControlText;
 						StringFormat sf = new StringFormat(StringFormat.GenericDefault);
-						if (ControlExtension.GetRightToLeftProperty(this) == System.Windows.Forms.RightToLeft.Yes) sf.FormatFlags |= StringFormatFlags.DirectionRightToLeft;
+						if (ControlExtensions.GetRightToLeftProperty(this) == System.Windows.Forms.RightToLeft.Yes) sf.FormatFlags |= StringFormatFlags.DirectionRightToLeft;
 						e.Graphics.DrawString(Text, Font, br, base.ClientRectangle, sf);
 					}
 					else
@@ -180,7 +198,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 				flags |= TextFormatFlags.HorizontalCenter;
 			if (showEllipsis)
 				flags |= TextFormatFlags.EndEllipsis;
-			if (ControlExtension.GetRightToLeftProperty(this) == RightToLeft.Yes)
+			if (ControlExtensions.GetRightToLeftProperty(this) == RightToLeft.Yes)
 				flags |= TextFormatFlags.RightToLeft;
 			if (!useMnemonic)
 				return (flags | TextFormatFlags.NoPrefix);

@@ -21,17 +21,11 @@ using System.Windows.Forms;
 
 namespace MercuryClient
 {
-	static class Program
+	public partial class FormMain : Form
 	{
-		/// <summary>
-		/// The main entry point for the application.
-		/// </summary>
-		[STAThread]
-		static void Main()
+		public FormMain()
 		{
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new FormMain());
+			InitializeComponent();
 		}
 	}
 }

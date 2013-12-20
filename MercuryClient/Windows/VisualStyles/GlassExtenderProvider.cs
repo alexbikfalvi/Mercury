@@ -160,7 +160,7 @@ namespace DotNetApi.Windows.VisualStyles
 			{
 				prop.GlassMargins = value;
 				form.Paint += new PaintEventHandler(form_Paint);
-				if (!ControlExtension.IsDesignMode(form))
+				if (!ControlExtensions.IsDesignMode(form))
 				{
 					form.MouseDown += new MouseEventHandler(form_MouseDown);
 					form.MouseMove += new MouseEventHandler(form_MouseMove);
@@ -238,7 +238,7 @@ namespace DotNetApi.Windows.VisualStyles
 		private void form_Resize(object sender, EventArgs e)
 		{
 			Form form = sender as Form;
-			if ((DesktopWindowManager.IsCompositionEnabled() && GetGlassEnabled(form)) || ControlExtension.IsDesignMode(form))
+			if ((DesktopWindowManager.IsCompositionEnabled() && GetGlassEnabled(form)) || ControlExtensions.IsDesignMode(form))
 				InvalidateNonGlassClientArea(form);
 		}
 
@@ -265,7 +265,7 @@ namespace DotNetApi.Windows.VisualStyles
 
 		private void GlassifyForm(Form form, Graphics g = null)
 		{
-			if (!(DesktopWindowManager.IsCompositionEnabled() && GetGlassEnabled(form)) && !ControlExtension.IsDesignMode(form))
+			if (!(DesktopWindowManager.IsCompositionEnabled() && GetGlassEnabled(form)) && !ControlExtensions.IsDesignMode(form))
 				return;
 
 			if (g == null) g = form.CreateGraphics();
@@ -284,7 +284,7 @@ namespace DotNetApi.Windows.VisualStyles
 				g.FillRegion(Brushes.Black, r);
 			}
 
-			if (!ControlExtension.IsDesignMode(form))
+			if (!ControlExtensions.IsDesignMode(form))
 				DesktopWindowManager.ExtendFrameIntoClientArea(form, prop.GlassMargins);
 		}
 

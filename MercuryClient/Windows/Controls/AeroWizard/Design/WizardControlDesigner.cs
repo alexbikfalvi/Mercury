@@ -1,14 +1,35 @@
-﻿using System;
+﻿/*
+ * Copyright (c) 2013 David Hall
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial
+ * portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+using System;
+using System.Collections;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing;
 using System.Drawing.Design;
+using System.Security.Permissions;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 
 namespace DotNetApi.Windows.Controls.AeroWizard.Design
 {
-	[System.Security.Permissions.PermissionSet(System.Security.Permissions.SecurityAction.Demand, Name = "FullTrust")]
+	[PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
 	[EditorBrowsable(EditorBrowsableState.Never)]
 	internal class WizardControlDesigner : ParentControlDesigner, IToolboxUser
 	{
@@ -31,7 +52,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard.Design
 			}
 		}
 
-		public override System.Collections.ICollection AssociatedComponents
+		public override ICollection AssociatedComponents
 		{
 			get { return this.WizardControl.Pages; }
 		}
@@ -146,7 +167,6 @@ namespace DotNetApi.Windows.Controls.AeroWizard.Design
 				WizardPage page = (WizardPage)h.CreateComponent(typeof(WizardPage));
 				MemberDescriptor member = TypeDescriptor.GetProperties(wiz)["Pages"];
 				base.RaiseComponentChanging(member);
-				//c.OnComponentChanging(wiz, null);
 
 				//Add a new page to the collection
 				if (wiz.Pages.Count == 0 || add)
@@ -154,7 +174,6 @@ namespace DotNetApi.Windows.Controls.AeroWizard.Design
 				else
 					wiz.Pages.Insert(wiz.SelectedPageIndex, page);
 
-				//c.OnComponentChanged(wiz, null, null, null);
 				base.RaiseComponentChanged(member, null, null);
 			}
 			finally
@@ -401,7 +420,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard.Design
 			{
 				WizardPage p = SelectionService.PrimarySelection as WizardPage;
 				if (p == null && SelectionService.PrimarySelection is Control)
-					p = ControlExtension.GetParent<WizardPage>((Control)SelectionService.PrimarySelection);
+					p = ControlExtensions.GetParent<WizardPage>((Control)SelectionService.PrimarySelection);
 				if (p != null && this.WizardControl.SelectedPage != p)
 				{
 					this.WizardControl.SelectedPage = p;
@@ -422,18 +441,6 @@ namespace DotNetApi.Windows.Controls.AeroWizard.Design
 			}
 		}
 
-		/*private void WizardControl_OnGotFocus(object sender, EventArgs e)
-		{
-			IEventHandlerService service = (IEventHandlerService)this.GetService(typeof(IEventHandlerService));
-			if (service != null)
-			{
-				Control focusWindow = service.FocusWindow;
-				if (focusWindow != null)
-				{
-					focusWindow.Focus();
-				}
-			}
-		}*/
 		private void WizardControl_OnControlAdded(object sender, ControlEventArgs e)
 		{
 			if ((e.Control != null) && !e.Control.IsHandleCreated)

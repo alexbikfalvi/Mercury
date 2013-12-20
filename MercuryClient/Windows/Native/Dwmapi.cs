@@ -22,9 +22,12 @@ using System.Runtime.InteropServices;
 
 namespace DotNetApi.Windows.Native
 {
+	/// <summary>
+	/// A class with native methods.
+	/// </summary>
 	internal static partial class NativeMethods
 	{
-		internal const string DWMAPI = "dwmapi.dll";
+		internal const string dllDwmapi = "dwmapi.dll";
 
 		public enum BlurBehindFlags : int
 		{
@@ -77,7 +80,9 @@ namespace DotNetApi.Windows.Native
 			public uint Color1, Color2, Intensity, Unk1, Unk2, Unk3, Opaque;
 		}
 
-		/// <summary>Margins structure for theme related functions.</summary>
+		/// <summary>
+		/// Margins structure for theme related functions.
+		/// </summary>
 		[StructLayout(LayoutKind.Sequential)]
 		public struct Margins
 		{
@@ -144,25 +149,22 @@ namespace DotNetApi.Windows.Native
 			}
 		}
 
-		[DllImport(DWMAPI, EntryPoint = "#127", PreserveSig = false)]
+		[DllImport(NativeMethods.dllDwmapi, EntryPoint = "#127", PreserveSig = false)]
 		public static extern void DwmGetColorizationParameters(ref ColorizationParams parameters);
 
-		[DllImport(DWMAPI, EntryPoint = "#131", PreserveSig = false)]
+		[DllImport(NativeMethods.dllDwmapi, EntryPoint = "#131", PreserveSig = false)]
 		public static extern void DwmSetColorizationParameters(ref ColorizationParams parameters, uint unk);
 
-		[DllImport(DWMAPI, ExactSpelling = true, PreserveSig = false)]
+		[DllImport(NativeMethods.dllDwmapi, ExactSpelling = true, PreserveSig = false)]
 		public static extern void DwmEnableBlurBehindWindow(IntPtr hWnd, ref BlurBehind pBlurBehind);
 
-		[DllImport(DWMAPI, ExactSpelling = true, PreserveSig = false)]
+		[DllImport(NativeMethods.dllDwmapi, ExactSpelling = true, PreserveSig = false)]
 		public static extern void DwmEnableComposition(int compositionAction);
 
-		[DllImport(DWMAPI, ExactSpelling = true, PreserveSig = false)]
+		[DllImport(NativeMethods.dllDwmapi, ExactSpelling = true, PreserveSig = false)]
 		public static extern void DwmExtendFrameIntoClientArea(IntPtr hWnd, ref Margins pMarInset);
 
-		//[DllImport(DWMAPI, ExactSpelling = true, PreserveSig = false)]
-		//public static extern void DwmGetColorizationColor(out uint ColorizationColor, [MarshalAs(UnmanagedType.Bool)]out bool ColorizationOpaqueBlend);
-
-		[DllImport(DWMAPI, ExactSpelling = true, PreserveSig = false)]
+		[DllImport(NativeMethods.dllDwmapi, ExactSpelling = true, PreserveSig = false)]
 		public static extern void DwmIsCompositionEnabled(ref int pfEnabled);
 	}
 }

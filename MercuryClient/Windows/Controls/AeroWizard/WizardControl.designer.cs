@@ -108,9 +108,9 @@
 			this.pageContainer.NextButton = this.nextButton;
 			this.pageContainer.Size = new System.Drawing.Size(552, 258);
 			this.pageContainer.TabIndex = 0;
-			this.pageContainer.Cancelling += new System.ComponentModel.CancelEventHandler(this.pageContainer_Cancelling);
-			this.pageContainer.Finished += new System.EventHandler(this.pageContainer_Finished);
-			this.pageContainer.SelectedPageChanged += new System.EventHandler(this.pageContainer_SelectedPageChanged);
+			this.pageContainer.Cancelling += new System.ComponentModel.CancelEventHandler(this.OnPageContainerCancelling);
+			this.pageContainer.Finished += new System.EventHandler(this.OnPageContainerFinished);
+			this.pageContainer.SelectedPageChanged += new System.EventHandler(this.OnPageContainerSelectedPageChanged);
 			// 
 			// backButton
 			// 
@@ -224,9 +224,9 @@
 			this.titleBar.SupportGlass = true;
 			this.titleBar.TabIndex = 0;
 			this.titleBar.WatchFocus = true;
-			this.titleBar.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TitleBar_MouseDown);
-			this.titleBar.MouseMove += new System.Windows.Forms.MouseEventHandler(this.TitleBar_MouseMove);
-			this.titleBar.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TitleBar_MouseUp);
+			this.titleBar.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TitleBarMouseDown);
+			this.titleBar.MouseMove += new System.Windows.Forms.MouseEventHandler(this.TitleBarMouseMove);
+			this.titleBar.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TitleBarMouseUp);
 			// 
 			// title
 			// 
@@ -295,6 +295,5 @@
 		private System.Windows.Forms.Panel bodyPanel;
 		private ThemedTableLayoutPanel contentArea;
 		internal DotNetApi.Windows.Controls.AeroWizard.WizardPageContainer pageContainer;
-
 	}
 }

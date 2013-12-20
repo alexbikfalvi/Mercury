@@ -22,7 +22,10 @@ using System.Windows.Forms;
 
 namespace DotNetApi.Windows.Controls
 {
-	static class ControlExtension
+	/// <summary>
+	/// A class with control extension methods.
+	/// </summary>
+	public static class ControlExtensions
 	{
 		/// <summary>
 		/// Performs an action on a control after its handle has been created. If the control's handle has already been created, the action is executed immediately.

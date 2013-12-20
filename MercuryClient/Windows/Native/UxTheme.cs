@@ -25,7 +25,7 @@ namespace DotNetApi.Windows.Native
 {
 	internal static partial class NativeMethods
 	{
-		const string UXTHEME = "uxtheme.dll";
+		internal const string dllUxtheme = "uxtheme.dll";
 
 		public enum DrawThemeTextSystemFonts
 		{
@@ -81,21 +81,20 @@ namespace DotNetApi.Windows.Native
 			WTA_NONCLIENT = 1,
 		}
 
-		[DllImport(UXTHEME)]
+		[DllImport(NativeMethods.dllUxtheme)]
 		public static extern int DrawThemeBackground(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, ref NativeMethods.Rect pRect, ref NativeMethods.Rect pClipRect);
 
-		[DllImport(UXTHEME)]
+		[DllImport(NativeMethods.dllUxtheme)]
 		public static extern int DrawThemeIcon(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, ref NativeMethods.Rect pRect, IntPtr himl, int iImageIndex);
 
-		[DllImport(UXTHEME, CharSet = CharSet.Unicode)]
+		[DllImport(NativeMethods.dllUxtheme, CharSet = CharSet.Unicode)]
 		public static extern int DrawThemeTextEx(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, string text, int iCharCount, int dwFlags, ref NativeMethods.Rect pRect, ref DrawThemeTextOptions pOptions);
 
-		[DllImport(UXTHEME, ExactSpelling = true)]
+		[DllImport(NativeMethods.dllUxtheme, ExactSpelling = true)]
 		public static extern int GetThemeMargins(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, int iPropId, IntPtr prc, out NativeMethods.Rect pMargins);
 
-		[DllImport(UXTHEME, ExactSpelling = true, PreserveSig = false)]
+		[DllImport(NativeMethods.dllUxtheme, ExactSpelling = true, PreserveSig = false)]
 		public static extern void SetWindowThemeAttribute(IntPtr hWnd, WindowThemeAttributeType wtype, ref WTA_OPTIONS attributes, int size);
-
 
 		[StructLayout(LayoutKind.Sequential)]
 		public struct DrawThemeTextOptions

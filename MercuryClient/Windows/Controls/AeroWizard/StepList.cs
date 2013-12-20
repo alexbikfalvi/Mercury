@@ -1,4 +1,23 @@
-﻿using System;
+﻿/*
+ * Copyright (c) 2013 David Hall
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial
+ * portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -14,7 +33,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
     [ProvideProperty("StepTextIndentLevel", typeof(WizardPage))]
     internal class StepList : ScrollableControl, IExtenderProvider
 	{
-		private WizardControl myParent;
+		private WizardControl parent;
 		private Dictionary<WizardPage, string> stepTexts = new Dictionary<WizardPage, string>();
         private Dictionary<WizardPage, int> indentLevels = new Dictionary<WizardPage, int>();
 
@@ -23,31 +42,6 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// </summary>
 		public StepList()
 		{
-		}
-
-		private void SetupControl(WizardControl p)
-		{
-			if (myParent != null)
-			{
-				WizardPageCollection pages = myParent.Pages;
-				pages.ItemAdded -= pages_Changed;
-				pages.ItemChanged -= pages_Changed;
-				pages.ItemDeleted -= pages_Changed;
-			}
-			myParent = p;
-			if (myParent != null)
-			{
-				WizardPageCollection pages = myParent.Pages;
-				pages.ItemAdded += pages_Changed;
-				pages.ItemChanged += pages_Changed;
-				pages.ItemDeleted += pages_Changed;
-			}
-			Refresh();
-		}
-
-		private void pages_Changed(object sender, EventedList<WizardPage>.ListChangedEventArgs<WizardPage> e)
-		{
-			Refresh();
 		}
 
 		/// <summary>
@@ -63,7 +57,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		protected override void OnParentChanged(EventArgs e)
 		{
 			base.OnParentChanged(e);
-			SetupControl(ControlExtension.GetParent<WizardControl>(this));
+			SetupControl(ControlExtensions.GetParent<WizardControl>(this));
 		}
 
 		/// <summary>
@@ -73,7 +67,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			base.OnPaint(e);
-			if (myParent == null) return;
+			if (parent == null) return;
 
 			using (Font ptrFont = new Font("Marlett", this.Font.Size), boldFont = new Font(this.Font, FontStyle.Bold))
 			{
@@ -82,29 +76,29 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 				const int rPad = 4;
 				Rectangle rect = new Rectangle(lPad, 0, this.Width - lPad - rPad, itemHeight);
 				Rectangle prect = new Rectangle(0, 0, lPad, itemHeight);
-				WizardPageCollection pages = myParent.Pages;
+				WizardPageCollection pages = parent.Pages;
 				bool hit = false;
 				for (int i = 0; i < pages.Count && rect.Y < (this.Height - itemHeight); i++)
 				{
 					if (!pages[i].Suppress)
 					{
 						Color fc = this.ForeColor, bc = this.BackColor;
-                        bool isSelected = myParent.SelectedPage == pages[i];
+                        bool isSelected = parent.SelectedPage == pages[i];
                         int level = GetStepTextIndentLevel(pages[i]);
                         prect.X = lPad * level;
                         rect.X = lPad * (level + 1);
 						if (isSelected)
 						{
 							hit = true;
-							//fc = SystemColors.HighlightText;
-							//bc = SystemColors.Highlight;
 						}
 						else if (!hit)
 						{
 							fc = SystemColors.GrayText;
 						}
 						using (Brush br = new SolidBrush(bc))
+						{
 							e.Graphics.FillRectangle(br, Rectangle.Union(rect, prect));
+						}
 						TextRenderer.DrawText(e.Graphics, hit ? "4" : "a", ptrFont, prect, fc, TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 						TextRenderer.DrawText(e.Graphics, GetStepText(pages[i]), isSelected ? boldFont : this.Font, rect, fc, TextFormatFlags.EndEllipsis | TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter);
 						prect.Y = rect.Y += itemHeight;
@@ -113,6 +107,11 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			}
 		}
 
+		/// <summary>
+		/// Specifies whether this object can provide its extender properties to the specified object.
+		/// </summary>
+		/// <param name="extendee">The object to receive the extender properties.</param>
+		/// <returns><b>True</b> if this object can provide extender properties to the specified object; <b>false</b> otherwise.</returns>
 		bool IExtenderProvider.CanExtend(object extendee)
 		{
 			return (extendee is WizardPage);
@@ -146,16 +145,6 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			Refresh();
 		}
 
-		private bool ShouldSerializeStepText(WizardPage page)
-		{
-			return (GetStepText(page) != page.Text);
-		}
-
-		private void ResetStepText(WizardPage page)
-		{
-			SetStepText(page, null);
-		}
-
         /// <summary>
         /// Gets the step text indent level.
         /// </summary>
@@ -182,7 +171,71 @@ namespace DotNetApi.Windows.Controls.AeroWizard
                 indentLevels.Remove(page);
             else
                 indentLevels[page] = value;
-            Refresh();
+			this.Refresh();
         }
+
+		// Private methods.
+
+		/// <summary>
+		/// Initializes the control.
+		/// </summary>
+		/// <param name="parent">The control parent.</param>
+		private void SetupControl(WizardControl parent)
+		{
+			// If the current parent is not null.
+			if (this.parent != null)
+			{
+				// Remove the parent pages event handlers.
+				WizardPageCollection pages = parent.Pages;
+				pages.AfterCleared -= this.OnPagesChanged;
+				pages.AfterItemInserted -= this.OnPagesChanged;
+				pages.AfterItemRemoved -= this.OnPagesChanged;
+				pages.AfterItemSet -= this.OnPagesChanged;
+			}
+			// Set the new parent.
+			this.parent = parent;
+			// If the new parent is not null.
+			if (parent != null)
+			{
+				// Add the parent pages event handlers.
+				WizardPageCollection pages = parent.Pages;
+				pages.AfterCleared += this.OnPagesChanged;
+				pages.AfterItemInserted += this.OnPagesChanged;
+				pages.AfterItemRemoved += this.OnPagesChanged;
+				pages.AfterItemSet += this.OnPagesChanged;
+			}
+			// Refresh the control.
+			this.Refresh();
+		}
+
+		/// <summary>
+		/// An event handler called when the list of pages ahs changed.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnPagesChanged(object sender, EventArgs e)
+		{
+			// Refresh.
+			this.Refresh();
+		}
+
+		/// <summary>
+		/// Indicates whether the step text should be serialized.
+		/// </summary>
+		/// <param name="page">The step wizard page.</param>
+		/// <returns><b>True</b> if the text should be serialized, <b>false</b> otherwise.</returns>
+		private bool ShouldSerializeStepText(WizardPage page)
+		{
+			return (GetStepText(page) != page.Text);
+		}
+
+		/// <summary>
+		/// Resets the step text.
+		/// </summary>
+		/// <param name="page">The step wizard page.</param>
+		private void ResetStepText(WizardPage page)
+		{
+			SetStepText(page, null);
+		}
     }
 }

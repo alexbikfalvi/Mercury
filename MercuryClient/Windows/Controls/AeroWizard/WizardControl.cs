@@ -1,6 +1,27 @@
-﻿using System;
+﻿/*
+ * Copyright (c) 2013 David Hall
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial
+ * portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+using System;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Drawing;
+using System.Drawing.Design;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using DotNetApi.Collections.Generic;
@@ -58,7 +79,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// </summary>
 		public WizardControl()
 		{
-			InitializeComponent();
+			this.InitializeComponent();
 
 			OnRightToLeftChanged(EventArgs.Empty);
 
@@ -75,8 +96,10 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			ResetTitleIcon();
 
 			// Connect to page add and remove events to track property changes
-			this.Pages.ItemAdded += Pages_ItemAdded;
-			this.Pages.ItemDeleted += Pages_ItemDeleted;
+			this.Pages.BeforeCleared += this.OnPagesCleared;
+			this.Pages.AfterItemInserted += this.OnPagesItemInserted;
+			this.Pages.AfterItemRemoved += this.OnPagesItemRemoved;
+			this.Pages.AfterItemSet += this.OnPagesItemSet;
 		}
 
 		/// <summary>
@@ -223,6 +246,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// <value>The <see cref="WizardPageCollection"/> that contains the <see cref="WizardPage"/> objects in this <see cref="WizardControl"/>.</value>
 		[Category("Wizard"), Description("Collection of wizard pages.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		[Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
 		public WizardPageCollection Pages
 		{
 			get { return this.pageContainer.Pages; }
@@ -359,7 +383,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			if (h != null)
 				h(this, EventArgs.Empty);
 
-			if (!ControlExtension.IsDesignMode(this))
+			if (!ControlExtensions.IsDesignMode(this))
 				CloseForm(DialogResult.Cancel);
 		}
 
@@ -402,7 +426,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			if (h != null)
 				h(this, EventArgs.Empty);
 
-			if (!ControlExtension.IsDesignMode(this))
+			if (!ControlExtensions.IsDesignMode(this))
 				CloseForm(DialogResult.OK);
 		}
 
@@ -425,8 +449,8 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			System.Diagnostics.Debug.WriteLine("OnHandleCreated");
 			base.OnHandleCreated(e);
 			this.SetLayout();
-			if (isMin6 && !ControlExtension.IsDesignMode(this))
-				DesktopWindowManager.CompositionChanged += DesktopWindowManager_CompositionChanged;
+			if (isMin6 && !ControlExtensions.IsDesignMode(this))
+				DesktopWindowManager.CompositionChanged += DesktopWindowManagerCompositionChanged;
 		}
 
 		/// <summary>
@@ -435,8 +459,8 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
 		protected override void OnHandleDestroyed(EventArgs e)
 		{
-			if (isMin6 && !ControlExtension.IsDesignMode(this))
-				DesktopWindowManager.CompositionChanged -= DesktopWindowManager_CompositionChanged;
+			if (isMin6 && !ControlExtensions.IsDesignMode(this))
+				DesktopWindowManager.CompositionChanged -= DesktopWindowManagerCompositionChanged;
 			base.OnHandleDestroyed(e);
 		}
 
@@ -448,11 +472,11 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		{
 			base.OnParentChanged(e);
 			if (parentForm != null)
-				parentForm.Load -= parentForm_Load;
+				parentForm.Load -= OnParentFormLoad;
 			parentForm = base.Parent as Form;
 			this.Dock = DockStyle.Fill;
 			if (parentForm != null)
-				parentForm.Load += parentForm_Load;
+				parentForm.Load += OnParentFormLoad;
 		}
 
 		/// <summary>
@@ -462,7 +486,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		protected override void OnRightToLeftChanged(EventArgs e)
 		{
 			base.OnRightToLeftChanged(e);
-			bool r2l = (ControlExtension.GetRightToLeftProperty(this) == System.Windows.Forms.RightToLeft.Yes);
+			bool r2l = (ControlExtensions.GetRightToLeftProperty(this) == System.Windows.Forms.RightToLeft.Yes);
 			Bitmap btnStrip = Mercury.Properties.Resources.AeroBackButtonStrip;
 			if (r2l) btnStrip.RotateFlip(RotateFlipType.RotateNoneFlipX);
 			backButton.SetImageListImageStrip(btnStrip, Orientation.Vertical);
@@ -542,7 +566,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 
 		private void contentArea_Paint(object sender, PaintEventArgs pe)
 		{
-			if (ControlExtension.IsDesignMode(this) && this.Pages.Count == 0)
+			if (ControlExtensions.IsDesignMode(this) && this.Pages.Count == 0)
 			{
 				string noPagesText = Mercury.Properties.Resources.WizardNoPagesNotice;
 				Rectangle r = this.GetContentAreaRectangle(false);
@@ -557,7 +581,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			}
 		}
 
-		private void DesktopWindowManager_CompositionChanged(object sender, EventArgs e)
+		private void DesktopWindowManagerCompositionChanged(object sender, EventArgs e)
 		{
 			ConfigureWindowFrame();
 		}
@@ -582,44 +606,58 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			return isMin6 && DesktopWindowManager.IsCompositionEnabled();
 		}
 
-		private void pageContainer_ButtonStateChanged(object sender, EventArgs e)
+		private void OnPageContainedButtonStateChanged(object sender, EventArgs e)
 		{
 			commandArea.Visible = (cancelButton.Enabled || nextButton.Enabled || cancelButton.Visible || nextButton.Visible);
 		}
 
-		private void pageContainer_Cancelling(object sender, CancelEventArgs e)
+		private void OnPageContainerCancelling(object sender, CancelEventArgs e)
 		{
 			OnCancelling();
 		}
 
-		private void pageContainer_Finished(object sender, EventArgs e)
+		private void OnPageContainerFinished(object sender, EventArgs e)
 		{
 			OnFinished();
 		}
 
-		private void pageContainer_SelectedPageChanged(object sender, EventArgs e)
+		private void OnPageContainerSelectedPageChanged(object sender, EventArgs e)
 		{
 			if (this.pageContainer.SelectedPage != null)
 				this.HeaderText = this.pageContainer.SelectedPage.Text;
 			OnSelectedPageChanged();
 		}
 
-		private void Pages_ItemAdded(object sender, EventedList<WizardPage>.ListChangedEventArgs<WizardPage> e)
+		private void OnPagesCleared(object sender, EventArgs e)
 		{
-			e.Item.TextChanged += Page_TextChanged;
+			foreach (WizardPage page in this.Pages)
+			{
+				page.TextChanged -= this.OnPageTextChanged;
+			}
 		}
 
-		private void Pages_ItemDeleted(object sender, EventedList<WizardPage>.ListChangedEventArgs<WizardPage> e)
+		private void OnPagesItemInserted(object sender, Collection<WizardPage>.ItemChangedEventArgs e)
 		{
-			e.Item.TextChanged -= Page_TextChanged;
+			e.Item.TextChanged += this.OnPageTextChanged;
 		}
 
-		private void Page_TextChanged(object sender, EventArgs e)
+		private void OnPagesItemRemoved(object sender, Collection<WizardPage>.ItemChangedEventArgs e)
+		{
+			e.Item.TextChanged -= this.OnPageTextChanged;
+		}
+
+		private void OnPagesItemSet(object sender, Collection<WizardPage>.ItemSetEventArgs e)
+		{
+			if (null != e.OldItem) e.OldItem.TextChanged -= this.OnPageTextChanged;
+			if (null != e.NewItem) e.NewItem.TextChanged += this.OnPageTextChanged;
+		}
+
+		private void OnPageTextChanged(object sender, EventArgs e)
 		{
 			this.HeaderText = ((WizardPage)sender).Text;
 		}
 
-		private void parentForm_Load(object sender, EventArgs e)
+		private void OnParentFormLoad(object sender, EventArgs e)
 		{
 			ConfigureWindowFrame();
 		}
@@ -740,7 +778,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			return titleImageIconSet;
 		}
 
-		private void TitleBar_MouseDown(object sender, MouseEventArgs e)
+		private void TitleBarMouseDown(object sender, MouseEventArgs e)
 		{
 			if (e.Button == MouseButtons.Left)
 			{
@@ -755,7 +793,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			base.OnMouseDown(e);
 		}
 
-		private void TitleBar_MouseMove(object sender, MouseEventArgs e)
+		private void TitleBarMouseMove(object sender, MouseEventArgs e)
 		{
 			if (formMoveTracking)
 			{
@@ -773,7 +811,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			base.OnMouseMove(e);
 		}
 
-		private void TitleBar_MouseUp(object sender, MouseEventArgs e)
+		private void TitleBarMouseUp(object sender, MouseEventArgs e)
 		{
 			if (e.Button == MouseButtons.Left)
 				formMoveTracking = false;
