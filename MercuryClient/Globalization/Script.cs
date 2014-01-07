@@ -17,22 +17,33 @@
  */
 
 using System;
-using System.Windows.Forms;
 
-namespace MercuryClient
+namespace DotNetApi.Globalization
 {
-	static class Program
+	/// <summary>
+	/// A class representing a script.
+	/// </summary>
+	[Serializable]
+	public class Script
 	{
 		/// <summary>
-		/// The main entry point for the application.
+		/// Creates a new script instance.
 		/// </summary>
-		[STAThread]
-		static void Main()
+		/// <param name="type">The script type.</param>
+		/// <param name="name">The script name.</param>
+		public Script(string type, string name)
 		{
-			//System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.GetCultureInfo("en");
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new FormMain());
+			this.Type = type;
+			this.Name = name;
 		}
+
+		/// <summary>
+		/// Gets the script type.
+		/// </summary>
+		public string Type { get; private set; }
+		/// <summary>
+		/// Gets the script name.
+		/// </summary>
+		public string Name { get; private set; }
 	}
 }

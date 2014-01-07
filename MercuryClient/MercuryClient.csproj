@@ -12,6 +12,21 @@
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -32,6 +47,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>545EFAB0AC1CB030C935BF899BCA0A4369D95564</ManifestCertificateThumbprint>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -42,18 +66,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\Resources.Designer.cs">
+    <Compile Include="Globalization\CultureId.cs" />
+    <Compile Include="Globalization\Language.cs" />
+    <Compile Include="Globalization\LanguageCollection.cs" />
+    <Compile Include="Globalization\Locale.cs" />
+    <Compile Include="Globalization\LocaleCollection.cs" />
+    <Compile Include="Globalization\LocaleReader.cs" />
+    <Compile Include="Globalization\Script.cs" />
+    <Compile Include="Globalization\ScriptCollection.cs" />
+    <Compile Include="Globalization\Territory.cs" />
+    <Compile Include="Globalization\TerritoryCollection.cs" />
+    <Compile Include="Globalization\Resources.cs" />
+    <Compile Include="Locales.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
+      <DependentUpon>Locales.resx</DependentUpon>
     </Compile>
-    <Compile Include="Resources.Designer.cs">
+    <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Windows\Controls\ComponentCollection.cs" />
     <Compile Include="Windows\Controls\ControlExtensions.cs" />
+    <Compile Include="Windows\Forms\ThreadSafeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Windows\VisualStyles\GlassExtenderProvider.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -70,7 +108,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\AeroWizard\StepWizardControl.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\AeroWizard\ThemedImageButton.cs">
       <SubType>Component</SubType>
@@ -86,9 +124,8 @@
     </Compile>
     <Compile Include="Windows\VisualStyles\VisualStyleElementEx.cs" />
     <Compile Include="Windows\Controls\AeroWizard\WizardControl.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Windows\Controls\AeroWizard\WizardControl.Designer.cs" />
     <Compile Include="Windows\Controls\AeroWizard\Design\WizardControlDesigner.cs" />
     <Compile Include="Windows\Controls\AeroWizard\WizardPage.cs">
       <SubType>Component</SubType>
@@ -107,17 +144,31 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Windows\Window.cs" />
+    <EmbeddedResource Include="FormMain.ca.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.de.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.es.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.fr.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.ro.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Locales.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <SubType>Designer</SubType>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resource.en.resx" />
-    <EmbeddedResource Include="Resources.en.resx" />
-    <EmbeddedResource Include="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
@@ -140,7 +191,21 @@
   <ItemGroup>
     <None Include="Resources\Icon.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

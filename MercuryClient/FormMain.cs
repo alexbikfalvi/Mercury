@@ -17,15 +17,66 @@
  */
 
 using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
+using DotNetApi.Globalization;
+using DotNetApi.Windows.Forms;
+
+using System.Resources;
 
 namespace MercuryClient
 {
-	public partial class FormMain : Form
+	/// <summary>
+	/// The main form.
+	/// </summary>
+	public partial class FormMain : ThreadSafeForm
 	{
+		/// <summary>
+		/// Creates a new form instance.
+		/// </summary>
 		public FormMain()
 		{
-			InitializeComponent();
+			// Initialize the component.
+			this.InitializeComponent();
+
+			LocaleCollection locales = Mercury.Globalization.Resources.Locales;
+		}
+
+		private void OnLoad(object sender, EventArgs e)
+		{
+			if (this.openFileDialog.ShowDialog(this) == DialogResult.OK)
+			{
+				try
+				{
+					using (FileStream file = new FileStream(this.openFileDialog.FileName, FileMode.Open))
+					{
+						using (LocaleReader reader = new LocaleReader(file))
+						{
+							LocaleCollection locales = reader.ReadLocaleCollection();
+
+							if (this.saveFileDialog.ShowDialog(this) == DialogResult.OK)
+							{
+								using (ResXResourceWriter writer = new ResXResourceWriter(this.saveFileDialog.FileName))
+								{
+									BinaryFormatter formatter = new BinaryFormatter();
+
+									using (MemoryStream stream = new MemoryStream())
+									{
+										formatter.Serialize(stream, locales);
+										writer.AddResource("Collection", stream.ToArray());
+									}
+								}
+							}
+						}
+					}
+				}
+				catch(Exception exception)
+				{
+					MessageBox.Show(this, exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			}
 		}
 	}
 }

@@ -25,6 +25,7 @@ using System.Drawing.Design;
 using System.Security.Permissions;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
+using DotNetApi.Windows;
 using DotNetApi.Windows.Native;
 using DotNetApi.Windows.VisualStyles;
 
@@ -58,6 +59,23 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 #endif
 		, ISupportInitialize
 	{
+		private IContainer components = null;
+
+		internal WizardPageContainer pageContainer;
+		private ThemedTableLayoutPanel titlePanel;
+		private ThemedTableLayoutPanel headerPanel;
+		private ThemedTableLayoutPanel commandPanel;
+		private ThemedTableLayoutPanel contentPanel;
+		internal Label headerLabel;
+		private Button cancelButton;
+		internal Button nextButton;
+		internal ThemedImageButton backButton;
+		private ThemedLabel titleLabel;
+		private ThemedLabel titleImage;
+		private Panel commandAreaBorder;
+		private Panel bodyPanel;
+		private ImageList titleImageList;
+
 		private static bool isMin6;
 
 		private WizardClassicStyle classicStyle = WizardClassicStyle.AeroStyle;
@@ -85,12 +103,12 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 
 			if (!Application.RenderWithVisualStyles)
 			{
-				this.titleBar.BackColor = SystemColors.Control;
+				this.titlePanel.BackColor = SystemColors.Control;
 			}
-			this.titleBar.SetTheme(VisualStyleElementEx.AeroWizard.TitleBar.Active);
-			this.header.SetTheme(VisualStyleElementEx.AeroWizard.HeaderArea.Normal);
-			this.contentArea.SetTheme(VisualStyleElementEx.AeroWizard.ContentArea.Normal);
-			this.commandArea.SetTheme(VisualStyleElementEx.AeroWizard.CommandArea.Normal);
+			this.titlePanel.SetTheme(VisualStyleElementEx.AeroWizard.TitleBar.Active);
+			this.headerPanel.SetTheme(VisualStyleElementEx.AeroWizard.HeaderArea.Normal);
+			this.contentPanel.SetTheme(VisualStyleElementEx.AeroWizard.ContentArea.Normal);
+			this.commandPanel.SetTheme(VisualStyleElementEx.AeroWizard.CommandArea.Normal);
 
 			// Get localized defaults for button text
 			this.ResetBackButtonToolTipText();
@@ -288,8 +306,8 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		[Category("Wizard"), Localizable(true), Description("Title for the wizard")]
 		public string Title
 		{
-			get { return title.Text; }
-			set { title.Text = value; base.Invalidate(); }
+			get { return titleLabel.Text; }
+			set { titleLabel.Text = value; base.Invalidate(); }
 		}
 
 		/// <summary>
@@ -386,6 +404,21 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		public void RestartPages()
 		{
 			this.pageContainer.RestartPages();
+		}
+
+		// Protected methods.
+
+		/// <summary> 
+		/// Clean up any resources being used.
+		/// </summary>
+		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && (components != null))
+			{
+				components.Dispose();
+			}
+			base.Dispose(disposing);
 		}
 
 		/// <summary>
@@ -519,6 +552,249 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 				temp(this, EventArgs.Empty);
 		}
 
+		// Private methods.
+
+		/// <summary>
+		/// Initializes the component.
+		/// </summary>
+		private void InitializeComponent()
+		{
+			this.components = new Container();
+			this.titleImageList = new ImageList(this.components);
+			this.commandAreaBorder = new Panel();
+			this.bodyPanel = new Panel();
+			this.contentPanel = new ThemedTableLayoutPanel();
+			this.pageContainer = new WizardPageContainer();
+			this.backButton = new ThemedImageButton();
+			this.cancelButton = new Button();
+			this.nextButton = new Button();
+			this.headerPanel = new ThemedTableLayoutPanel();
+			this.headerLabel = new Label();
+			this.commandPanel = new ThemedTableLayoutPanel();
+			this.titlePanel = new ThemedTableLayoutPanel();
+			this.titleLabel = new ThemedLabel();
+			this.titleImage = new ThemedLabel();
+			this.bodyPanel.SuspendLayout();
+			this.contentPanel.SuspendLayout();
+			((ISupportInitialize)(this.pageContainer)).BeginInit();
+			this.headerPanel.SuspendLayout();
+			this.commandPanel.SuspendLayout();
+			this.titlePanel.SuspendLayout();
+			this.SuspendLayout();
+			// 
+			// titleImageList
+			// 
+			this.titleImageList.ColorDepth = ColorDepth.Depth32Bit;
+			this.titleImageList.ImageSize = new Size(16, 16);
+			this.titleImageList.TransparentColor = Color.Transparent;
+			// 
+			// commandAreaBorder
+			// 
+			this.commandAreaBorder.BackColor = SystemColors.ControlLight;
+			this.commandAreaBorder.Dock = DockStyle.Bottom;
+			this.commandAreaBorder.Location = new Point(0, 368);
+			this.commandAreaBorder.Margin = new Padding(0);
+			this.commandAreaBorder.Size = new Size(609, 1);
+			this.commandAreaBorder.TabIndex = 2;
+			// 
+			// bodyPanel
+			// 
+			this.bodyPanel.Controls.Add(this.contentPanel);
+			this.bodyPanel.Controls.Add(this.headerPanel);
+			this.bodyPanel.Dock = DockStyle.Fill;
+			this.bodyPanel.Location = new Point(0, 32);
+			this.bodyPanel.Size = new Size(609, 336);
+			this.bodyPanel.TabIndex = 1;
+			// 
+			// contentArea
+			// 
+			this.contentPanel.BackColor = SystemColors.Window;
+			this.contentPanel.ColumnCount = 3;
+			this.contentPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 38F));
+			this.contentPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+			this.contentPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 19F));
+			this.contentPanel.Controls.Add(this.pageContainer, 1, 0);
+			this.contentPanel.Dock = DockStyle.Fill;
+			this.contentPanel.Location = new Point(0, 59);
+			this.contentPanel.RowCount = 2;
+			this.contentPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+			this.contentPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 19F));
+			this.contentPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+			this.contentPanel.Size = new Size(609, 277);
+			this.contentPanel.TabIndex = 1;
+			this.contentPanel.Paint += new PaintEventHandler(this.contentArea_Paint);
+			// 
+			// pageContainer
+			// 
+			this.pageContainer.BackButton = this.backButton;
+			this.pageContainer.BackButtonText = Mercury.Properties.Resources.WizardBackText;
+			this.pageContainer.CancelButton = this.cancelButton;
+			this.pageContainer.Dock = DockStyle.Fill;
+			this.pageContainer.Location = new Point(38, 0);
+			this.pageContainer.Margin = new Padding(0);
+			this.pageContainer.NextButton = this.nextButton;
+			this.pageContainer.Size = new Size(552, 258);
+			this.pageContainer.TabIndex = 0;
+			this.pageContainer.Cancelling += new CancelEventHandler(this.OnPageContainerCancelling);
+			this.pageContainer.Finished += new System.EventHandler(this.OnPageContainerFinished);
+			this.pageContainer.SelectedPageChanged += new System.EventHandler(this.OnPageContainerSelectedPageChanged);
+			// 
+			// backButton
+			// 
+			this.backButton.Anchor = AnchorStyles.Left;
+			this.backButton.Enabled = false;
+			this.backButton.Image = null;
+			this.backButton.Location = new Point(0, 0);
+			this.backButton.Margin = new Padding(0, 0, 0, 2);
+			this.backButton.Size = new Size(30, 30);
+			this.backButton.StyleClass = "NAVIGATION";
+			this.backButton.TabIndex = 0;
+			this.backButton.UseVisualStyleBackColor = true;
+			// 
+			// cancelButton
+			// 
+			this.cancelButton.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Right)));
+			this.cancelButton.AutoSize = true;
+			this.cancelButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+			this.cancelButton.Location = new Point(520, 10);
+			this.cancelButton.Margin = new Padding(7, 0, 0, 0);
+			this.cancelButton.MinimumSize = new Size(70, 0);
+			this.cancelButton.Size = new Size(70, 25);
+			this.cancelButton.TabIndex = 1;
+			this.cancelButton.Text = Mercury.Properties.Resources.WizardCancelText;
+			this.cancelButton.UseVisualStyleBackColor = true;
+			// 
+			// nextButton
+			// 
+			this.nextButton.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Right)));
+			this.nextButton.AutoSize = true;
+			this.nextButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+			this.nextButton.Location = new Point(443, 10);
+			this.nextButton.Margin = new Padding(0);
+			this.nextButton.MinimumSize = new Size(70, 0);
+			this.nextButton.Size = new Size(70, 23);
+			this.nextButton.TabIndex = 0;
+			this.nextButton.Text = Mercury.Properties.Resources.WizardNextText;
+			this.nextButton.UseVisualStyleBackColor = true;
+			// 
+			// header
+			// 
+			this.headerPanel.AutoSize = true;
+			this.headerPanel.BackColor = SystemColors.Window;
+			this.headerPanel.ColumnCount = 1;
+			this.headerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+			this.headerPanel.Controls.Add(this.headerLabel, 0, 0);
+			this.headerPanel.Dock = DockStyle.Top;
+			this.headerPanel.Location = new Point(0, 0);
+			this.headerPanel.RowCount = 1;
+			this.headerPanel.RowStyles.Add(new RowStyle());
+			this.headerPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 59F));
+			this.headerPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 59F));
+			this.headerPanel.Size = new Size(609, 59);
+			this.headerPanel.TabIndex = 0;
+			// 
+			// headerLabel
+			// 
+			this.headerLabel.AutoSize = true;
+			this.headerLabel.BackColor = Color.Transparent;
+			this.headerLabel.Font = new Font(Window.DefaultFont.FontFamily, 12F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
+			this.headerLabel.ForeColor = Color.FromArgb(((int)(((byte)(19)))), ((int)(((byte)(112)))), ((int)(((byte)(171)))));
+			this.headerLabel.Location = new Point(38, 19);
+			this.headerLabel.Margin = new Padding(38, 19, 0, 19);
+			this.headerLabel.Size = new Size(77, 21);
+			this.headerLabel.TabIndex = 0;
+			this.headerLabel.Text = Mercury.Properties.Resources.WizardHeader;
+			// 
+			// commandArea
+			// 
+			this.commandPanel.AutoSize = true;
+			this.commandPanel.BackColor = SystemColors.Control;
+			this.commandPanel.ColumnCount = 3;
+			this.commandPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+			this.commandPanel.ColumnStyles.Add(new ColumnStyle());
+			this.commandPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 19F));
+			this.commandPanel.Controls.Add(this.cancelButton, 1, 1);
+			this.commandPanel.Controls.Add(this.nextButton, 0, 1);
+			this.commandPanel.Dock = DockStyle.Bottom;
+			this.commandPanel.Location = new Point(0, 369);
+			this.commandPanel.RowCount = 3;
+			this.commandPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 10F));
+			this.commandPanel.RowStyles.Add(new RowStyle());
+			this.commandPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 10F));
+			this.commandPanel.Size = new Size(609, 45);
+			this.commandPanel.TabIndex = 3;
+			// 
+			// titleBar
+			// 
+			this.titlePanel.AutoSize = true;
+			this.titlePanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+			this.titlePanel.BackColor = SystemColors.ActiveCaption;
+			this.titlePanel.ColumnCount = 3;
+			this.titlePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 32F));
+			this.titlePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 23F));
+			this.titlePanel.ColumnStyles.Add(new ColumnStyle());
+			this.titlePanel.Controls.Add(this.titleLabel, 2, 0);
+			this.titlePanel.Controls.Add(this.titleImage, 1, 0);
+			this.titlePanel.Controls.Add(this.backButton, 0, 0);
+			this.titlePanel.Dock = DockStyle.Top;
+			this.titlePanel.Location = new Point(0, 0);
+			this.titlePanel.RowCount = 1;
+			this.titlePanel.RowStyles.Add(new RowStyle());
+			this.titlePanel.Size = new Size(609, 32);
+			this.titlePanel.SupportGlass = true;
+			this.titlePanel.TabIndex = 0;
+			this.titlePanel.WatchFocus = true;
+			this.titlePanel.MouseDown += new MouseEventHandler(this.TitleBarMouseDown);
+			this.titlePanel.MouseMove += new MouseEventHandler(this.TitleBarMouseMove);
+			this.titlePanel.MouseUp += new MouseEventHandler(this.TitleBarMouseUp);
+			// 
+			// title
+			// 
+			this.titleLabel.Anchor = AnchorStyles.Left;
+			this.titleLabel.AutoSize = true;
+			this.titleLabel.ForeColor = SystemColors.ActiveCaptionText;
+			this.titleLabel.Location = new Point(55, 6);
+			this.titleLabel.Margin = new Padding(0);
+			this.titleLabel.Padding = new Padding(0, 2, 0, 2);
+			this.titleLabel.Size = new Size(79, 19);
+			this.titleLabel.TabIndex = 2;
+			this.titleLabel.Text = Mercury.Properties.Resources.WizardTitle;
+			this.titleLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
+			// titleImage
+			// 
+			this.titleImage.Anchor = AnchorStyles.Left;
+			this.titleImage.AutoSize = true;
+			this.titleImage.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
+			this.titleImage.ImageList = this.titleImageList;
+			this.titleImage.Location = new Point(32, 8);
+			this.titleImage.Margin = new Padding(0, 0, 7, 0);
+			this.titleImage.MinimumSize = new Size(16, 16);
+			this.titleImage.Size = new Size(16, 16);
+			this.titleImage.TabIndex = 1;
+			// 
+			// WizardControl
+			// 
+			this.Controls.Add(this.bodyPanel);
+			this.Controls.Add(this.commandAreaBorder);
+			this.Controls.Add(this.commandPanel);
+			this.Controls.Add(this.titlePanel);
+			this.Font = new Font(Window.DefaultFont.FontFamily, 9F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
+			this.Size = new Size(609, 414);
+			this.bodyPanel.ResumeLayout(false);
+			this.bodyPanel.PerformLayout();
+			this.contentPanel.ResumeLayout(false);
+			((ISupportInitialize)(this.pageContainer)).EndInit();
+			this.headerPanel.ResumeLayout(false);
+			this.headerPanel.PerformLayout();
+			this.commandPanel.ResumeLayout(false);
+			this.commandPanel.PerformLayout();
+			this.titlePanel.ResumeLayout(false);
+			this.titlePanel.PerformLayout();
+			this.ResumeLayout(false);
+			this.PerformLayout();
+		}
+
 		private void CloseForm(DialogResult dlgResult)
 		{
 			Form form = base.FindForm();
@@ -531,18 +807,18 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			if (aero)
 			{
 				bodyPanel.BorderStyle = System.Windows.Forms.BorderStyle.None;
-				header.BackColor = contentArea.BackColor = SystemColors.Window;
-				headerLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+				headerPanel.BackColor = contentPanel.BackColor = SystemColors.Window;
+				headerLabel.Font = new System.Drawing.Font(Window.DefaultFont.FontFamily, 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 				headerLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(19)))), ((int)(((byte)(112)))), ((int)(((byte)(171)))));
-				title.Font = this.Font;
+				titleLabel.Font = this.Font;
 			}
 			else
 			{
 				bodyPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-				header.BackColor = contentArea.BackColor = SystemColors.Control;
-				headerLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+				headerPanel.BackColor = contentPanel.BackColor = SystemColors.Control;
+				headerLabel.Font = new System.Drawing.Font(Window.DefaultFont.FontFamily, 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 				headerLabel.ForeColor = SystemColors.ControlText;
-				title.Font = new Font(this.Font, FontStyle.Bold);
+				titleLabel.Font = new Font(this.Font, FontStyle.Bold);
 			}
 		}
 
@@ -550,18 +826,18 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		{
 			if (HasGlass())
 			{
-				titleBar.BackColor = Color.Black;
+				titlePanel.BackColor = Color.Black;
 				ConfigureStyles();
 				try
 				{
 					if (parentForm != null)
-						DesktopWindowManager.ExtendFrameIntoClientArea(parentForm, new Padding(0) { Top = titleBar.Height });
+						DesktopWindowManager.ExtendFrameIntoClientArea(parentForm, new Padding(0) { Top = titlePanel.Height });
 				}
-				catch { titleBar.BackColor = commandArea.BackColor; }
+				catch { titlePanel.BackColor = commandPanel.BackColor; }
 			}
 			else
 			{
-				titleBar.BackColor = commandArea.BackColor;
+				titlePanel.BackColor = commandPanel.BackColor;
 				ConfigureStyles(UseAeroStyle);
 			}
 
@@ -608,11 +884,11 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// <returns>Coordinates of content area.</returns>
 		private Rectangle GetContentAreaRectangle(bool parentRelative)
 		{
-			int[] cw = contentArea.GetColumnWidths();
-			int[] ch = contentArea.GetRowHeights();
+			int[] cw = contentPanel.GetColumnWidths();
+			int[] ch = contentPanel.GetRowHeights();
 			Rectangle r = new Rectangle(cw[contentCol - 1], 0, cw[contentCol], ch[0]);
 			if (parentRelative)
-				r.Offset(contentArea.Location);
+				r.Offset(contentPanel.Location);
 			return r;
 		}
 
@@ -623,7 +899,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 
 		private void OnPageContainedButtonStateChanged(object sender, EventArgs e)
 		{
-			commandArea.Visible = (cancelButton.Enabled || nextButton.Enabled || cancelButton.Visible || nextButton.Visible);
+			commandPanel.Visible = (cancelButton.Enabled || nextButton.Enabled || cancelButton.Visible || nextButton.Visible);
 		}
 
 		private void OnPageContainerCancelling(object sender, CancelEventArgs e)
@@ -747,9 +1023,9 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 
 					// Title
 					theme.SetParameters(VisualStyleElementEx.AeroWizard.TitleBar.Active);
-					titleBar.Height = Math.Max(VisualStyleRendererExtension.GetMargins2(theme, g, MarginProperty.ContentMargins).Top, bbSize.Height + 2);
-					titleBar.ColumnStyles[0].Width = bbSize.Width + 4F;
-					titleBar.ColumnStyles[1].Width = titleImageIcon != null ? titleImageList.ImageSize.Width + 4F : 0;
+					titlePanel.Height = Math.Max(VisualStyleRendererExtension.GetMargins2(theme, g, MarginProperty.ContentMargins).Top, bbSize.Height + 2);
+					titlePanel.ColumnStyles[0].Width = bbSize.Width + 4F;
+					titlePanel.ColumnStyles[1].Width = titleImageIcon != null ? titleImageList.ImageSize.Width + 4F : 0;
 					backButton.Size = bbSize;
 
 					// Header
@@ -761,15 +1037,15 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 					theme.SetParameters(VisualStyleElementEx.AeroWizard.ContentArea.Normal);
 					this.BackColor = theme.GetColor(ColorProperty.FillColor);
 					Padding cp = VisualStyleRendererExtension.GetMargins2(theme, g, MarginProperty.ContentMargins);
-					contentArea.ColumnStyles[0].Width = cp.Left;
-					contentArea.RowStyles[1].Height = cp.Bottom;
+					contentPanel.ColumnStyles[0].Width = cp.Left;
+					contentPanel.RowStyles[1].Height = cp.Bottom;
 
 					// Command
 					theme.SetParameters(VisualStyleElementEx.AeroWizard.CommandArea.Normal);
 					cp = VisualStyleRendererExtension.GetMargins2(theme, g, MarginProperty.ContentMargins);
-					commandArea.RowStyles[0].Height = cp.Top;
-					commandArea.RowStyles[2].Height = cp.Bottom;
-					commandArea.ColumnStyles[2].Width = contentArea.ColumnStyles[contentCol + 1].Width = cp.Right;
+					commandPanel.RowStyles[0].Height = cp.Top;
+					commandPanel.RowStyles[2].Height = cp.Bottom;
+					commandPanel.ColumnStyles[2].Width = contentPanel.ColumnStyles[contentCol + 1].Width = cp.Right;
 				}
 			}
 			else
@@ -818,7 +1094,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		{
 			if (e.Button == MouseButtons.Left)
 			{
-				Control c = titleBar.GetChildAtPoint(e.Location);
+				Control c = titlePanel.GetChildAtPoint(e.Location);
 				if (c != backButton)
 				{
 					formMoveTracking = true;

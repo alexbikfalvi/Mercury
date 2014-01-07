@@ -17,22 +17,33 @@
  */
 
 using System;
-using System.Windows.Forms;
 
-namespace MercuryClient
+namespace DotNetApi.Globalization
 {
-	static class Program
+	/// <summary>
+	/// A class representing a territory.
+	/// </summary>
+	[Serializable]
+	public class Territory
 	{
 		/// <summary>
-		/// The main entry point for the application.
+		/// Creates a new territory instance.
 		/// </summary>
-		[STAThread]
-		static void Main()
+		/// <param name="type">The territory type.</param>
+		/// <param name="name">The laguage name.</param>
+		public Territory(string type, string name)
 		{
-			//System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.GetCultureInfo("en");
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new FormMain());
+			this.Type = type;
+			this.Name = name;
 		}
+
+		/// <summary>
+		/// Gets the territory type.
+		/// </summary>
+		public string Type { get; private set; }
+		/// <summary>
+		/// Gets the territory name.
+		/// </summary>
+		public string Name { get; private set; }
 	}
 }
