@@ -98,39 +98,32 @@ namespace DotNetApi.Globalization
 					cultureElement.HasAttribute("Script") ? cultureElement.GetAttribute("Script") : null,
 					cultureElement.HasAttribute("Territory") ? cultureElement.GetAttribute("Territory") : null));
 
-				// Parse the locale territories.
-				foreach (XmlElement territoryElement in (localeElement.GetElementsByTagName("Territories")[0] as XmlElement).GetElementsByTagName()
+				// Get the languages element.
+				XmlElement languagesElement = localeElement.GetElementsByTagName("Languages")[0] as XmlElement;
+				// Get the scripts element.
+				XmlElement scriptsElement = localeElement.GetElementsByTagName("Scripts")[0] as XmlElement;
+				// Get the territories element.
+				XmlElement territoriesElement = localeElement.GetElementsByTagName("Territories")[0] as XmlElement;
+
+				// Parse the languages.
+				foreach (XmlElement languageElement in languagesElement.GetElementsByTagName("Language"))
+				{
+					locale.Languages.Add(languageElement.GetAttributeNode("Type").Value, languageElement.InnerText);
+				}
+				// Parse the scripts.
+				foreach (XmlElement scriptElement in scriptsElement.GetElementsByTagName("Script"))
+				{
+					locale.Scripts.Add(scriptElement.GetAttributeNode("Type").Value, scriptElement.InnerText);
+				}
+				// Parse the territories.
+				foreach (XmlElement territoryElement in territoriesElement.GetElementsByTagName("Territory"))
+				{
+					locale.Territories.Add(territoryElement.GetAttributeNode("Type").Value, territoryElement.InnerText);
+				}
 
 				// Add the locale.
 				locales.Add(locale);
 			}
-
-			//// Create the locale collection.
-			//LocaleCollection locales = new LocaleCollection(
-			//	document.Root.Elements("Locale").Select((XElement localeElement) =>
-			//		{
-			//			XElement cultureElement = localeElement.Element("Culture");
-			//			XAttribute languageAttribute = cultureElement.Attribute("Language");
-			//			XAttribute scriptAttribute = cultureElement.Attribute("Script");
-			//			XAttribute territoryAttribute = cultureElement.Attribute("Territory");
-			//			return new Locale(new CultureId(
-			//				languageAttribute.Value,
-			//				scriptAttribute != null ? scriptAttribute.Value : null,
-			//				territoryAttribute != null ? territoryAttribute.Value : null
-			//				),
-			//				localeElement.Element("Languages").Elements("Language").Select((XElement languageElement) =>
-			//					{
-			//						return new Language(languageElement.Attribute("Type").Value, languageElement.Value);
-			//					}),
-			//				localeElement.Element("Scripts").Elements("Script").Select((XElement scriptElement) =>
-			//					{
-			//						return new Script(scriptElement.Attribute("Type").Value, scriptElement.Value);
-			//					}),
-			//				localeElement.Element("Territories").Elements("Territory").Select((XElement territoryElement) =>
-			//					{
-			//						return new Territory(territoryElement.Attribute("Type").Value, territoryElement.Value);
-			//					}));
-			//		}));
 
 			// Return the collection.
 			return locales;

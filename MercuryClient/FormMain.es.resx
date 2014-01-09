@@ -117,18 +117,24 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="wizardPageStart.Text" xml:space="preserve">
-    <value>Seleccione el país y el idioma</value>
-  </data>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="wizardPageRun.Size" type="System.Drawing.Size, System.Drawing">
-    <value>527, 256</value>
-  </data>
-  <data name="wizardPageFinish.Size" type="System.Drawing.Size, System.Drawing">
-    <value>537, 256</value>
+  <data name="wizardPageLocale.Text" xml:space="preserve">
+    <value>Seleccione su idioma y país</value>
   </data>
   <data name="wizardControl.Title" xml:space="preserve">
     <value>Cliente para Mercury</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="labelCountry.Size" type="System.Drawing.Size, System.Drawing">
+    <value>31, 15</value>
+  </data>
+  <data name="labelCountry.Text" xml:space="preserve">
+    <value>&amp;País:</value>
+  </data>
+  <data name="labelLanguage.Size" type="System.Drawing.Size, System.Drawing">
+    <value>47, 15</value>
+  </data>
+  <data name="labelLanguage.Text" xml:space="preserve">
+    <value>&amp;Idioma:</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>Cliente para Mercury</value>

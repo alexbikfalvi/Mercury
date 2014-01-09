@@ -30,18 +30,17 @@
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
 			this.wizardControl = new DotNetApi.Windows.Controls.AeroWizard.WizardControl();
-			this.wizardPageStart = new DotNetApi.Windows.Controls.AeroWizard.WizardPage();
-			this.buttonLoad = new System.Windows.Forms.Button();
+			this.wizardPageLocale = new DotNetApi.Windows.Controls.AeroWizard.WizardPage();
+			this.comboBoxCountry = new System.Windows.Forms.ComboBox();
+			this.comboBoxLanguage = new System.Windows.Forms.ComboBox();
 			this.labelCountry = new System.Windows.Forms.Label();
-			this.comboBox2 = new System.Windows.Forms.ComboBox();
-			this.comboBox1 = new System.Windows.Forms.ComboBox();
 			this.labelLanguage = new System.Windows.Forms.Label();
 			this.wizardPageRun = new DotNetApi.Windows.Controls.AeroWizard.WizardPage();
 			this.wizardPageFinish = new DotNetApi.Windows.Controls.AeroWizard.WizardPage();
 			this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
 			this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
 			((System.ComponentModel.ISupportInitialize)(this.wizardControl)).BeginInit();
-			this.wizardPageStart.SuspendLayout();
+			this.wizardPageLocale.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// wizardControl
@@ -49,62 +48,40 @@
 			resources.ApplyResources(this.wizardControl, "wizardControl");
 			this.wizardControl.Name = "wizardControl";
 			this.wizardControl.Pages.AddRange(new DotNetApi.Windows.Controls.AeroWizard.WizardPage[] {
-            this.wizardPageStart,
+            this.wizardPageLocale,
             this.wizardPageRun,
             this.wizardPageFinish});
 			// 
-			// wizardPageStart
+			// wizardPageLocale
 			// 
-			this.wizardPageStart.AllowBack = false;
-			this.wizardPageStart.Controls.Add(this.buttonLoad);
-			this.wizardPageStart.Controls.Add(this.labelCountry);
-			this.wizardPageStart.Controls.Add(this.comboBox2);
-			this.wizardPageStart.Controls.Add(this.comboBox1);
-			this.wizardPageStart.Controls.Add(this.labelLanguage);
-			this.wizardPageStart.Name = "wizardPageStart";
-			resources.ApplyResources(this.wizardPageStart, "wizardPageStart");
+			this.wizardPageLocale.AllowBack = false;
+			this.wizardPageLocale.AllowNext = false;
+			this.wizardPageLocale.Controls.Add(this.comboBoxCountry);
+			this.wizardPageLocale.Controls.Add(this.comboBoxLanguage);
+			this.wizardPageLocale.Controls.Add(this.labelCountry);
+			this.wizardPageLocale.Controls.Add(this.labelLanguage);
+			this.wizardPageLocale.Name = "wizardPageLocale";
+			resources.ApplyResources(this.wizardPageLocale, "wizardPageLocale");
 			// 
-			// buttonLoad
+			// comboBoxCountry
 			// 
-			resources.ApplyResources(this.buttonLoad, "buttonLoad");
-			this.buttonLoad.Name = "buttonLoad";
-			this.buttonLoad.UseVisualStyleBackColor = true;
-			this.buttonLoad.Click += new System.EventHandler(this.OnLoad);
+			this.comboBoxCountry.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxCountry.FormattingEnabled = true;
+			resources.ApplyResources(this.comboBoxCountry, "comboBoxCountry");
+			this.comboBoxCountry.Name = "comboBoxCountry";
+			// 
+			// comboBoxLanguage
+			// 
+			this.comboBoxLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxLanguage.FormattingEnabled = true;
+			resources.ApplyResources(this.comboBoxLanguage, "comboBoxLanguage");
+			this.comboBoxLanguage.Name = "comboBoxLanguage";
+			this.comboBoxLanguage.SelectedIndexChanged += new System.EventHandler(this.OnLanguageChanged);
 			// 
 			// labelCountry
 			// 
 			resources.ApplyResources(this.labelCountry, "labelCountry");
 			this.labelCountry.Name = "labelCountry";
-			// 
-			// comboBox2
-			// 
-			this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboBox2.FormattingEnabled = true;
-			this.comboBox2.Items.AddRange(new object[] {
-            resources.GetString("comboBox2.Items"),
-            resources.GetString("comboBox2.Items1"),
-            resources.GetString("comboBox2.Items2"),
-            resources.GetString("comboBox2.Items3"),
-            resources.GetString("comboBox2.Items4"),
-            resources.GetString("comboBox2.Items5"),
-            resources.GetString("comboBox2.Items6")});
-			resources.ApplyResources(this.comboBox2, "comboBox2");
-			this.comboBox2.Name = "comboBox2";
-			// 
-			// comboBox1
-			// 
-			this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboBox1.FormattingEnabled = true;
-			this.comboBox1.Items.AddRange(new object[] {
-            resources.GetString("comboBox1.Items"),
-            resources.GetString("comboBox1.Items1"),
-            resources.GetString("comboBox1.Items2"),
-            resources.GetString("comboBox1.Items3"),
-            resources.GetString("comboBox1.Items4"),
-            resources.GetString("comboBox1.Items5"),
-            resources.GetString("comboBox1.Items6")});
-			resources.ApplyResources(this.comboBox1, "comboBox1");
-			this.comboBox1.Name = "comboBox1";
 			// 
 			// labelLanguage
 			// 
@@ -138,8 +115,8 @@
 			this.Controls.Add(this.wizardControl);
 			this.Name = "FormMain";
 			((System.ComponentModel.ISupportInitialize)(this.wizardControl)).EndInit();
-			this.wizardPageStart.ResumeLayout(false);
-			this.wizardPageStart.PerformLayout();
+			this.wizardPageLocale.ResumeLayout(false);
+			this.wizardPageLocale.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -147,16 +124,15 @@
 		#endregion
 
 		private DotNetApi.Windows.Controls.AeroWizard.WizardControl wizardControl;
-		private DotNetApi.Windows.Controls.AeroWizard.WizardPage wizardPageStart;
+		private DotNetApi.Windows.Controls.AeroWizard.WizardPage wizardPageLocale;
 		private DotNetApi.Windows.Controls.AeroWizard.WizardPage wizardPageRun;
 		private DotNetApi.Windows.Controls.AeroWizard.WizardPage wizardPageFinish;
-		private System.Windows.Forms.ComboBox comboBox1;
-		private System.Windows.Forms.Label labelLanguage;
-		private System.Windows.Forms.ComboBox comboBox2;
 		private System.Windows.Forms.Label labelCountry;
-		private System.Windows.Forms.Button buttonLoad;
 		private System.Windows.Forms.OpenFileDialog openFileDialog;
 		private System.Windows.Forms.SaveFileDialog saveFileDialog;
+		private System.Windows.Forms.Label labelLanguage;
+		private System.Windows.Forms.ComboBox comboBoxLanguage;
+		private System.Windows.Forms.ComboBox comboBoxCountry;
 
 	}
 }

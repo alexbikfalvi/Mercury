@@ -45,5 +45,28 @@ namespace DotNetApi.Globalization
 		/// Gets the language name.
 		/// </summary>
 		public string Name { get; private set; }
+
+		// Public methods.
+
+		/// <summary>
+		/// Gets the language name.
+		/// </summary>
+		/// <returns>The name.</returns>
+		public override string ToString()
+		{
+			return this.Name;
+		}
+
+		/// <summary>
+		/// Compares with an object for equality.
+		/// </summary>
+		/// <param name="obj">The object to compare.</param>
+		/// <returns><b>True</b> if the languages are the same, <b>false</b> otherwise.</returns>
+		public override bool Equals(object obj)
+		{
+			if (null == obj) return false;
+			if (!(obj is Language)) return false;
+			return this == (obj as Language);
+		}
 	}
 }

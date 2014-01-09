@@ -37,6 +37,8 @@ namespace DotNetApi.Globalization
 			this.Name = name;
 		}
 
+		// Public properties.
+
 		/// <summary>
 		/// Gets the territory type.
 		/// </summary>
@@ -45,5 +47,16 @@ namespace DotNetApi.Globalization
 		/// Gets the territory name.
 		/// </summary>
 		public string Name { get; private set; }
+
+		// Public methods.
+
+		/// <summary>
+		/// Gets the language name.
+		/// </summary>
+		/// <returns>The name.</returns>
+		public override string ToString()
+		{
+			return this.Name;
+		}
 	}
 }

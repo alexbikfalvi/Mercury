@@ -118,25 +118,25 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="wizardPageLocale.Text" xml:space="preserve">
-    <value>Selectați limba și țara dumneavoastră</value>
+    <value>Selecione o idioma eo país</value>
   </data>
   <data name="wizardControl.Title" xml:space="preserve">
-    <value>Client pentru Mercury</value>
+    <value>Cliente para Mercury</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="labelCountry.Size" type="System.Drawing.Size, System.Drawing">
-    <value>33, 15</value>
+    <value>31, 15</value>
   </data>
   <data name="labelCountry.Text" xml:space="preserve">
-    <value>Ț&amp;ara:</value>
+    <value>&amp;País:</value>
   </data>
   <data name="labelLanguage.Size" type="System.Drawing.Size, System.Drawing">
-    <value>43, 15</value>
+    <value>47, 15</value>
   </data>
   <data name="labelLanguage.Text" xml:space="preserve">
-    <value>&amp;Limba:</value>
+    <value>&amp;Idioma:</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
-    <value>Client pentru Mercury</value>
+    <value>Cliente para Mercury</value>
   </data>
 </root>

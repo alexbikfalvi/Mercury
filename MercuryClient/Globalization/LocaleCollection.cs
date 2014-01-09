@@ -56,16 +56,6 @@ namespace DotNetApi.Globalization
 			}
 		}
 
-		///// <summary>
-		///// Creates a locale collection from the specified serialization context.
-		///// </summary>
-		///// <param name="info">The serialization information.</param>
-		///// <param name="context">The streaming context.</param>
-		//public LocaleCollection(SerializationInfo info, StreamingContext context)
-		//{
-		//	this.locales = info.GetValue("locales", typeof(Dictionary<CultureId, Locale>)) as Dictionary<CultureId, Locale>;
-		//}
-
 		// Public properties.
 
 		/// <summary>
@@ -74,6 +64,26 @@ namespace DotNetApi.Globalization
 		public int Count
 		{
 			get { return this.locales.Count; }
+		}
+
+		/// <summary>
+		/// Returns the locale for the specified language.
+		/// </summary>
+		/// <param name="language">The language.</param>
+		/// <returns>The locale.</returns>
+		public Locale this[string language]
+		{
+			get { return this.locales[new CultureId(language)]; }
+		}
+
+		/// <summary>
+		/// Returns the locale for the specified language.
+		/// </summary>
+		/// <param name="language">The language.</param>
+		/// <returns>The locale.</returns>
+		public Locale this[Language language]
+		{
+			get { return this.locales[new CultureId(language.Type)]; }
 		}
 
 		// Public methods.
@@ -95,16 +105,6 @@ namespace DotNetApi.Globalization
 		{
 			return this.GetEnumerator();
 		}
-
-		///// <summary>
-		///// Gets the serialization data for the current object.
-		///// </summary>
-		///// <param name="info">The serialization info.</param>
-		///// <param name="context">The streaming context.</param>
-		//public void GetObjectData(SerializationInfo info, StreamingContext context)
-		//{
-		//	info.AddValue("locales", this.locales);
-		//}
 
 		/// <summary>
 		/// Adds a new locale to the collection.

@@ -67,6 +67,15 @@ namespace DotNetApi.Globalization
 		{
 			get { return this.languages.Count; }
 		}
+		/// <summary>
+		/// Gets the language for the specified language.
+		/// </summary>
+		/// <param name="language">The language.</param>
+		/// <returns>The language.</returns>
+		public Language this[string language]
+		{
+			get { return this.languages[language]; }
+		}
 
 		// Public methods.
 

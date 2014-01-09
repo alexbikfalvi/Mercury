@@ -124,7 +124,7 @@
     </Compile>
     <Compile Include="Windows\VisualStyles\VisualStyleElementEx.cs" />
     <Compile Include="Windows\Controls\AeroWizard\WizardControl.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Windows\Controls\AeroWizard\Design\WizardControlDesigner.cs" />
     <Compile Include="Windows\Controls\AeroWizard\WizardPage.cs">
@@ -155,6 +155,9 @@
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormMain.fr.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.pt.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
