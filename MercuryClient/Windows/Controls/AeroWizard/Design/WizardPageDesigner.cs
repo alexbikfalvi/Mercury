@@ -24,7 +24,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 
-namespace DotNetApi.Windows.Controls.AeroWizard.Design
+namespace Mercury.Windows.Controls.AeroWizard.Design
 {
 	internal class WizardPageDesigner : ParentControlDesigner
 	{

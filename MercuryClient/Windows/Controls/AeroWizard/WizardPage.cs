@@ -19,10 +19,11 @@
 
 using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Security.Permissions;
 using System.Windows.Forms;
 
-namespace DotNetApi.Windows.Controls.AeroWizard
+namespace Mercury.Windows.Controls.AeroWizard
 {
 	/// <summary>
 	/// Represents a single page in a <see cref="WizardControl"/>.
@@ -46,7 +47,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		{
 			// Set the default properties.
 			base.Margin = Padding.Empty;
-			base.Text = Mercury.Properties.Resources.WizardHeader;
+			base.Text = WizardResources.WizardHeader;
 			this.Suppress = false;
 		}
 
@@ -123,7 +124,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 				if (allowNext != value)
 				{
 					allowNext = value;
-					UpdateOwner();
+					this.UpdateOwner();
 				}
 			}
 		}
@@ -143,7 +144,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 				if (helpLink == null)
 				{
 					helpLink = new LinkLabel() { AutoSize = true, Dock = DockStyle.Bottom, Text = "Help", Visible = false };
-					helpLink.LinkClicked += new LinkLabelLinkClickedEventHandler(helpLink_LinkClicked);
+					helpLink.LinkClicked += new LinkLabelLinkClickedEventHandler(OnHelpLinkClicked);
 					this.Controls.Add(helpLink);
 				}
 				helpText = value;
@@ -172,7 +173,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 				if (isFinishPage != value)
 				{
 					isFinishPage = value;
-					UpdateOwner();
+					this.UpdateOwner();
 				}
 			}
 		}
@@ -236,7 +237,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// The <see cref="T:System.Drawing.Size"/> that represents the height and width of the control in pixels.
 		/// </returns>
 		[Browsable(false)]
-		public new System.Drawing.Size Size { get { return base.Size; } set { base.Size = value; } }
+		public new Size Size { get { return base.Size; } set { base.Size = value; } }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether this <see cref="WizardPage"/> is suppressed and not shown in the normal flow.
@@ -279,31 +280,45 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			return string.Format("{0} (\"{1}\")", this.Name, this.Text);
 		}
 
+		// Internal methods.
+
+		/// <summary>
+		/// Commits the page, rasing the <see cref="Commit" /> event.
+		/// </summary>
+		/// <returns><c>True</c> if handler does not set the <see cref="WizardPageConfirmEventArgs.Cancel"/> to <c>true</c>; otherwise, <c>false</c>.</returns>
 		internal bool CommitPage()
 		{
-			return OnCommit();
+			return this.OnCommit();
 		}
 
+		/// <summary>
+		/// Initializes the page.
+		/// </summary>
+		/// <param name="prevPage">The previous wizard page.</param>
 		internal void InitializePage(WizardPage prevPage)
 		{
-			OnInitialize(prevPage);
+			this.OnInitialize(prevPage);
 		}
 
+		/// <summary>
+		/// Rolls-back the page.
+		/// </summary>
+		/// <returns><c>True</c> if handler does not set the <see cref="WizardPageConfirmEventArgs.Cancel"/> to <c>true</c>; otherwise, <c>false</c>.</returns>
 		internal bool RollbackPage()
 		{
-			return OnRollback();
+			return this.OnRollback();
 		}
+
+		// Protected methods.
 
 		/// <summary>
 		/// Raises the <see cref="Commit" /> event.
 		/// </summary>
-		/// <returns><c>true</c> if handler does not set the <see cref="WizardPageConfirmEventArgs.Cancel"/> to <c>true</c>; otherwise, <c>false</c>.</returns>
+		/// <returns><c>True</c> if handler does not set the <see cref="WizardPageConfirmEventArgs.Cancel"/> to <c>true</c>; otherwise, <c>false</c>.</returns>
 		protected virtual bool OnCommit()
 		{
-			EventHandler<WizardPageConfirmEventArgs> handler = Commit;
 			WizardPageConfirmEventArgs e =  new WizardPageConfirmEventArgs(this);
-			if (handler != null)
-				handler(this,e);
+			if (this.Commit != null) this.Commit(this,e);
 			return !e.Cancel;
 		}
 
@@ -313,10 +328,14 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
 		protected override void OnGotFocus(EventArgs e)
 		{
+			// Call the base class focus.
 			base.OnGotFocus(e);
+			// Focus the next control.
 			Control firstChild = this.GetNextControl(this, true);
 			if (firstChild != null)
+			{
 				firstChild.Focus();
+			}
 		}
 
 		/// <summary>
@@ -324,9 +343,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// </summary>
 		protected virtual void OnHelpClicked()
 		{
-			EventHandler handler = HelpClicked;
-			if (handler != null)
-				handler(this, EventArgs.Empty);
+			if (this.HelpClicked != null) this.HelpClicked(this, EventArgs.Empty);
 		}
 
 		/// <summary>
@@ -335,34 +352,41 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		/// <param name="prevPage">The page that was previously selected.</param>
 		protected virtual void OnInitialize(WizardPage prevPage)
 		{
-			EventHandler<WizardPageInitEventArgs> handler = Initialize;
-			WizardPageInitEventArgs e = new WizardPageInitEventArgs(this, prevPage);
-			if (handler != null)
-				handler(this, e);
+			if (this.Initialize != null) this.Initialize(this, new WizardPageInitEventArgs(this, prevPage));
 		}
 
 		/// <summary>
 		/// Raises the <see cref="Rollback"/> event.
 		/// </summary>
-		/// <returns><c>true</c> if handler does not set the <see cref="WizardPageConfirmEventArgs.Cancel"/> to <c>true</c>; otherwise, <c>false</c>.</returns>
+		/// <returns><c>True</c> if handler does not set the <see cref="WizardPageConfirmEventArgs.Cancel"/> to <c>true</c>; otherwise, <c>false</c>.</returns>
 		protected virtual bool OnRollback()
 		{
-			EventHandler<WizardPageConfirmEventArgs> handler = Rollback;
 			WizardPageConfirmEventArgs e = new WizardPageConfirmEventArgs(this);
-			if (handler != null)
-				handler(this, e);
+			if (this.Rollback != null) this.Rollback(this, e);
 			return !e.Cancel;
 		}
 
-		private void helpLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		// Private methods.
+
+		/// <summary>
+		/// An event handler called when the user clicks on the page help link.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnHelpLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
-			OnHelpClicked();
+			this.OnHelpClicked();
 		}
 
+		/// <summary>
+		/// A method called when updating the owner of a wizard page.
+		/// </summary>
 		private void UpdateOwner()
 		{
-			if (Owner != null && this == Owner.SelectedPage)
-				Owner.OnUpdateButtons();
+			if ((this.Owner != null) && (this == this.Owner.SelectedPage))
+			{
+				this.Owner.OnUpdateButtons();
+			}
 		}
 	}
 
@@ -371,10 +395,14 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 	/// </summary>
 	public class WizardPageConfirmEventArgs : EventArgs
 	{
+		/// <summary>
+		/// Creates a new wizard page confirm event arguments.
+		/// </summary>
+		/// <param name="page">The wizard page.</param>
 		internal WizardPageConfirmEventArgs(WizardPage page)
 		{
-			Cancel = false;
-			Page = page;
+			this.Cancel = false;
+			this.Page = page;
 		}
 
 		/// <summary>
@@ -396,10 +424,15 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 	/// </summary>
 	public class WizardPageInitEventArgs : WizardPageConfirmEventArgs
 	{
+		/// <summary>
+		/// Creates a wizard page init event arguments instance.
+		/// </summary>
+		/// <param name="page">The wizard page.</param>
+		/// <param name="prevPage">The previous wizard page.</param>
 		internal WizardPageInitEventArgs(WizardPage page, WizardPage prevPage)
 			: base(page)
 		{
-			PreviousPage = prevPage;
+			this.PreviousPage = prevPage;
 		}
 
 		/// <summary>

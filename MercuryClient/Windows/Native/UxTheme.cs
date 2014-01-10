@@ -21,7 +21,7 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace DotNetApi.Windows.Native
+namespace Mercury.Windows.Native
 {
 	internal static partial class NativeMethods
 	{

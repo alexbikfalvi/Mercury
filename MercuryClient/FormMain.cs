@@ -18,14 +18,14 @@
 
 using System;
 using System.Collections.Generic;
-//using System.IO;
-//using System.Runtime.Serialization;
-//using System.Runtime.Serialization.Formatters.Binary;
+using System.ComponentModel;
+using System.Globalization;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
-using DotNetApi.Globalization;
-using DotNetApi.Windows.Forms;
-
-using System.Resources;
+using Mercury.Globalization;
+using Mercury.Windows.Controls.AeroWizard;
+using Mercury.Windows.Forms;
 
 namespace MercuryClient
 {
@@ -70,11 +70,18 @@ namespace MercuryClient
 		/// </summary>
 		private void LoadLanguages()
 		{
+			Language currentLanguage = null;
+
 			// Create the lanugages.
 			this.languages.Clear();
 			foreach (string locale in FormMain.locales)
 			{
-				this.languages.Add(Mercury.Globalization.Resources.Locales[locale].Languages[locale]);
+				Language language = Mercury.Globalization.Resources.Locales[locale].Languages[locale];
+				this.languages.Add(language);
+				if (language.Equals(Thread.CurrentThread.CurrentUICulture))
+				{
+					currentLanguage = language;
+				}
 			}
 			
 			// Sort the languages by name.
@@ -83,57 +90,16 @@ namespace MercuryClient
 				return left.Name.CompareTo(right.Name);
 			});
 
-			// Save the selected language.
-			Language selectedLanguage = this.comboBoxLanguage.SelectedItem as Language;
-
 			// Add the languages to the language combo box.
 			this.comboBoxLanguage.Items.Clear();
 			this.comboBoxLanguage.Items.AddRange(this.languages.ToArray());
 
-			// Find the 
-			this.comboBoxLanguage.SelectedIndex = this.comboBoxLanguage.Items.IndexOf(selectedLanguage);
+			// Select the current language, if exists.
+			if (null != currentLanguage)
+			{
+				this.comboBoxLanguage.SelectedIndex = this.comboBoxLanguage.Items.IndexOf(currentLanguage);
+			}
 		}
-
-
-		/// <summary>
-		/// Loads the locales from the specified XML file and saves them to a resource file.
-		/// </summary>
-		/// <param name="sender">The sender object.</param>
-		/// <param name="e">The event arguments.</param>
-		//private void OnLoadLocales(object sender, EventArgs e)
-		//{
-		//	if (this.openFileDialog.ShowDialog(this) == DialogResult.OK)
-		//	{
-		//		try
-		//		{
-		//			using (FileStream file = new FileStream(this.openFileDialog.FileName, FileMode.Open))
-		//			{
-		//				using (LocaleReader reader = new LocaleReader(file))
-		//				{
-		//					LocaleCollection locales = reader.ReadLocaleCollection();
-
-		//					if (this.saveFileDialog.ShowDialog(this) == DialogResult.OK)
-		//					{
-		//						using (ResXResourceWriter writer = new ResXResourceWriter(this.saveFileDialog.FileName))
-		//						{
-		//							BinaryFormatter formatter = new BinaryFormatter();
-
-		//							using (MemoryStream stream = new MemoryStream())
-		//							{
-		//								formatter.Serialize(stream, locales);
-		//								writer.AddResource("Collection", stream.ToArray());
-		//							}
-		//						}
-		//					}
-		//				}
-		//			}
-		//		}
-		//		catch(Exception exception)
-		//		{
-		//			MessageBox.Show(this, exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-		//		}
-		//	}
-		//}
 
 		/// <summary>
 		/// An event handler called when the language has changed.
@@ -149,7 +115,10 @@ namespace MercuryClient
 			this.territories.Clear();
 			foreach (Territory territory in Mercury.Globalization.Resources.Locales[language].Territories)
 			{
-				this.territories.Add(territory);
+				if (Regex.IsMatch(territory.Type, "[(A-Z|a-z)][(A-Z|a-z)]"))
+				{
+					this.territories.Add(territory);
+				}
 			}
 
 			// Sort the territories by name.
@@ -157,20 +126,75 @@ namespace MercuryClient
 			{
 				return left.Name.CompareTo(right.Name);
 			});
-			
+
+			// Save the selected country.
+			Territory selectedCountry = this.comboBoxCountry.SelectedItem as Territory;
+
 			// Clear the countries.
 			this.comboBoxCountry.Items.Clear();
 			this.comboBoxCountry.Items.AddRange(this.territories.ToArray());
 
-			//int index = this.comboBoxLanguage.SelectedIndex;
-			//string locale = FormMain.locales[this.comboBoxLanguage.SelectedIndex];
+			// Find the selected language.
+			if (null != selectedCountry)
+			{
+				this.comboBoxCountry.SelectedIndex = this.comboBoxCountry.Items.IndexOf(selectedCountry);
+			}
 
-			//this.comboBoxCountry.Items.Clear();
-			//foreach (Language language in .Languages)
-			//{
-			//	this.comboBoxCountry.Items.Add(language.Name);
-			//}
-			//this.comboBoxCountry.SelectedIndex = index;
+			// Update the language.
+			this.OnUpdateCulture(new CultureInfo(language.Type));
+
+			// Call the country changed event handler.
+			this.OnCountryChanged(sender, e);
+		}
+
+		/// <summary>
+		/// An event handler called when the country has changed.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnCountryChanged(object sender, EventArgs e)
+		{
+			this.wizardPageLocale.AllowNext = this.comboBoxCountry.SelectedIndex >= 0;
+		}
+
+		/// <summary>
+		/// Updates the current culture.
+		/// </summary>
+		/// <param name="culture"></param>
+		private void OnUpdateCulture(CultureInfo culture)
+		{
+			Thread.CurrentThread.CurrentUICulture = culture;
+			
+			this.wizardControl.Culture = culture;
+			this.wizardPageLocale.Text = WizardResources.GetString("PageLocalesTitle");
+			this.wizardPageRun.Text = WizardResources.GetString("PageRunTitle");
+			this.wizardPageFinish.Text = WizardResources.GetString("PageFinishTitle");
+			this.wizardPageLocale.HelpText = WizardResources.GetString("HelpLocales");
+			this.labelLanguage.Text = WizardResources.GetString("LabelLanguage");
+			this.labelCountry.Text = WizardResources.GetString("LabelCountry");
+			this.labelInfo.Text = WizardResources.GetString("LabelInfo");
+			this.labelProgress.Text = WizardResources.GetString("LabelProgress");
+			this.labelFinish.Text = WizardResources.GetString("LabelFinish");
+		}
+
+		/// <summary>
+		/// An event handler called when the user clicks the cancel button.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnCanceling(object sender, CancelEventArgs e)
+		{
+			this.Close();
+		}
+
+		/// <summary>
+		/// An event handler called when the user clicks the finish button.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnFinished(object sender, EventArgs e)
+		{
+			this.Close();
 		}
 	}
 }

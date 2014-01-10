@@ -22,14 +22,15 @@ using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing;
 using System.Drawing.Design;
+using System.Globalization;
 using System.Security.Permissions;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using DotNetApi.Windows;
-using DotNetApi.Windows.Native;
-using DotNetApi.Windows.VisualStyles;
+using Mercury.Windows;
+using Mercury.Windows.Native;
+using Mercury.Windows.VisualStyles;
 
-namespace DotNetApi.Windows.Controls.AeroWizard
+namespace Mercury.Windows.Controls.AeroWizard
 {
 	/// <summary>
 	/// Styles that can be applied to the body of a <see cref="WizardControl"/> when on XP or earlier or when a Basic theme is applied.
@@ -335,6 +336,30 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the current culture.
+		/// </summary>
+		[Category("Wizard"), Description("The wizard culture.")]
+		public CultureInfo Culture
+		{
+			get { return WizardResources.Culture; }
+			set
+			{
+				// Set the resources culture.
+				WizardResources.Culture = value;
+				// Update the wizard controls.
+				this.titleLabel.Text = WizardResources.WizardTitle;
+				this.pageContainer.BackButtonText = WizardResources.WizardBackText;
+				this.cancelButton.Text = WizardResources.WizardCancelText;
+				this.nextButton.Text = WizardResources.WizardNextText;
+				this.backButton.Text = WizardResources.WizardBackText;
+				this.backButton.ToolTipText = WizardResources.WizardBackButtonToolTip;
+				this.pageContainer.NextButtonText = WizardResources.WizardNextText;
+				this.pageContainer.BackButtonText = WizardResources.WizardBackText;
+				this.pageContainer.FinishButtonText = WizardResources.WizardFinishText;
+			}
+		}
+
 		// Internal properties.
 
 		/// <summary>
@@ -536,7 +561,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		{
 			base.OnRightToLeftChanged(e);
 			bool r2l = (ControlExtensions.GetRightToLeftProperty(this) == System.Windows.Forms.RightToLeft.Yes);
-			Bitmap btnStrip = Mercury.Properties.Resources.AeroBackButtonStrip;
+			Bitmap btnStrip = WizardResources.AeroBackButtonStrip;
 			if (r2l) btnStrip.RotateFlip(RotateFlipType.RotateNoneFlipX);
 			backButton.SetImageListImageStrip(btnStrip, Orientation.Vertical);
 			backButton.StylePart = r2l ? 2 : 1;
@@ -627,7 +652,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			// pageContainer
 			// 
 			this.pageContainer.BackButton = this.backButton;
-			this.pageContainer.BackButtonText = Mercury.Properties.Resources.WizardBackText;
+			this.pageContainer.BackButtonText = WizardResources.WizardBackText;
 			this.pageContainer.CancelButton = this.cancelButton;
 			this.pageContainer.Dock = DockStyle.Fill;
 			this.pageContainer.Location = new Point(38, 0);
@@ -656,12 +681,12 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			this.cancelButton.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Right)));
 			this.cancelButton.AutoSize = true;
 			this.cancelButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-			this.cancelButton.Location = new Point(520, 10);
+			this.cancelButton.Location = new Point(510, 10);
 			this.cancelButton.Margin = new Padding(7, 0, 0, 0);
-			this.cancelButton.MinimumSize = new Size(70, 0);
-			this.cancelButton.Size = new Size(70, 25);
+			this.cancelButton.MinimumSize = new Size(80, 0);
+			this.cancelButton.Size = new Size(80, 25);
 			this.cancelButton.TabIndex = 1;
-			this.cancelButton.Text = Mercury.Properties.Resources.WizardCancelText;
+			this.cancelButton.Text = WizardResources.WizardCancelText;
 			this.cancelButton.UseVisualStyleBackColor = true;
 			// 
 			// nextButton
@@ -669,12 +694,12 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			this.nextButton.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Right)));
 			this.nextButton.AutoSize = true;
 			this.nextButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-			this.nextButton.Location = new Point(443, 10);
+			this.nextButton.Location = new Point(423, 10);
 			this.nextButton.Margin = new Padding(0);
-			this.nextButton.MinimumSize = new Size(70, 0);
-			this.nextButton.Size = new Size(70, 23);
+			this.nextButton.MinimumSize = new Size(80, 0);
+			this.nextButton.Size = new Size(80, 23);
 			this.nextButton.TabIndex = 0;
-			this.nextButton.Text = Mercury.Properties.Resources.WizardNextText;
+			this.nextButton.Text = WizardResources.WizardNextText;
 			this.nextButton.UseVisualStyleBackColor = true;
 			// 
 			// header
@@ -703,7 +728,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			this.headerLabel.Margin = new Padding(38, 19, 0, 19);
 			this.headerLabel.Size = new Size(77, 21);
 			this.headerLabel.TabIndex = 0;
-			this.headerLabel.Text = Mercury.Properties.Resources.WizardHeader;
+			this.headerLabel.Text = WizardResources.WizardHeader;
 			// 
 			// commandArea
 			// 
@@ -758,7 +783,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			this.titleLabel.Padding = new Padding(0, 2, 0, 2);
 			this.titleLabel.Size = new Size(79, 19);
 			this.titleLabel.TabIndex = 2;
-			this.titleLabel.Text = Mercury.Properties.Resources.WizardTitle;
+			this.titleLabel.Text = WizardResources.WizardTitle;
 			this.titleLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// titleImage
@@ -859,7 +884,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 		{
 			if (ControlExtensions.IsDesignMode(this) && this.Pages.Count == 0)
 			{
-				string noPagesText = Mercury.Properties.Resources.WizardNoPagesNotice;
+				string noPagesText = WizardResources.WizardNoPagesNotice;
 				Rectangle r = this.GetContentAreaRectangle(false);
 
 				r.Inflate(-2, -2);
@@ -963,29 +988,38 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			if (null != e.NewItem) e.NewItem.TextChanged += this.OnPageTextChanged;
 		}
 
+		/// <summary>
+		/// An event handler called when the page text has changed.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void OnPageTextChanged(object sender, EventArgs e)
 		{
-			this.HeaderText = ((WizardPage)sender).Text;
+			WizardPage page = sender as WizardPage;
+			if (this.SelectedPage == page)
+			{
+				this.HeaderText = page.Text;
+			}
 		}
 
 		private void OnParentFormLoad(object sender, EventArgs e)
 		{
-			ConfigureWindowFrame();
+			this.ConfigureWindowFrame();
 		}
 
 		private void ResetBackButtonToolTipText()
 		{
-			BackButtonToolTipText = Mercury.Properties.Resources.WizardBackButtonToolTip;
+			this.BackButtonToolTipText = WizardResources.WizardBackButtonToolTip;
 		}
 
 		private void ResetBackButtonText()
 		{
-			pageContainer.ResetBackButtonText();
+			this.pageContainer.ResetBackButtonText();
 		}
 
 		private void ResetCancelButtonText()
 		{
-			pageContainer.ResetCancelButtonText();
+			this.pageContainer.ResetCancelButtonText();
 		}
 
 		private void ResetFinishButtonText()
@@ -1000,12 +1034,12 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 
 		private void ResetTitle()
 		{
-			Title = Mercury.Properties.Resources.WizardTitle;
+			Title = WizardResources.WizardTitle;
 		}
 
 		private void ResetTitleIcon()
 		{
-			TitleIcon = Mercury.Properties.Resources.Icon;
+			TitleIcon = WizardResources.Icon;
 			titleImageIconSet = false;
 		}
 
@@ -1050,14 +1084,14 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 			}
 			else
 			{
-				backButton.Size = new Size(Mercury.Properties.Resources.AeroBackButtonStrip.Width, Mercury.Properties.Resources.AeroBackButtonStrip.Height / 4);
+				backButton.Size = new Size(WizardResources.AeroBackButtonStrip.Width, WizardResources.AeroBackButtonStrip.Height / 4);
 				this.BackColor = UseAeroStyle ? SystemColors.Window : SystemColors.Control;
 			}
 		}
 
 		private bool ShouldSerializeBackButtonToolTipText()
 		{
-			return BackButtonToolTipText != Mercury.Properties.Resources.WizardBackButtonToolTip;
+			return BackButtonToolTipText != WizardResources.WizardBackButtonToolTip;
 		}
 
 		private bool ShouldSerializeBackButtonText()
@@ -1082,7 +1116,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 
 		private bool ShouldSerializeTitle()
 		{
-			return Title != Mercury.Properties.Resources.WizardTitle;
+			return Title != WizardResources.WizardTitle;
 		}
 
 		private bool ShouldSerializeTitleIcon()

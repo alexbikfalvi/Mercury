@@ -21,9 +21,9 @@ using System;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using DotNetApi.Windows.VisualStyles;
+using Mercury.Windows.VisualStyles;
 
-namespace DotNetApi.Windows.Controls
+namespace Mercury.Windows.Controls
 {
 	/// <summary>
 	/// A class for a themed table layout panel.

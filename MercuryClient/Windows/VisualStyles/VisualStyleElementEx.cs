@@ -19,7 +19,7 @@
 
 using System.Windows.Forms.VisualStyles;
 
-namespace DotNetApi.Windows.VisualStyles
+namespace Mercury.Windows.VisualStyles
 {
 	/// <summary>
 	/// Identifies a control or user interface (UI) element that is drawn with visual styles.

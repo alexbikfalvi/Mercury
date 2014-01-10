@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace DotNetApi.Windows
+namespace Mercury.Windows
 {
 	/// <summary>
 	/// Formats a control to the default configuration.

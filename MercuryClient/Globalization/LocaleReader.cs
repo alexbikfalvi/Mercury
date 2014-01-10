@@ -20,7 +20,7 @@ using System;
 using System.IO;
 using System.Xml;
 
-namespace DotNetApi.Globalization
+namespace Mercury.Globalization
 {
 	/// <summary>
 	/// A class representing a locale reader.

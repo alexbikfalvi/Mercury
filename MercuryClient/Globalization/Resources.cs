@@ -2,7 +2,7 @@
 using System.IO;
 using System.Runtime;
 using System.Runtime.Serialization.Formatters.Binary;
-using DotNetApi.Globalization;
+using Mercury.Globalization;
 
 namespace Mercury.Globalization
 {

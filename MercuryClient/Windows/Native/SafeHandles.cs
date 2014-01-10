@@ -22,7 +22,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 
-namespace DotNetApi.Windows.Native
+namespace Mercury.Windows.Native
 {
 	/// <summary>
 	/// A class with native methods.

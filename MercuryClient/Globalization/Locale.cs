@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DotNetApi.Globalization
+namespace Mercury.Globalization
 {
 	/// <summary>
 	/// A class representing a locale.

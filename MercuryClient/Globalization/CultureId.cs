@@ -19,7 +19,7 @@
 using System;
 using System.Text;
 
-namespace DotNetApi.Globalization
+namespace Mercury.Globalization
 {
 	/// <summary>
 	/// A structure representing the culture identifier.

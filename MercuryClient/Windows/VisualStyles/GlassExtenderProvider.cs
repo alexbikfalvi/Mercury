@@ -22,9 +22,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using DotNetApi.Windows.Controls;
+using Mercury.Windows.Controls;
 
-namespace DotNetApi.Windows.VisualStyles
+namespace Mercury.Windows.VisualStyles
 {
 	/// <summary>
 	/// GlassExtenderProvider extends a <see cref="System.Windows.Forms.Form"/> and provides glass margins.

@@ -23,9 +23,9 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using DotNetApi.Windows.VisualStyles;
+using Mercury.Windows.VisualStyles;
 
-namespace DotNetApi.Windows.Controls.AeroWizard
+namespace Mercury.Windows.Controls.AeroWizard
 {
 	/// <summary>
 	/// A button that displays an image and no text.

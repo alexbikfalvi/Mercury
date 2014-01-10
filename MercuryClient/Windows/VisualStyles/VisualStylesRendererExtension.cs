@@ -23,9 +23,9 @@ using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using DotNetApi.Windows.Native;
+using Mercury.Windows.Native;
 
-namespace DotNetApi.Windows.VisualStyles
+namespace Mercury.Windows.VisualStyles
 {
 	internal static class VisualStyleRendererExtension
 	{

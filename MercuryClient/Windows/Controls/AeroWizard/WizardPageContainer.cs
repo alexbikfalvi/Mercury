@@ -24,9 +24,9 @@ using System.ComponentModel.Design;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Windows.Forms;
-using DotNetApi.Windows.Native;
+using Mercury.Windows.Native;
 
-namespace DotNetApi.Windows.Controls.AeroWizard
+namespace Mercury.Windows.Controls.AeroWizard
 {
 	/// <summary>
 	/// Button state for buttons controlling the wizard.
@@ -568,42 +568,42 @@ namespace DotNetApi.Windows.Controls.AeroWizard
 
 		internal void ResetBackButtonText()
 		{
-			BackButtonText = Mercury.Properties.Resources.WizardBackText;
+			BackButtonText = WizardResources.WizardBackText;
 		}
 
 		internal void ResetCancelButtonText()
 		{
-			CancelButtonText = Mercury.Properties.Resources.WizardCancelText;
+			CancelButtonText = WizardResources.WizardCancelText;
 		}
 
 		internal void ResetFinishButtonText()
 		{
-			FinishButtonText = Mercury.Properties.Resources.WizardFinishText;
+			FinishButtonText = WizardResources.WizardFinishText;
 		}
 
 		internal void ResetNextButtonText()
 		{
-			NextButtonText = Mercury.Properties.Resources.WizardNextText;
+			NextButtonText = WizardResources.WizardNextText;
 		}
 
 		internal bool ShouldSerializeBackButtonText()
 		{
-			return BackButtonText != Mercury.Properties.Resources.WizardBackText;
+			return BackButtonText != WizardResources.WizardBackText;
 		}
 
 		internal bool ShouldSerializeCancelButtonText()
 		{
-			return CancelButtonText != Mercury.Properties.Resources.WizardCancelText;
+			return CancelButtonText != WizardResources.WizardCancelText;
 		}
 
 		internal bool ShouldSerializeFinishButtonText()
 		{
-			return FinishButtonText != Mercury.Properties.Resources.WizardFinishText;
+			return FinishButtonText != WizardResources.WizardFinishText;
 		}
 
 		internal bool ShouldSerializeNextButtonText()
 		{
-			return NextButtonText != Mercury.Properties.Resources.WizardNextText;
+			return NextButtonText != WizardResources.WizardNextText;
 		}
 
 		// Private methods.

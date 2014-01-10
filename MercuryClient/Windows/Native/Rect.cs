@@ -19,7 +19,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace DotNetApi.Windows.Native
+namespace Mercury.Windows.Native
 {
 	/// <summary>
 	/// A class with native methods.

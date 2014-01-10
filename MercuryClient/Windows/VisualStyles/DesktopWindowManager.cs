@@ -22,9 +22,9 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Security.Permissions;
 using System.Windows.Forms;
-using DotNetApi.Windows.Native;
+using Mercury.Windows.Native;
 
-namespace DotNetApi.Windows.VisualStyles
+namespace Mercury.Windows.VisualStyles
 {
 	/// <summary>
 	/// Main DWM class, provides glass sheet effect and blur behind.

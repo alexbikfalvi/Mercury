@@ -17,7 +17,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace DotNetApi.Windows.Controls.AeroWizard
+namespace Mercury.Windows.Controls.AeroWizard
 {
 	/// <summary>
 	/// A collection of <see cref="WizardPage"/> controls.

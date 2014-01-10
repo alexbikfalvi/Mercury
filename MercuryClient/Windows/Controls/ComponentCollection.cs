@@ -20,7 +20,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 
-namespace DotNetApi.Windows.Controls
+namespace Mercury.Windows.Controls
 {
 	/// <summary>
 	/// A collection of components.

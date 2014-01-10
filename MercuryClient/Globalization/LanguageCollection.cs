@@ -20,7 +20,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace DotNetApi.Globalization
+namespace Mercury.Globalization
 {
 	/// <summary>
 	/// A class that represents a language collection.

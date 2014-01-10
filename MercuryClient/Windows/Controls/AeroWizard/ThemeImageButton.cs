@@ -21,9 +21,9 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using DotNetApi.Windows.VisualStyles;
+using Mercury.Windows.VisualStyles;
 
-namespace DotNetApi.Windows.Controls.AeroWizard
+namespace Mercury.Windows.Controls.AeroWizard
 {
 	/// <summary>
 	/// Image button that can be displayed on glass.

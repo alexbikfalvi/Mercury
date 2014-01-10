@@ -20,7 +20,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace DotNetApi.Windows.Controls
+namespace Mercury.Windows.Controls
 {
 	/// <summary>
 	/// A class with control extension methods.

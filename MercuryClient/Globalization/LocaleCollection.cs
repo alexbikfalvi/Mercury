@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Xml.Serialization;
 
-namespace DotNetApi.Globalization
+namespace Mercury.Globalization
 {
 	/// <summary>
 	/// A class representing a collection of locale objects.

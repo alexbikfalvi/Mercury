@@ -25,7 +25,7 @@ using System.Drawing.Design;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 
-namespace DotNetApi.Windows.Controls.AeroWizard.Design
+namespace Mercury.Windows.Controls.AeroWizard.Design
 {
 	[System.Security.Permissions.PermissionSet(System.Security.Permissions.SecurityAction.Demand, Name = "FullTrust")]
 	[EditorBrowsable(EditorBrowsableState.Never)]
@@ -138,7 +138,7 @@ namespace DotNetApi.Windows.Controls.AeroWizard.Design
 		public override void InitializeNewComponent(System.Collections.IDictionary defaultValues)
 		{
 			base.InitializeNewComponent(defaultValues);
-			this.Control.Text = Mercury.Properties.Resources.WizardTitle;
+			this.Control.Text = AeroWizard.WizardResources.WizardTitle;
 		}
 
 		public void ToolPicked(ToolboxItem tool)

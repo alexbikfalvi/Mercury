@@ -21,7 +21,7 @@ using System;
 using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace DotNetApi.Windows.Controls.AeroWizard
+namespace Mercury.Windows.Controls.AeroWizard
 {
 	/// <summary>
 	/// Wizard control that shows a step summary on the left of the wizard page area.

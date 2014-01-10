@@ -22,7 +22,7 @@ using System.Runtime;
 using System.Windows.Forms;
 using System.Threading;
 
-namespace DotNetApi.Windows.Forms
+namespace Mercury.Windows.Forms
 {
 	/// <summary>
 	/// An parameterless action delegate.

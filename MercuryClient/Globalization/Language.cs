@@ -17,8 +17,9 @@
  */
 
 using System;
+using System.Globalization;
 
-namespace DotNetApi.Globalization
+namespace Mercury.Globalization
 {
 	/// <summary>
 	/// A class representing a language.
@@ -33,7 +34,7 @@ namespace DotNetApi.Globalization
 		/// <param name="name">The language name.</param>
 		public Language(string type, string name)
 		{
-			this.Type = type;
+			this.Type = type.ToLowerInvariant();
 			this.Name = name;
 		}
 
@@ -61,12 +62,56 @@ namespace DotNetApi.Globalization
 		/// Compares with an object for equality.
 		/// </summary>
 		/// <param name="obj">The object to compare.</param>
-		/// <returns><b>True</b> if the languages are the same, <b>false</b> otherwise.</returns>
+		/// <returns><b>True</b> if the objects are the equal, <b>false</b> otherwise.</returns>
 		public override bool Equals(object obj)
 		{
 			if (null == obj) return false;
-			if (!(obj is Language)) return false;
-			return this == (obj as Language);
+			Language language = obj as Language;
+			if (null == language) return false;
+			return this.Type == language.Type;
+		}
+
+		/// <summary>
+		/// Compares with a culture for equality.
+		/// </summary>
+		/// <param name="culture">The culture to compare.</param>
+		/// <returns><b>True</b> if the objects are the equal, <b>false</b> otherwise.</returns>
+		public bool Equals(CultureInfo culture)
+		{
+			return null != culture ? this.Type.ToLowerInvariant().Equals(culture.TwoLetterISOLanguageName.ToLowerInvariant()) : false;
+		}
+
+		/// <summary>
+		/// Returns the hash code of the current object.
+		/// </summary>
+		/// <returns>The hash code.</returns>
+		public override int GetHashCode()
+		{
+			return this.Type.GetHashCode();
+		}
+
+		/// <summary>
+		/// Compares two language objects for equality.
+		/// </summary>
+		/// <param name="left">The left language.</param>
+		/// <param name="right">The right language.</param>
+		/// <returns><b>True</b> if the languages are the equal, <b>false</b> otherwise.</returns>
+		public static bool operator ==(Language left, Language right)
+		{
+			if (object.ReferenceEquals(left, right)) return true;
+			if (((object)left == null) || ((object)right == null)) return false;
+			return left.Type == right.Type;
+		}
+
+		/// <summary>
+		/// Compares two language objects for inequality.
+		/// </summary>
+		/// <param name="left">The left language.</param>
+		/// <param name="right">The right language.</param>
+		/// <returns><b>True</b> if the languages are the different, <b>false</b> otherwise.</returns>
+		public static bool operator !=(Language left, Language right)
+		{
+			return !(left == right);
 		}
 	}
 }

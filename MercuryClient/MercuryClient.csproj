@@ -66,6 +66,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Async\AsyncResult.cs" />
     <Compile Include="Globalization\CultureId.cs" />
     <Compile Include="Globalization\Language.cs" />
     <Compile Include="Globalization\LanguageCollection.cs" />
@@ -82,11 +83,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Locales.resx</DependentUpon>
     </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
+    <Compile Include="Web\AsyncWebBuffer.cs" />
+    <Compile Include="Web\AsyncWebRequest.cs" />
+    <Compile Include="Web\AsyncWebResult.cs" />
+    <Compile Include="Web\Location\LocationRequest.cs" />
+    <Compile Include="Web\Location\LocationResult.cs" />
+    <Compile Include="Windows\Controls\AeroWizard\WizardResources.cs" />
     <Compile Include="Windows\Controls\ComponentCollection.cs" />
     <Compile Include="Windows\Controls\ControlExtensions.cs" />
     <Compile Include="Windows\Forms\ThreadSafeForm.cs">
@@ -108,7 +110,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\AeroWizard\StepWizardControl.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Windows\Controls\AeroWizard\ThemedImageButton.cs">
       <SubType>Component</SubType>
@@ -145,25 +147,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Windows\Window.cs" />
-    <EmbeddedResource Include="FormMain.ca.resx">
-      <DependentUpon>FormMain.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FormMain.de.resx">
-      <DependentUpon>FormMain.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FormMain.es.resx">
-      <DependentUpon>FormMain.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FormMain.fr.resx">
-      <DependentUpon>FormMain.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FormMain.pt.resx">
-      <DependentUpon>FormMain.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
-      <DependentUpon>FormMain.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FormMain.ro.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Locales.resx">
@@ -172,8 +156,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <SubType>Designer</SubType>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
