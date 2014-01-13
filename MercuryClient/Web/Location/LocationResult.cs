@@ -17,7 +17,9 @@
  */
 
 using System;
-using System.Net;
+using System.IO;
+using System.Xml;
+using Mercury.Xml;
 
 namespace Mercury.Web.Location
 {
@@ -27,9 +29,18 @@ namespace Mercury.Web.Location
 	public sealed class LocationResult
 	{
 		/// <summary>
+		/// Creates a new location result instance.
+		/// </summary>
+		private LocationResult()
+		{
+		}
+
+		// Public methods.
+
+		/// <summary>
 		/// Gets the IP address.
 		/// </summary>
-		public IPAddress Address { get; private set; }
+		public string Address { get; private set; }
 		/// <summary>
 		/// Gets the country code.
 		/// </summary>
@@ -38,26 +49,85 @@ namespace Mercury.Web.Location
 		/// Gets the country name.
 		/// </summary>
 		public string CountryName { get; private set; }
+		/// <summary>
+		/// Gets the region code.
+		/// </summary>
 		public string RegionCode { get; private set; }
+		/// <summary>
+		/// Gets the region name.
+		/// </summary>
 		public string RegionName { get; private set; }
+		/// <summary>
+		/// Gets the city.
+		/// </summary>
 		public string City { get; private set; }
+		/// <summary>
+		/// Gets the ZIP code.
+		/// </summary>
 		public string ZipCode { get; private set; }
-		public double? Latitude { get; private set; }
-		public double? Longitude { get; private set; }
+		/// <summary>
+		/// Gets the latitude.
+		/// </summary>
+		public string Latitude { get; private set; }
+		/// <summary>
+		/// Gets the longitude.
+		/// </summary>
+		public string Longitude { get; private set; }
+		/// <summary>
+		/// Gets the metropolitan code.
+		/// </summary>
 		public string MetroCode { get; private set; }
+		/// <summary>
+		/// Gets the area code.
+		/// </summary>
 		public string AreaCode { get; private set; }
 
-//		<script/>
-//<Ip>193.145.48.8</Ip>
-//<CountryCode>ES</CountryCode>
-//<CountryName>Spain</CountryName>
-//<RegionCode>56</RegionCode>
-//<RegionName>Catalonia</RegionName>
-//<City>Barcelona</City>
-//<ZipCode/>
-//<Latitude>41.3984</Latitude>
-//<Longitude>2.1741</Longitude>
-//<MetroCode/>
-//<AreaCode/>
+		// Public methods.
+
+		/// <summary>
+		/// Parses an XML string into a location result object.
+		/// </summary>
+		/// <param name="xml">The XML string.</param>
+		/// <returns>The location result.</returns>
+		public static LocationResult Parse(string xml)
+		{
+			// Create the XML document.
+			XmlDocument document = new XmlDocument();
+
+			// Create the location result object.
+			LocationResult result = new LocationResult();
+
+			using (StringReader reader = new StringReader(xml))
+			{
+				// Parse the string data into the XML document.
+				document.Load(reader);
+			}
+
+			// Set the properties.
+			result.Address = XmlExtensions.GetElementValue(document.DocumentElement, "Ip");
+			result.CountryCode = XmlExtensions.GetElementValue(document.DocumentElement, "CountryCode");
+			result.CountryName = XmlExtensions.GetElementValue(document.DocumentElement, "CountryName");
+			result.RegionCode = XmlExtensions.GetElementValue(document.DocumentElement, "RegionCode");
+			result.RegionName = XmlExtensions.GetElementValue(document.DocumentElement, "RegionName");
+			result.City = XmlExtensions.GetElementValue(document.DocumentElement, "City");
+			result.ZipCode = XmlExtensions.GetElementValue(document.DocumentElement, "ZipCode");
+			result.Latitude = XmlExtensions.GetElementValue(document.DocumentElement, "Latitude");
+			result.Longitude = XmlExtensions.GetElementValue(document.DocumentElement, "Longitude");
+			result.MetroCode = XmlExtensions.GetElementValue(document.DocumentElement, "MetroCode");
+			result.AreaCode = XmlExtensions.GetElementValue(document.DocumentElement, "AreaCode");
+
+			// Return the result.
+			return result;
+		}
+
+		// Private methods.
+
+		private static XmlElement GetElement(XmlElement element, string name)
+		{
+			// Get the child elements.
+			XmlNodeList children = element.GetElementsByTagName(name);
+			// If the list is not empty, return the first element.
+			return children.Count > 0 ? children[0] as XmlElement : null;
+		}
 	}
 }

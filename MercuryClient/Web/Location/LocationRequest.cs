@@ -40,6 +40,17 @@ namespace Mercury.Web.Location
 		/// <summary>
 		/// Begins an asynchronous request for the Internet Protocol geo location information.
 		/// </summary>
+		/// <param name="callback">The callback method.</param>
+		/// <param name="userState">The user state.</param>
+		/// <returns>The result of the asynchronous operation.</returns>
+		public IAsyncResult Begin(AsyncWebRequestCallback callback, object userState)
+		{
+			return base.Begin(new Uri(string.Format(LocationRequest.url, string.Empty)), callback, userState);
+		}
+
+		/// <summary>
+		/// Begins an asynchronous request for the Internet Protocol geo location information.
+		/// </summary>
 		/// <param name="address">The IP address.</param>
 		/// <param name="callback">The callback method.</param>
 		/// <param name="userState">The user state.</param>
@@ -49,6 +60,17 @@ namespace Mercury.Web.Location
 			return base.Begin(new Uri(string.Format(LocationRequest.url, address.ToString())), callback, userState);
 		}
 
-		public 
+		/// <summary>
+		/// Ends an asynchronous request for the Internet Protocol geo location information.
+		/// </summary>
+		/// <param name="result">The result of the asynchronous operation.</param>
+		/// <returns>The location result.</returns>
+		public new LocationResult End(IAsyncResult result)
+		{
+			return base.End<LocationResult>(result, (string data) =>
+				{
+					return LocationResult.Parse(data);
+				});
+		}
 	}
 }

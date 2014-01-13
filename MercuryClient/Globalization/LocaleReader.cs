@@ -19,6 +19,7 @@
 using System;
 using System.IO;
 using System.Xml;
+using Mercury.Xml;
 
 namespace Mercury.Globalization
 {
@@ -88,10 +89,10 @@ namespace Mercury.Globalization
 			LocaleCollection locales = new LocaleCollection();
 
 			// Parse all locale elements.
-			foreach (XmlElement localeElement in document.DocumentElement.GetElementsByTagName("Locale"))
+			foreach (XmlElement localeElement in XmlExtensions.GetElements(document.DocumentElement, "Locale"))
 			{
 				// Parse the locale culture element.
-				XmlElement cultureElement = localeElement.GetElementsByTagName("Culture")[0] as XmlElement;
+				XmlElement cultureElement = XmlExtensions.GetElement(localeElement, "Culture");
 				// Create the culture.
 				Locale locale = new Locale(new CultureId(
 					cultureElement.GetAttribute("Language"),
@@ -99,26 +100,26 @@ namespace Mercury.Globalization
 					cultureElement.HasAttribute("Territory") ? cultureElement.GetAttribute("Territory") : null));
 
 				// Get the languages element.
-				XmlElement languagesElement = localeElement.GetElementsByTagName("Languages")[0] as XmlElement;
+				XmlElement languagesElement = XmlExtensions.GetElement(localeElement, "Languages");
 				// Get the scripts element.
-				XmlElement scriptsElement = localeElement.GetElementsByTagName("Scripts")[0] as XmlElement;
+				XmlElement scriptsElement = XmlExtensions.GetElement(localeElement, "Scripts");
 				// Get the territories element.
-				XmlElement territoriesElement = localeElement.GetElementsByTagName("Territories")[0] as XmlElement;
+				XmlElement territoriesElement = XmlExtensions.GetElement(localeElement, "Territories");
 
 				// Parse the languages.
 				foreach (XmlElement languageElement in languagesElement.GetElementsByTagName("Language"))
 				{
-					locale.Languages.Add(languageElement.GetAttributeNode("Type").Value, languageElement.InnerText);
+					locale.Languages.Add(languageElement.GetAttribute("Type"), languageElement.InnerText);
 				}
 				// Parse the scripts.
 				foreach (XmlElement scriptElement in scriptsElement.GetElementsByTagName("Script"))
 				{
-					locale.Scripts.Add(scriptElement.GetAttributeNode("Type").Value, scriptElement.InnerText);
+					locale.Scripts.Add(scriptElement.GetAttribute("Type"), scriptElement.InnerText);
 				}
 				// Parse the territories.
 				foreach (XmlElement territoryElement in territoriesElement.GetElementsByTagName("Territory"))
 				{
-					locale.Territories.Add(territoryElement.GetAttributeNode("Type").Value, territoryElement.InnerText);
+					locale.Territories.Add(territoryElement.GetAttribute("Type"), territoryElement.InnerText);
 				}
 
 				// Add the locale.

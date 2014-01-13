@@ -53,7 +53,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		private readonly WizardPageCollection pages;
 		private readonly Stack<WizardPage> pageHistory = new Stack<WizardPage>();
 
-		private WizardPage selectedPage;
+		private WizardPage selectedPage = null;
 
 		private ButtonBase backButton;
 		private ButtonBase nextButton;
@@ -186,7 +186,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		public WizardCommandButtonState BackButtonState
 		{
 			get { return this.GetCmdButtonState(this.backButton); }
-			internal set { this.SetCmdButtonState(this.backButton, value); }
+			internal set { this.SetButtonState(this.backButton, value); }
 		}
 
 		/// <summary>
@@ -197,7 +197,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		public string BackButtonText
 		{
 			get { return this.GetCmdButtonText(this.backButton); }
-			set { this.SetCmdButtonText(this.backButton, value); }
+			set { this.SetButtonText(this.backButton, value); }
 		}
 
 		/// <summary>
@@ -209,7 +209,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		public WizardCommandButtonState CancelButtonState
 		{
 			get { return this.GetCmdButtonState(this.cancelButton); }
-			internal set { this.SetCmdButtonState(this.cancelButton, value); }
+			internal set { this.SetButtonState(this.cancelButton, value); }
 		}
 
 		/// <summary>
@@ -220,7 +220,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		public string CancelButtonText
 		{
 			get { return this.GetCmdButtonText(this.cancelButton); }
-			set { this.SetCmdButtonText(this.cancelButton, value); }
+			set { this.SetButtonText(this.cancelButton, value); }
 		}
 
 		/// <summary>
@@ -236,7 +236,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 				finishButtonText = value;
 				if (selectedPage != null && selectedPage.IsFinishPage && !ControlExtensions.IsDesignMode(this))
 				{
-					SetCmdButtonText(NextButton, value);
+					SetButtonText(NextButton, value);
 				}
 			}
 		}
@@ -254,8 +254,8 @@ namespace Mercury.Windows.Controls.AeroWizard
 			{
 				if (System.Environment.OSVersion.Version.Major >= 6)
 				{
-					const uint BCM_FIRST = 0x1600;                      //Normal button
-					const uint BCM_SETSHIELD = (BCM_FIRST + 0x000C);    //Elevated butto
+					const uint BCM_FIRST = 0x1600;                      //Normal button.
+					const uint BCM_SETSHIELD = (BCM_FIRST + 0x000C);    //Elevated button.
 
 					nextButtonShieldEnabled = value;
 
@@ -286,7 +286,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		public WizardCommandButtonState NextButtonState
 		{
 			get { return GetCmdButtonState(NextButton); }
-			internal set { SetCmdButtonState(NextButton, value); }
+			internal set { SetButtonState(NextButton, value); }
 		}
 
 		/// <summary>
@@ -296,13 +296,13 @@ namespace Mercury.Windows.Controls.AeroWizard
 		[Category("Wizard"), Localizable(true), Description("The next button text.")]
 		public string NextButtonText
 		{
-			get { return nextButtonText; }
+			get { return this.nextButtonText; }
 			set
 			{
-				nextButtonText = value;
-				if (!ControlExtensions.IsDesignMode(this) && (selectedPage == null || !selectedPage.IsFinishPage))
+				this.nextButtonText = value;
+				if (!ControlExtensions.IsDesignMode(this) && (this.selectedPage == null || !this.selectedPage.IsFinishPage))
 				{
-					SetCmdButtonText(NextButton, value);
+					this.SetButtonText(this.NextButton, value);
 				}
 			}
 		}
@@ -520,7 +520,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		protected override void OnHandleCreated(EventArgs e)
 		{
 			base.OnHandleCreated(e);
-			InitialSetup();
+			Initialize();
 		}
 
 		/// <summary>
@@ -540,25 +540,25 @@ namespace Mercury.Windows.Controls.AeroWizard
 		{
 			if (selectedPage == null)
 			{
-				CancelButtonState = ControlExtensions.IsDesignMode(this) ? WizardCommandButtonState.Disabled : WizardCommandButtonState.Enabled;
-				NextButtonState = BackButtonState = WizardCommandButtonState.Hidden;
+				this.CancelButtonState = ControlExtensions.IsDesignMode(this) ? WizardCommandButtonState.Disabled : WizardCommandButtonState.Enabled;
+				this.NextButtonState = this.BackButtonState = WizardCommandButtonState.Hidden;
 			}
 			else
 			{
 				if (ControlExtensions.IsDesignMode(this))
 				{
-					CancelButtonState = WizardCommandButtonState.Disabled;
-					NextButtonState = SelectedPageIndex == Pages.Count - 1 ? WizardCommandButtonState.Disabled : WizardCommandButtonState.Enabled;
-					BackButtonState = SelectedPageIndex <= 0 ? WizardCommandButtonState.Disabled : WizardCommandButtonState.Enabled;
+					this.CancelButtonState = WizardCommandButtonState.Disabled;
+					this.NextButtonState = this.SelectedPageIndex == this.Pages.Count - 1 ? WizardCommandButtonState.Disabled : WizardCommandButtonState.Enabled;
+					this.BackButtonState = this.SelectedPageIndex <= 0 ? WizardCommandButtonState.Disabled : WizardCommandButtonState.Enabled;
 				}
 				else
 				{
-					CancelButtonState = selectedPage.ShowCancel ? (selectedPage.AllowCancel && !ControlExtensions.IsDesignMode(this) ? WizardCommandButtonState.Enabled : WizardCommandButtonState.Disabled) : WizardCommandButtonState.Hidden;
-					NextButtonState = selectedPage.ShowNext ? (selectedPage.AllowNext ? WizardCommandButtonState.Enabled : WizardCommandButtonState.Disabled) : WizardCommandButtonState.Hidden;
-					if (selectedPage.IsFinishPage || IsLastPage(SelectedPage))
-						SetCmdButtonText(NextButton, FinishButtonText);
+					this.CancelButtonState = this.selectedPage.ShowCancel ? (this.selectedPage.AllowCancel && !ControlExtensions.IsDesignMode(this) ? WizardCommandButtonState.Enabled : WizardCommandButtonState.Disabled) : WizardCommandButtonState.Hidden;
+					this.NextButtonState = this.selectedPage.ShowNext ? (this.selectedPage.AllowNext ? WizardCommandButtonState.Enabled : WizardCommandButtonState.Disabled) : WizardCommandButtonState.Hidden;
+					if (this.selectedPage.IsFinishPage || this.IsLastPage(SelectedPage))
+						SetButtonText(NextButton, FinishButtonText);
 					else
-						SetCmdButtonText(NextButton, NextButtonText);
+						SetButtonText(NextButton, NextButtonText);
 					BackButtonState = (pageHistory.Count == 0 || !selectedPage.AllowBack) ? WizardCommandButtonState.Disabled : WizardCommandButtonState.Enabled;
 				}
 			}
@@ -636,6 +636,11 @@ namespace Mercury.Windows.Controls.AeroWizard
 			return btn == null ? string.Empty : btn.Text;
 		}
 
+		/// <summary>
+		/// Returns the next page for the specified wizard page.
+		/// </summary>
+		/// <param name="page">The page.</param>
+		/// <returns>The next page, or ,<c>null</c> if there is no next page.</returns>
 		private WizardPage GetNextPage(WizardPage page)
 		{
 			if (page == null || page.IsFinishPage)
@@ -655,23 +660,39 @@ namespace Mercury.Windows.Controls.AeroWizard
 			return page;
 		}
 
-		private void InitialSetup()
+		/// <summary>
+		/// Initialize the control.
+		/// </summary>
+		private void Initialize()
 		{
+			//  If the control is not initialized.
 			if (!initialized)
 			{
-				if (Pages.Count > 0)
-					SelectedPage = Pages[0];
+				// Select the first page or update the buttons.
+				if (this.Pages.Count > 0)
+					this.SelectedPage = Pages[0];
 				else
-					OnUpdateButtons();
+					this.OnUpdateButtons();
+				// Set the control as initialized.
 				initialized = true;
 			}
 		}
 
+		/// <summary>
+		/// Determines whether the specified page is the last page.
+		/// </summary>
+		/// <param name="page">The wizard page.</param>
+		/// <returns><c>true</c> if the specified page is the last page, <c>false</c> otherwise.</returns>
 		private bool IsLastPage(WizardPage page)
 		{
-			return GetNextPage(page) == null;
+			return this.GetNextPage(page) == null;
 		}
 
+		/// <summary>
+		/// An event handler called when the user clicks on the <b>Next</b> button.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
 		private void NextButtonClick(object sender, EventArgs e)
 		{
 			this.NextPage();
@@ -688,11 +709,21 @@ namespace Mercury.Windows.Controls.AeroWizard
 			this.Controls.Clear();
 		}
 
+		/// <summary>
+		/// An event handler called when a page is inserted.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
 		private void OnPagesItemInserted(object sender, WizardPageCollection.ItemChangedEventArgs e)
 		{
-			this.OnPagesItemInserted(e.Item, !initializing);
+			this.OnPagesItemInserted(e.Item, !this.initializing);
 		}
 
+		/// <summary>
+		/// An event handler called when a page is inserted.
+		/// </summary>
+		/// <param name="item">The wizard page.</param>
+		/// <param name="selectAfterAdd"><c>true</c> if the page is selected.</param>
 		private void OnPagesItemInserted(WizardPage item, bool selectAfterAdd)
 		{
 			item.Owner = this;
@@ -700,59 +731,79 @@ namespace Mercury.Windows.Controls.AeroWizard
 			if (!this.Contains(item))
 				this.Controls.Add(item);
 			if (selectAfterAdd)
-				SelectedPage = item;
+				this.SelectedPage = item;
 		}
 
+		/// <summary>
+		/// An event handler called when a page is removed.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
 		private void OnPagesItemRemoved(object sender, WizardPageCollection.ItemChangedEventArgs e)
 		{
 			this.Controls.Remove(e.Item);
-			if (e.Item == selectedPage && Pages.Count > 0)
-				SelectedPage = Pages[e.Index == Pages.Count ? e.Index - 1 : e.Index];
+			if (e.Item == selectedPage && this.Pages.Count > 0)
+				this.SelectedPage = this.Pages[e.Index == this.Pages.Count ? e.Index - 1 : e.Index];
 			else
-				OnUpdateButtons();
+				this.OnUpdateButtons();
 		}
 
+		/// <summary>
+		/// An event handler called when a page is set.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
 		private void OnPagesItemSet(object sender, WizardPageCollection.ItemSetEventArgs e)
 		{
 			throw new NotImplementedException();
 		}
 
-		private void SetCmdButtonState(ButtonBase btn, WizardCommandButtonState value)
+		/// <summary>
+		/// Sets the state for the specified button.
+		/// </summary>
+		/// <param name="button">The button.</param>
+		/// <param name="state">The button state.</param>
+		private void SetButtonState(ButtonBase button, WizardCommandButtonState state)
 		{
-			if (btn == null)
-				return;
+			if (button == null) return;
 
-			switch (value)
+			switch (state)
 			{
 				case WizardCommandButtonState.Disabled:
-					btn.Enabled = false;
-					btn.Visible = true;
+					button.Enabled = false;
+					button.Visible = true;
 					break;
 				case WizardCommandButtonState.Hidden:
-					btn.Enabled = false;
-					if (btn != BackButton)
-						btn.Visible = false;
+					button.Enabled = false;
+					if (button != this.BackButton)
+						button.Visible = false;
 					break;
 				case WizardCommandButtonState.Enabled:
 				default:
-					btn.Enabled = btn.Visible = true;
+					button.Enabled = button.Visible = true;
 					break;
 			}
 
-			EventHandler h = this.ButtonStateChanged;
-			if (h != null)
-				h(this, EventArgs.Empty);
+			// Raise the button changed event.
+			if (this.ButtonStateChanged != null) this.ButtonStateChanged(this, EventArgs.Empty);
 
+			// Invalidate the conrol.
 			base.Invalidate();
 		}
 
-		private void SetCmdButtonText(ButtonBase btn, string text)
+		/// <summary>
+		/// Sets the text for the specified button.
+		/// </summary>
+		/// <param name="button">The button.</param>
+		/// <param name="text">The text.</param>
+		private void SetButtonText(ButtonBase button, string text)
 		{
-			if (btn != null)
-			{
-				btn.Text = text;
-				base.Invalidate();
-			}
+			if (button == null) return;
+	
+			// Set the button text.
+			button.Text = text;
+			// Invalidate the control.
+			base.Invalidate();
 		}
 	}
 }

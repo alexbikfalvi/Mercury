@@ -1,4 +1,4 @@
-﻿namespace MercuryClient
+﻿namespace Mercury
 {
 	partial class FormMain
 	{
@@ -35,13 +35,13 @@
 			this.labelCountry = new System.Windows.Forms.Label();
 			this.labelLanguage = new System.Windows.Forms.Label();
 			this.wizardPageRun = new Mercury.Windows.Controls.AeroWizard.WizardPage();
+			this.labelProgress = new System.Windows.Forms.Label();
+			this.progressBar = new System.Windows.Forms.ProgressBar();
+			this.labelInfo = new System.Windows.Forms.Label();
 			this.wizardPageFinish = new Mercury.Windows.Controls.AeroWizard.WizardPage();
+			this.labelFinish = new System.Windows.Forms.Label();
 			this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
 			this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-			this.labelInfo = new System.Windows.Forms.Label();
-			this.progressBar = new System.Windows.Forms.ProgressBar();
-			this.labelProgress = new System.Windows.Forms.Label();
-			this.labelFinish = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.wizardControl)).BeginInit();
 			this.wizardPageLocale.SuspendLayout();
 			this.wizardPageRun.SuspendLayout();
@@ -76,24 +76,29 @@
 			this.wizardPageLocale.Size = new System.Drawing.Size(537, 257);
 			this.wizardPageLocale.TabIndex = 0;
 			this.wizardPageLocale.Text = "Select your language and country";
+			this.wizardPageLocale.HelpClicked += new System.EventHandler(this.OnLocaleHelp);
 			// 
 			// comboBoxCountry
 			// 
+			this.comboBoxCountry.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.comboBoxCountry.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboBoxCountry.FormattingEnabled = true;
 			this.comboBoxCountry.Location = new System.Drawing.Point(80, 117);
 			this.comboBoxCountry.Name = "comboBoxCountry";
-			this.comboBoxCountry.Size = new System.Drawing.Size(250, 23);
+			this.comboBoxCountry.Size = new System.Drawing.Size(360, 23);
 			this.comboBoxCountry.TabIndex = 7;
 			this.comboBoxCountry.SelectedIndexChanged += new System.EventHandler(this.OnCountryChanged);
 			// 
 			// comboBoxLanguage
 			// 
+			this.comboBoxLanguage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.comboBoxLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboBoxLanguage.FormattingEnabled = true;
 			this.comboBoxLanguage.Location = new System.Drawing.Point(80, 88);
 			this.comboBoxLanguage.Name = "comboBoxLanguage";
-			this.comboBoxLanguage.Size = new System.Drawing.Size(250, 23);
+			this.comboBoxLanguage.Size = new System.Drawing.Size(360, 23);
 			this.comboBoxLanguage.TabIndex = 6;
 			this.comboBoxLanguage.SelectedIndexChanged += new System.EventHandler(this.OnLanguageChanged);
 			// 
@@ -127,35 +132,16 @@
 			this.wizardPageRun.Size = new System.Drawing.Size(537, 257);
 			this.wizardPageRun.TabIndex = 1;
 			this.wizardPageRun.Text = "Measuring the Internet";
+			this.wizardPageRun.Commit += new System.EventHandler<Mercury.Windows.Controls.AeroWizard.WizardPageConfirmEventArgs>(this.OnRunCommit);
+			this.wizardPageRun.Initialize += new System.EventHandler<Mercury.Windows.Controls.AeroWizard.WizardPageInitEventArgs>(this.OnRunInitialize);
 			// 
-			// wizardPageFinish
+			// labelProgress
 			// 
-			this.wizardPageFinish.AllowCancel = false;
-			this.wizardPageFinish.Controls.Add(this.labelFinish);
-			this.wizardPageFinish.HelpText = "";
-			this.wizardPageFinish.IsFinishPage = true;
-			this.wizardPageFinish.Name = "wizardPageFinish";
-			this.wizardPageFinish.Size = new System.Drawing.Size(537, 257);
-			this.wizardPageFinish.TabIndex = 2;
-			this.wizardPageFinish.Text = "Finished";
-			// 
-			// openFileDialog
-			// 
-			this.openFileDialog.Filter = "XML files (*.xml)|*.xml";
-			this.openFileDialog.Title = "Open Locales File";
-			// 
-			// saveFileDialog
-			// 
-			this.saveFileDialog.Filter = "Resource files (*.resx)|*.resx";
-			this.saveFileDialog.Title = "Save Resource File";
-			// 
-			// labelInfo
-			// 
-			this.labelInfo.Dock = System.Windows.Forms.DockStyle.Top;
-			this.labelInfo.Location = new System.Drawing.Point(0, 0);
-			this.labelInfo.Name = "labelInfo";
-			this.labelInfo.Size = new System.Drawing.Size(537, 100);
-			this.labelInfo.TabIndex = 1;
+			this.labelProgress.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.labelProgress.Location = new System.Drawing.Point(0, 157);
+			this.labelProgress.Name = "labelProgress";
+			this.labelProgress.Size = new System.Drawing.Size(537, 100);
+			this.labelProgress.TabIndex = 3;
 			// 
 			// progressBar
 			// 
@@ -166,13 +152,24 @@
 			this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
 			this.progressBar.TabIndex = 2;
 			// 
-			// labelProgress
+			// labelInfo
 			// 
-			this.labelProgress.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.labelProgress.Location = new System.Drawing.Point(0, 157);
-			this.labelProgress.Name = "labelProgress";
-			this.labelProgress.Size = new System.Drawing.Size(537, 100);
-			this.labelProgress.TabIndex = 3;
+			this.labelInfo.Dock = System.Windows.Forms.DockStyle.Top;
+			this.labelInfo.Location = new System.Drawing.Point(0, 0);
+			this.labelInfo.Name = "labelInfo";
+			this.labelInfo.Size = new System.Drawing.Size(537, 100);
+			this.labelInfo.TabIndex = 1;
+			// 
+			// wizardPageFinish
+			// 
+			this.wizardPageFinish.AllowCancel = false;
+			this.wizardPageFinish.Controls.Add(this.labelFinish);
+			this.wizardPageFinish.HelpText = "";
+			this.wizardPageFinish.IsFinishPage = true;
+			this.wizardPageFinish.Name = "wizardPageFinish";
+			this.wizardPageFinish.Size = new System.Drawing.Size(537, 256);
+			this.wizardPageFinish.TabIndex = 2;
+			this.wizardPageFinish.Text = "Finished";
 			// 
 			// labelFinish
 			// 
@@ -181,6 +178,16 @@
 			this.labelFinish.Name = "labelFinish";
 			this.labelFinish.Size = new System.Drawing.Size(537, 100);
 			this.labelFinish.TabIndex = 2;
+			// 
+			// openFileDialog
+			// 
+			this.openFileDialog.Filter = "XML files (*.xml)|*.xml";
+			this.openFileDialog.Title = "Open Locales File";
+			// 
+			// saveFileDialog
+			// 
+			this.saveFileDialog.Filter = "Resource files (*.resx)|*.resx";
+			this.saveFileDialog.Title = "Save Resource File";
 			// 
 			// FormMain
 			// 

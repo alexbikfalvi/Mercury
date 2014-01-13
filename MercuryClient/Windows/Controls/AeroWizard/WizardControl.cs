@@ -88,9 +88,13 @@ namespace Mercury.Windows.Controls.AeroWizard
 
 		internal int contentCol = 1;
 
+		/// <summary>
+		/// Static constructor.
+		/// </summary>
 		static WizardControl()
 		{
-			isMin6 = System.Environment.OSVersion.Version.Major >= 6;
+			// Set the operating system version.
+			WizardControl.isMin6 = System.Environment.OSVersion.Version.Major >= 6;
 		}
 
 		/// <summary>
@@ -100,7 +104,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		{
 			this.InitializeComponent();
 
-			OnRightToLeftChanged(EventArgs.Empty);
+			this.OnRightToLeftChanged(EventArgs.Empty);
 
 			if (!Application.RenderWithVisualStyles)
 			{

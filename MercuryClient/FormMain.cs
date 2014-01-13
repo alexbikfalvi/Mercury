@@ -24,10 +24,17 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using Mercury.Globalization;
+using Mercury.Web;
+using Mercury.Web.Location;
 using Mercury.Windows.Controls.AeroWizard;
 using Mercury.Windows.Forms;
 
-namespace MercuryClient
+using System.IO;
+using System.Resources;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+
+namespace Mercury
 {
 	/// <summary>
 	/// The main form.
@@ -38,6 +45,10 @@ namespace MercuryClient
 		private readonly List<Language> languages = new List<Language>();
 		private readonly List<Territory> territories = new List<Territory>();
 
+		private readonly object sync = new object();
+		private bool countryUser = false;
+		private LocationResult location = null;
+
 		/// <summary>
 		/// Creates a new form instance.
 		/// </summary>
@@ -46,8 +57,11 @@ namespace MercuryClient
 			// Initialize the component.
 			this.InitializeComponent();
 
-			// Load the languages.
-			this.LoadLanguages();
+			// Set the languages.
+			this.SetLanguages();
+
+			// Set the current country.
+			this.SetCountry();
 		}
 
 		// Static methods.
@@ -66,9 +80,9 @@ namespace MercuryClient
 		// Private methods.
 
 		/// <summary>
-		/// Loads the languages.
+		/// Set the languages.
 		/// </summary>
-		private void LoadLanguages()
+		private void SetLanguages()
 		{
 			Language currentLanguage = null;
 
@@ -99,6 +113,48 @@ namespace MercuryClient
 			{
 				this.comboBoxLanguage.SelectedIndex = this.comboBoxLanguage.Items.IndexOf(currentLanguage);
 			}
+
+			// Reset the user country selection.
+			this.countryUser = false;
+		}
+
+		/// <summary>
+		/// Sets the current country.
+		/// </summary>
+		private void SetCountry()
+		{
+			// Create a location request.
+			LocationRequest request = new LocationRequest();
+
+			try
+			{
+				// Begin an asynchronous request.
+				IAsyncResult asyncResult = request.Begin((AsyncWebResult result) =>
+					{
+						try
+						{
+							lock (this.sync)
+							{
+								// End the asynchronous request.
+								this.location = request.End(result);
+							}
+
+							this.Invoke(() =>
+								{
+									// If the user did not select a country.
+									if (!this.countryUser)
+									{
+										// Create a new territory for the current country.
+										Territory territory = new Territory(this.location.CountryCode, this.location.CountryName);
+										// Select the current country.
+										this.comboBoxCountry.SelectedIndex = this.comboBoxCountry.Items.IndexOf(territory);
+									}
+								});
+						}
+						catch { }
+					}, null);
+			}
+			catch { }
 		}
 
 		/// <summary>
@@ -154,7 +210,11 @@ namespace MercuryClient
 		/// <param name="e">The event arguments.</param>
 		private void OnCountryChanged(object sender, EventArgs e)
 		{
+			// Enable the next button.
 			this.wizardPageLocale.AllowNext = this.comboBoxCountry.SelectedIndex >= 0;
+
+			// Set the user country selection.
+			this.countryUser = true;
 		}
 
 		/// <summary>
@@ -163,8 +223,10 @@ namespace MercuryClient
 		/// <param name="culture"></param>
 		private void OnUpdateCulture(CultureInfo culture)
 		{
+			// Set the thread culture.
 			Thread.CurrentThread.CurrentUICulture = culture;
 			
+			// Set the controls.
 			this.wizardControl.Culture = culture;
 			this.wizardPageLocale.Text = WizardResources.GetString("PageLocalesTitle");
 			this.wizardPageRun.Text = WizardResources.GetString("PageRunTitle");
@@ -195,6 +257,76 @@ namespace MercuryClient
 		private void OnFinished(object sender, EventArgs e)
 		{
 			this.Close();
+		}
+
+
+		/// <summary>
+		/// Loads the locales from the specified XML file and saves them to a resource file.
+		/// </summary>
+		private void OnLoadLocales()
+		{
+			if (this.openFileDialog.ShowDialog(this) == DialogResult.OK)
+			{
+				try
+				{
+					using (FileStream file = new FileStream(this.openFileDialog.FileName, FileMode.Open))
+					{
+						using (LocaleReader reader = new LocaleReader(file))
+						{
+							LocaleCollection locales = reader.ReadLocaleCollection();
+
+							if (this.saveFileDialog.ShowDialog(this) == DialogResult.OK)
+							{
+								using (ResXResourceWriter writer = new ResXResourceWriter(this.saveFileDialog.FileName))
+								{
+									BinaryFormatter formatter = new BinaryFormatter();
+
+									using (MemoryStream stream = new MemoryStream())
+									{
+										formatter.Serialize(stream, locales);
+										writer.AddResource("Collection", stream.ToArray());
+									}
+								}
+							}
+						}
+					}
+				}
+				catch (Exception exception)
+				{
+					MessageBox.Show(this, exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			}
+		}
+
+		/// <summary>
+		/// An event handler called when the user clicks on the locale help link.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnLocaleHelp(object sender, EventArgs e)
+		{
+
+		}
+
+		/// <summary>
+		/// An event raised when the user enterso on the run page.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnRunInitialize(object sender, WizardPageInitEventArgs e)
+		{
+			this.wizardControl.NextButtonText = "Start";
+		}
+
+		/// <summary>
+		/// An event raised when the user clicks on the run page commit button.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnRunCommit(object sender, WizardPageConfirmEventArgs e)
+		{
+			// Cancel the page change.
+			e.Cancel = true;
 		}
 	}
 }

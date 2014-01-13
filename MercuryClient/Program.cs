@@ -19,7 +19,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace MercuryClient
+namespace Mercury
 {
 	static class Program
 	{
