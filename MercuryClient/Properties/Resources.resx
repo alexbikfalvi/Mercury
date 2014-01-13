@@ -202,25 +202,25 @@ Para fechar, clique em Concluir.</value>
 Pentru a închide, faceți clic pe &amp;Termină.</value>
   </data>
   <data name="LabelInfo" xml:space="preserve">
-    <value>The wizard is ready to start the Internet measurements. This may take several minutes, depending on the speed of your Internet connection. To continue, click Next.</value>
+    <value>The wizard is ready to start the Internet measurements. This may take several minutes, depending on the speed of your Internet connection. To continue, click Start.</value>
   </data>
   <data name="LabelInfo.ca" xml:space="preserve">
-    <value>L'assistent està llest per iniciar els mesuraments d'Internet. Això pot trigar diversos minuts, depenent de la velocitat de la seva connexió a Internet. Per continuar, feu clic a Següent.</value>
+    <value>L'assistent està llest per iniciar els mesuraments d'Internet. Això pot trigar diversos minuts, depenent de la velocitat de la seva connexió a Internet. Per continuar, feu clic a Iniciar.</value>
   </data>
   <data name="LabelInfo.de" xml:space="preserve">
-    <value>Der Assistent ist bereit, die Internet-Messungen zu starten. Dies kann einige Minuten dauern, abhängig von der Geschwindigkeit Ihrer Internetverbindung. Um fortzufahren, klicken Sie auf Nächste.</value>
+    <value>Der Assistent ist bereit, die Internet-Messungen zu starten. Dies kann einige Minuten dauern, abhängig von der Geschwindigkeit Ihrer Internetverbindung. Um fortzufahren, klicken Sie auf Start.</value>
   </data>
   <data name="LabelInfo.es" xml:space="preserve">
-    <value>El asistente está listo para iniciar las mediciones de Internet. Esto puede tardar varios minutos, dependiendo de la velocidad de su conexión a Internet. Para continuar, haga clic en Siguiente.</value>
+    <value>El asistente está listo para iniciar las mediciones de Internet. Esto puede tardar varios minutos, dependiendo de la velocidad de su conexión a Internet. Para continuar, haga clic en Iniciar.</value>
   </data>
   <data name="LabelInfo.fr" xml:space="preserve">
-    <value>L'assistant est prêt à commencer les mesures d'Internet. Cela peut prendre plusieurs minutes, selon la vitesse de votre connexion Internet. Pour continuer, cliquez sur Suivant.</value>
+    <value>L'assistant est prêt à commencer les mesures d'Internet. Cela peut prendre plusieurs minutes, selon la vitesse de votre connexion Internet. Pour continuer, cliquez sur Début.</value>
   </data>
   <data name="LabelInfo.pt" xml:space="preserve">
-    <value>O assistente está pronto para iniciar as medições de Internet. Isso pode levar vários minutos, dependendo da velocidade de sua conexão de Internet. Para continuar, clique em Próximo.</value>
+    <value>O assistente está pronto para iniciar as medições de Internet. Isso pode levar vários minutos, dependendo da velocidade de sua conexão de Internet. Para continuar, clique em Começo.</value>
   </data>
   <data name="LabelInfo.ro" xml:space="preserve">
-    <value>Expertul este pregătit pentru a începe măsurătorile de Internet. Acest lucru poate dura câteva minute, în funcție de viteza conexiunii la Internet. Pentru a continua, faceți clic pe Următor.</value>
+    <value>Expertul este pregătit pentru a începe măsurătorile de Internet. Acest lucru poate dura câteva minute, în funcție de viteza conexiunii la Internet. Pentru a continua, faceți clic pe Start.</value>
   </data>
   <data name="LabelLanguage" xml:space="preserve">
     <value>&amp;Language:</value>
@@ -263,6 +263,48 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
   </data>
   <data name="LabelProgress.ro" xml:space="preserve">
     <value>{0} la sută finalizat (0 minute rămase)</value>
+  </data>
+  <data name="LabelProgressDownloadFinish" xml:space="preserve">
+    <value>Running the Internet measurements using {0} web destinations...</value>
+  </data>
+  <data name="LabelProgressDownloadFinish.ca" xml:space="preserve">
+    <value>Execució de les mesures d'Internet utilitzant {0} destins web...</value>
+  </data>
+  <data name="LabelProgressDownloadFinish.de" xml:space="preserve">
+    <value>Ausführen der Internet-Messungen mit {0} Web-Destinationen...</value>
+  </data>
+  <data name="LabelProgressDownloadFinish.es" xml:space="preserve">
+    <value>Ejecución de las medidas de Internet utilizando {0} destinos web...</value>
+  </data>
+  <data name="LabelProgressDownloadFinish.fr" xml:space="preserve">
+    <value>Exécution des mesures d'Internet en utilisant {0} des destinations web...</value>
+  </data>
+  <data name="LabelProgressDownloadFinish.pt" xml:space="preserve">
+    <value>Correndo as medições de Internet com {0} destinos web...</value>
+  </data>
+  <data name="LabelProgressDownloadFinish.ro" xml:space="preserve">
+    <value>Rularea măsurătorilor de Internet folosind {0} destinatii web...</value>
+  </data>
+  <data name="LabelProgressDownloadStart" xml:space="preserve">
+    <value>Downloading the list of web destinations...</value>
+  </data>
+  <data name="LabelProgressDownloadStart.ca" xml:space="preserve">
+    <value>Descarregant la llista de destinacions web...</value>
+  </data>
+  <data name="LabelProgressDownloadStart.de" xml:space="preserve">
+    <value>Herunterladen der Liste von Web-Destinationen...</value>
+  </data>
+  <data name="LabelProgressDownloadStart.es" xml:space="preserve">
+    <value>Descargando la lista de destinos web...</value>
+  </data>
+  <data name="LabelProgressDownloadStart.fr" xml:space="preserve">
+    <value>Téléchargement de la liste des destinations web...</value>
+  </data>
+  <data name="LabelProgressDownloadStart.pt" xml:space="preserve">
+    <value>Baixando a lista de destinos da web...</value>
+  </data>
+  <data name="LabelProgressDownloadStart.ro" xml:space="preserve">
+    <value>Descărcarea listei de destinații de web...</value>
   </data>
   <data name="PageFinishTitle" xml:space="preserve">
     <value>Thank you!</value>
@@ -437,6 +479,27 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
   </data>
   <data name="WizardNoPagesNotice" xml:space="preserve">
     <value>No wizard pages have been added.</value>
+  </data>
+  <data name="WizardStartText" xml:space="preserve">
+    <value>&amp;Start</value>
+  </data>
+  <data name="WizardStartText.ca" xml:space="preserve">
+    <value>&amp;Iniciar</value>
+  </data>
+  <data name="WizardStartText.de" xml:space="preserve">
+    <value>&amp;Start</value>
+  </data>
+  <data name="WizardStartText.es" xml:space="preserve">
+    <value>&amp;Iniciar</value>
+  </data>
+  <data name="WizardStartText.fr" xml:space="preserve">
+    <value>&amp;Début</value>
+  </data>
+  <data name="WizardStartText.pt" xml:space="preserve">
+    <value>&amp;Começo</value>
+  </data>
+  <data name="WizardStartText.ro" xml:space="preserve">
+    <value>&amp;Start</value>
   </data>
   <data name="WizardTitle" xml:space="preserve">
     <value>Mercury Client</value>

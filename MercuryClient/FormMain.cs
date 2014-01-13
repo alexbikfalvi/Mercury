@@ -19,11 +19,16 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
+using Mercury.Collections.Generic;
 using Mercury.Globalization;
+using Mercury.Net.Core;
+using Mercury.Threading;
 using Mercury.Web;
 using Mercury.Web.Location;
 using Mercury.Windows.Controls.AeroWizard;
@@ -41,13 +46,64 @@ namespace Mercury
 	/// </summary>
 	public partial class FormMain : ThreadSafeForm
 	{
-		private static string[] locales = { "ca", "de", "en", "es", "fr", "pt", "ro" };
+		/// <summary>
+		/// A class representing the information for a traceroute.
+		/// </summary>
+		private sealed class TracerouteInfo
+		{
+			/// <summary>
+			/// Creates a new traceroute information instance.
+			/// </summary>
+			/// <param name="site">The destination site.</param>
+			public TracerouteInfo(string site)
+			{
+				this.Site = site;
+				this.Address = null;
+				this.Count = 0;
+			}
+
+			// Public properties.
+
+			/// <summary>
+			/// Gets the traceroute site.
+			/// </summary>
+			public string Site { get; private set; }
+			/// <summary>
+			/// Gets or sets the IP address.
+			/// </summary>
+			public IPAddress Address { get; set; }
+			/// <summary>
+			/// Gets or sets the number of attempts for this traceroute.
+			/// </summary>
+			public int Count { get; set; }
+		}
+
+		private static readonly string[] locales = { "ca", "de", "en", "es", "fr", "pt", "ro" };
 		private readonly List<Language> languages = new List<Language>();
 		private readonly List<Territory> territories = new List<Territory>();
 
-		private readonly object sync = new object();
+		private static readonly string uriGetUrls = "http://inetanalytics.nets.upf.edu/getUrls?countryCode={0}";
+
 		private bool countryUser = false;
 		private LocationResult location = null;
+
+		private readonly object sync = new object();
+
+		private readonly AsyncWebRequest asyncWebRequest = new AsyncWebRequest();
+		private IAsyncResult asyncWebResult = null;
+		private readonly ManualResetEvent waitAsync = new ManualResetEvent(true);
+
+		private readonly Traceroute traceroute;
+		private readonly TracerouteSettings tracerouteSettings;
+		private const int tracerouteConcurrent = 1;
+		private readonly Queue<TracerouteInfo> traceroutePending = new Queue<TracerouteInfo>();
+		private readonly HashSet<TracerouteInfo> tracerouteRunning = new HashSet<TracerouteInfo>();
+		private readonly HashSet<TracerouteInfo> tracerouteCompleted = new HashSet<TracerouteInfo>();
+		private readonly CancellationToken tracerouteCancel = new CancellationToken();
+
+		private bool completed = false;
+		private bool canceling = false;
+		private bool canceled = false;
 
 		/// <summary>
 		/// Creates a new form instance.
@@ -62,6 +118,15 @@ namespace Mercury
 
 			// Set the current country.
 			this.SetCountry();
+
+			// Create the traceroute settings.
+			this.tracerouteSettings = new TracerouteSettings();
+			this.tracerouteSettings.MaximumFailedHops = 10;
+			this.tracerouteSettings.StopTracerouteOnFail = true;
+			this.tracerouteSettings.StopHopOnSuccess = true;
+
+			// Create the traceroute.
+			this.traceroute = new Traceroute(this.tracerouteSettings);
 		}
 
 		// Static methods.
@@ -235,8 +300,19 @@ namespace Mercury
 			this.labelLanguage.Text = WizardResources.GetString("LabelLanguage");
 			this.labelCountry.Text = WizardResources.GetString("LabelCountry");
 			this.labelInfo.Text = WizardResources.GetString("LabelInfo");
-			this.labelProgress.Text = WizardResources.GetString("LabelProgress");
 			this.labelFinish.Text = WizardResources.GetString("LabelFinish");
+			this.wizardPageRun.TextNext = WizardResources.GetString("WizardStartText");
+		}
+
+		/// <summary>
+		/// An event handler called when the user closes the wizard.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnClosing(object sender, FormClosingEventArgs e)
+		{
+			// Call the canceling event handler.
+			this.OnCanceling(sender, e);
 		}
 
 		/// <summary>
@@ -246,7 +322,67 @@ namespace Mercury
 		/// <param name="e">The event arguments.</param>
 		private void OnCanceling(object sender, CancelEventArgs e)
 		{
-			this.Close();
+			lock (this.sync)
+			{
+				// If the wizard is already canceled, do nothing.
+				if (this.canceled) return;
+				// If the wizard is already canceling.
+				if (this.canceling)
+				{
+					// Cancel the event.
+					e.Cancel = true;
+					// Return.
+					return;
+				}
+
+				// If there are pending web or traceroute requests.
+				if ((null != this.asyncWebResult) || (this.tracerouteRunning.Count > 0))
+				{
+					// Ask the user whether to cancel.
+					if (MessageBox.Show(this, "Cancelling the wizard will prevent uploading any measurement result. Do you want to continue?", "Confirm Cancellation", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+					{
+						// Cancel the close event.
+						e.Cancel = true;
+						// Set the canceling flag.
+						this.canceling = true;
+						// Disable the cancel button.
+						this.wizardPageRun.AllowCancel = false;
+						// Cancel the asynchronous operations.
+						this.OnCancel();
+					}
+				}
+				else
+				{
+					// Set the canceled to true.
+					this.canceled = true;
+					// Close the form.
+					this.Close();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Cancels all pending asynchronous operations.
+		/// </summary>
+		private void OnCancel()
+		{
+			// Execute the cancellation on the thread pool.
+			ThreadPool.QueueUserWorkItem((object state) =>
+				{
+					// Wait for the asynchronous handle.
+					this.waitAsync.WaitOne();
+
+					this.Invoke(() =>
+						{
+							lock (this.sync)
+							{
+								// Set the canceled flag.
+								this.canceled = true;
+							}
+							// Close the form.
+							this.Close();
+						});
+				});
 		}
 
 		/// <summary>
@@ -256,6 +392,7 @@ namespace Mercury
 		/// <param name="e">The event arguments.</param>
 		private void OnFinished(object sender, EventArgs e)
 		{
+			// Close the form.
 			this.Close();
 		}
 
@@ -305,7 +442,7 @@ namespace Mercury
 		/// <param name="e">The event arguments.</param>
 		private void OnLocaleHelp(object sender, EventArgs e)
 		{
-
+			Process.Start("http://inetanalytics.nets.upf.edu/mercury/faq");
 		}
 
 		/// <summary>
@@ -325,8 +462,193 @@ namespace Mercury
 		/// <param name="e">The event arguments.</param>
 		private void OnRunCommit(object sender, WizardPageConfirmEventArgs e)
 		{
-			// Cancel the page change.
-			e.Cancel = true;
+			if (!this.completed)
+			{
+				// Cancel the page change.
+				e.Cancel = true;
+				// Start the wizard.
+				this.OnStartDownload();
+			}
+		}
+
+		/// <summary>
+		/// Starts the wizard download.
+		/// </summary>
+		private void OnStartDownload()
+		{
+			// Get the selected country.
+			Territory country = this.comboBoxCountry.SelectedItem as Territory;
+			// Get the country.
+			string countryCode = country != null ? country.Type.ToUpperInvariant() : string.Empty;
+
+			// Disable the start button.
+			this.wizardPageRun.AllowNext = false;
+			// Show the progress.
+			this.progressBar.Visible = true;
+			this.progressBar.Style = ProgressBarStyle.Marquee;
+			this.labelProgress.Text = WizardResources.GetString("LabelProgressDownloadStart");
+
+			lock (this.sync)
+			{
+				try
+				{
+					// Reset the wait handle.
+					this.waitAsync.Reset();
+					// Download the web destinations.
+					this.asyncWebResult = this.asyncWebRequest.Begin(new Uri(string.Format(FormMain.uriGetUrls, countryCode)), (AsyncWebResult asyncResult) =>
+						{
+							lock (this.sync)
+							{
+								this.asyncWebResult = null;
+							}
+
+							try
+							{
+								// Complete the web request.
+								string data;
+								this.asyncWebRequest.End(asyncResult, out data);
+								// Parse the list of sites.
+								string[] sites = data.Split(new char[] { '\n', '\r', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+								// Set the wait handle.
+								this.waitAsync.Set();
+
+								this.Invoke(() =>
+									{
+										// Begin the traceroutes.
+										this.OnStartTraceroute(sites);
+									});
+							}
+							catch (Exception exception)
+							{
+								this.Invoke(() =>
+									{
+										// Set the wait handle.
+										this.waitAsync.Set();
+										// Show an error message.
+										MessageBox.Show(
+											this,
+											string.Format("Cannot connect to the Mercury web server. Check your Internet connection and try again.{0}{1}Technical information: {2}", Environment.NewLine, Environment.NewLine, exception.Message),
+											"Mercury Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+										// Enable the start button.
+										this.wizardPageRun.AllowNext = true;
+									});
+							}
+						}, null);
+				}
+				catch (Exception exception)
+				{
+					// Set the wait handle.
+					this.waitAsync.Set();
+					// Show an error message.
+					MessageBox.Show(
+						this,
+						string.Format("Cannot connect to the Mercury web server. Check your Internet connection and try again.{0}{1}Technical information: {2}", Environment.NewLine, Environment.NewLine, exception.Message),
+						"Mercury Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					// Enable the start button.
+					this.wizardPageRun.AllowNext = true;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Starts the wizard traceroute.
+		/// </summary>
+		/// <param name="sites">The list of sites.</param>
+		private void OnStartTraceroute(string[] sites)
+		{
+			// Set the progress.
+			this.progressBar.Style = ProgressBarStyle.Continuous;
+			this.progressBar.Minimum = 0;
+			this.progressBar.Maximum = sites.Length;
+			this.progressBar.Value = 0;
+			this.labelProgress.Text = string.Format(WizardResources.GetString("LabelProgressDownloadFinish"), sites.Length);
+
+			// Set the pending traceroutes.
+			lock (this.sync)
+			{
+				this.traceroutePending.Clear();
+				this.tracerouteRunning.Clear();
+				this.tracerouteCompleted.Clear();
+
+				foreach (string site in sites)
+				{
+					this.traceroutePending.Enqueue(new TracerouteInfo(site));
+				}
+			}
+
+			// Reset the wait handle.
+			this.waitAsync.Reset();
+			// Reset the cancellation token.
+			this.tracerouteCancel.Reset();
+
+			// For all the concurrent traceroutes.
+			for (int index = 0; index < FormMain.tracerouteConcurrent; index++)
+			{
+				this.OnStartTraceroute();
+			}
+		}
+
+		/// <summary>
+		/// Starts an individual traceroute.
+		/// </summary>
+		private void OnStartTraceroute()
+		{
+			// Start the traceroute on the thread pool.
+			ThreadPool.QueueUserWorkItem((object state) =>
+				{
+					TracerouteInfo info;
+
+					lock (this.sync)
+					{
+						// If the sites queue is empty.
+						if (this.traceroutePending.Count == 0)
+						{
+							this.Invoke(() =>
+								{
+									// If the wizard is not completed.
+									if (!this.completed)
+									{
+										// Set the completed flag.
+										this.completed = true;
+										// Enable the start button.
+										this.wizardPageRun.AllowNext = true;
+									}
+								});
+							return;
+						}
+						// Get a site from the queue.
+						info = this.traceroutePending.Dequeue();
+						// Add the site to the running list.
+						this.tracerouteRunning.Add(info);
+					}
+
+					try
+					{
+						// If the IP address is null.
+						if (null == info.Address)
+						{
+							// Get the IP addresses.
+							IPAddress[] ipAddresses = Dns.GetHostAddresses(info.Site);
+							// Set the first IP address.
+							info.Address = ipAddresses[0];
+						}
+
+						// If the list of IP addresses has at least one address.
+						if (null != info.Address)
+						{
+							// Begin a traceroute for the specified destination.
+							TracerouteResult result = this.traceroute.Run(info.Address, this.tracerouteCancel);
+
+							// Upload the result.
+						}
+					}
+					catch
+					{
+						// Start another traceroute.
+						this.OnStartTraceroute();
+					}
+				});
 		}
 	}
 }

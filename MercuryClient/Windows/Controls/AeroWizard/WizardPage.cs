@@ -38,6 +38,9 @@ namespace Mercury.Windows.Controls.AeroWizard
 		private bool isFinishPage = false;
 		private string helpText = null;
 
+		private string textNext = null;
+		private string textFinish = null;
+
 		private LinkLabel helpLink;
 
 		/// <summary>
@@ -51,29 +54,33 @@ namespace Mercury.Windows.Controls.AeroWizard
 			this.Suppress = false;
 		}
 
+		// Public events.
+
 		/// <summary>
 		/// Occurs when the user has clicked the Next/Finish button but before the page is changed.
 		/// </summary>
-		[Category("Wizard"), Description("Occurs when the user has clicked the Next/Finish button but before the page is changed")]
+		[Category("Wizard"), Description("Occurs when the user has clicked the Next/Finish button but before the page is changed.")]
 		public event EventHandler<WizardPageConfirmEventArgs> Commit;
 
 		/// <summary>
 		/// Occurs when <see cref="HelpText"/> is set and the user has clicked the link at bottom of the content area.
 		/// </summary>
-		[Category("Wizard"), Description("Occurs when the user has clicked the help link")]
+		[Category("Wizard"), Description("Occurs when the user has clicked the help link.")]
 		public event EventHandler HelpClicked;
 
 		/// <summary>
 		/// Occurs when this page is entered.
 		/// </summary>
-		[Category("Wizard"), Description("Occurs when this page is entered")]
+		[Category("Wizard"), Description("Occurs when this page is entered.")]
 		public event EventHandler<WizardPageInitEventArgs> Initialize;
 
 		/// <summary>
 		/// Occurs when the user has clicked the Back button but before the page is changed.
 		/// </summary>
-		[Category("Wizard"), Description("Occurs when the user has clicked the Back button")]
+		[Category("Wizard"), Description("Occurs when the user has clicked the Back button.")]
 		public event EventHandler<WizardPageConfirmEventArgs> Rollback;
+
+		// Public properties.
 
 		/// <summary>
 		/// Gets or sets a value indicating whether to enable the Back button.
@@ -106,7 +113,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 				if (allowCancel != value)
 				{
 					allowCancel = value;
-					UpdateOwner();
+					this.UpdateOwner();
 				}
 			}
 		}
@@ -138,24 +145,24 @@ namespace Mercury.Windows.Controls.AeroWizard
 		[DefaultValue((string)null), Category("Appearance"), Description("Help text to display on hyperlink at bottom left of content area.")]
 		public string HelpText
 		{
-			get { return helpText; }
+			get { return this.helpText; }
 			set
 			{
-				if (helpLink == null)
+				if (this.helpLink == null)
 				{
-					helpLink = new LinkLabel() { AutoSize = true, Dock = DockStyle.Bottom, Text = "Help", Visible = false };
-					helpLink.LinkClicked += new LinkLabelLinkClickedEventHandler(OnHelpLinkClicked);
-					this.Controls.Add(helpLink);
+					this.helpLink = new LinkLabel() { AutoSize = true, Dock = DockStyle.Bottom, Text = "Help", Visible = false };
+					this.helpLink.LinkClicked += new LinkLabelLinkClickedEventHandler(OnHelpLinkClicked);
+					this.Controls.Add(this.helpLink);
 				}
-				helpText = value;
+				this.helpText = value;
 				if (helpText == null)
 				{
-					helpLink.Visible = false;
+					this.helpLink.Visible = false;
 				}
 				else
 				{
-					helpLink.Text = helpText;
-					helpLink.Visible = true;
+					this.helpLink.Text = helpText;
+					this.helpLink.Visible = true;
 				}
 			}
 		}
@@ -224,7 +231,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 				if (showNext != value)
 				{
 					showNext = value;
-					UpdateOwner();
+					this.UpdateOwner();
 				}
 			}
 		}
@@ -249,25 +256,40 @@ namespace Mercury.Windows.Controls.AeroWizard
 		public bool Suppress { get; set; }
 
 		/// <summary>
-		/// Gets the required creation parameters when the control handle is created.
+		/// Gets or sets the text displayed on the Next button for this page.
 		/// </summary>
-		/// <returns>A <see cref="T:System.Windows.Forms.CreateParams" /> that contains the required creation parameters when the handle to the control is created.</returns>
-		protected override CreateParams CreateParams
+		[DefaultValue((string)null), Category("Appearance"), Description("The text displayed on the Next button for this page.")]
+		public string TextNext
 		{
-			[SecurityPermission(SecurityAction.LinkDemand, Flags=SecurityPermissionFlag.UnmanagedCode)]
-			get
+			get { return this.textNext; }
+			set
 			{
-				CreateParams createParams = base.CreateParams;
-				Form parent = this.FindForm();
-				bool parentRightToLeftLayout = parent != null ? parent.RightToLeftLayout : false;
-				if ((this.RightToLeft == RightToLeft.Yes) && parentRightToLeftLayout)
+				if (this.textNext != value)
 				{
-					createParams.ExStyle |= 0x500000; // WS_EX_LAYOUTRTL | WS_EX_NOINHERITLAYOUT
-					createParams.ExStyle &= ~0x7000; // WS_EX_RIGHT | WS_EX_RTLREADING | WS_EX_LEFTSCROLLBAR
+					this.textNext = value;
+					this.UpdateOwner();
 				}
-				return createParams;
 			}
 		}
+
+		/// <summary>
+		/// Gets or sets the text displayed on the Finish button for this page.
+		/// </summary>
+		[DefaultValue((string)null), Category("Appearance"), Description("The text displayed on the Finish button for this page.")]
+		public string TextFinish
+		{
+			get { return this.textFinish; }
+			set
+			{
+				if (this.textFinish != value)
+				{
+					this.textFinish = value;
+					this.UpdateOwner();
+				}
+			}
+		}
+
+		// Public methods.
 
 		/// <summary>
 		/// Returns a <see cref="System.String"/> that represents this wizard page.
@@ -310,6 +332,44 @@ namespace Mercury.Windows.Controls.AeroWizard
 		}
 
 		// Protected methods.
+
+		/// <summary>
+		/// Disposes the current object.
+		/// </summary>
+		/// <param name="disposing"><c>True</c> if the managed resources are disposed, <c>false</c> otherwise.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				if (null != this.helpLink)
+				{
+					this.helpLink.Dispose();
+				}
+			}
+			// Call the base class method.
+			base.Dispose(disposing);
+		}
+
+		/// <summary>
+		/// Gets the required creation parameters when the control handle is created.
+		/// </summary>
+		/// <returns>A <see cref="T:System.Windows.Forms.CreateParams" /> that contains the required creation parameters when the handle to the control is created.</returns>
+		protected override CreateParams CreateParams
+		{
+			[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+			get
+			{
+				CreateParams createParams = base.CreateParams;
+				Form parent = this.FindForm();
+				bool parentRightToLeftLayout = parent != null ? parent.RightToLeftLayout : false;
+				if ((this.RightToLeft == RightToLeft.Yes) && parentRightToLeftLayout)
+				{
+					createParams.ExStyle |= 0x500000; // WS_EX_LAYOUTRTL | WS_EX_NOINHERITLAYOUT
+					createParams.ExStyle &= ~0x7000; // WS_EX_RIGHT | WS_EX_RTLREADING | WS_EX_LEFTSCROLLBAR
+				}
+				return createParams;
+			}
+		}
 
 		/// <summary>
 		/// Raises the <see cref="Commit" /> event.

@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Async\AsyncResult.cs" />
+    <Compile Include="Collections\Generic\HashSet.cs" />
     <Compile Include="Globalization\CultureId.cs" />
     <Compile Include="Globalization\Language.cs" />
     <Compile Include="Globalization\LanguageCollection.cs" />
@@ -83,6 +84,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Locales.resx</DependentUpon>
     </Compile>
+    <Compile Include="Net\Core\Traceroute.cs" />
+    <Compile Include="Net\Core\TracerouteHop.cs" />
+    <Compile Include="Net\Core\TracerouteResult.cs" />
+    <Compile Include="Net\Core\TracerouteSettings.cs" />
+    <Compile Include="Threading\CancellationToken.cs" />
     <Compile Include="Web\AsyncWebBuffer.cs" />
     <Compile Include="Web\AsyncWebRequest.cs" />
     <Compile Include="Web\AsyncWebResult.cs" />
@@ -192,6 +198,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

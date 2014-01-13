@@ -185,7 +185,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public WizardCommandButtonState BackButtonState
 		{
-			get { return this.GetCmdButtonState(this.backButton); }
+			get { return this.GetButtonState(this.backButton); }
 			internal set { this.SetButtonState(this.backButton, value); }
 		}
 
@@ -196,7 +196,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		[Category("Wizard"), Localizable(true), Description("The back button text")]
 		public string BackButtonText
 		{
-			get { return this.GetCmdButtonText(this.backButton); }
+			get { return this.GetButtonText(this.backButton); }
 			set { this.SetButtonText(this.backButton, value); }
 		}
 
@@ -208,7 +208,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public WizardCommandButtonState CancelButtonState
 		{
-			get { return this.GetCmdButtonState(this.cancelButton); }
+			get { return this.GetButtonState(this.cancelButton); }
 			internal set { this.SetButtonState(this.cancelButton, value); }
 		}
 
@@ -219,7 +219,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		[Category("Wizard"), Localizable(true), Description("The cancel button text")]
 		public string CancelButtonText
 		{
-			get { return this.GetCmdButtonText(this.cancelButton); }
+			get { return this.GetButtonText(this.cancelButton); }
 			set { this.SetButtonText(this.cancelButton, value); }
 		}
 
@@ -285,7 +285,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public WizardCommandButtonState NextButtonState
 		{
-			get { return GetCmdButtonState(NextButton); }
+			get { return GetButtonState(NextButton); }
 			internal set { SetButtonState(NextButton, value); }
 		}
 
@@ -463,8 +463,10 @@ namespace Mercury.Windows.Controls.AeroWizard
 				return;
 			}
 
-			if (SelectedPage.RollbackPage())
-				SelectedPage = pageHistory.Pop();
+			if (this.SelectedPage.RollbackPage())
+			{
+				this.SelectedPage = this.pageHistory.Pop();
+			}
 		}
 
 		/// <summary>
@@ -472,11 +474,13 @@ namespace Mercury.Windows.Controls.AeroWizard
 		/// </summary>
 		public void RestartPages()
 		{
-			if (selectedPage != null)
-				selectedPage.Hide();
-			selectedPage = null;
-			pageHistory.Clear();
-			initialized = false;
+			if (this.selectedPage != null)
+			{
+				this.selectedPage.Hide();
+			}
+			this.selectedPage = null;
+			this.pageHistory.Clear();
+			this.initialized = false;
 		}
 
 		// Protected methods.
@@ -555,11 +559,12 @@ namespace Mercury.Windows.Controls.AeroWizard
 				{
 					this.CancelButtonState = this.selectedPage.ShowCancel ? (this.selectedPage.AllowCancel && !ControlExtensions.IsDesignMode(this) ? WizardCommandButtonState.Enabled : WizardCommandButtonState.Disabled) : WizardCommandButtonState.Hidden;
 					this.NextButtonState = this.selectedPage.ShowNext ? (this.selectedPage.AllowNext ? WizardCommandButtonState.Enabled : WizardCommandButtonState.Disabled) : WizardCommandButtonState.Hidden;
-					if (this.selectedPage.IsFinishPage || this.IsLastPage(SelectedPage))
-						SetButtonText(NextButton, FinishButtonText);
+					this.BackButtonState = (pageHistory.Count == 0 || !selectedPage.AllowBack) ? WizardCommandButtonState.Disabled : WizardCommandButtonState.Enabled;
+
+					if (this.selectedPage.IsFinishPage || this.IsLastPage(this.selectedPage))
+						this.SetButtonText(this.NextButton, string.IsNullOrEmpty(this.selectedPage.TextFinish) ? this.finishButtonText : this.selectedPage.TextFinish);
 					else
-						SetButtonText(NextButton, NextButtonText);
-					BackButtonState = (pageHistory.Count == 0 || !selectedPage.AllowBack) ? WizardCommandButtonState.Disabled : WizardCommandButtonState.Enabled;
+						this.SetButtonText(this.NextButton, string.IsNullOrEmpty(this.selectedPage.TextNext) ? this.nextButtonText : this.selectedPage.TextNext);
 				}
 			}
 		}
@@ -610,30 +615,40 @@ namespace Mercury.Windows.Controls.AeroWizard
 
 		private void OnBackButtonClick(object sender, EventArgs e)
 		{
-			PreviousPage();
+			this.PreviousPage();
 		}
 
 		private void OnCancelButtonClick(object sender, EventArgs e)
 		{
-			OnCancelling();
+			this.OnCancelling();
 		}
 
-		private WizardCommandButtonState GetCmdButtonState(ButtonBase btn)
+		/// <summary>
+		/// Gets the state for the specified button.
+		/// </summary>
+		/// <param name="button">The button.</param>
+		/// <returns>The button state.</returns>
+		private WizardCommandButtonState GetButtonState(ButtonBase button)
 		{
-			if (btn == null || !btn.Visible)
+			if (button == null || !button.Visible)
 				return WizardCommandButtonState.Hidden;
 			else
 			{
-				if (btn.Enabled)
+				if (button.Enabled)
 					return WizardCommandButtonState.Enabled;
 				else
 					return WizardCommandButtonState.Disabled;
 			}
 		}
 
-		private string GetCmdButtonText(ButtonBase btn)
+		/// <summary>
+		/// Returns the text for the specified button.
+		/// </summary>
+		/// <param name="button">The button.</param>
+		/// <returns>The button text.</returns>
+		private string GetButtonText(ButtonBase button)
 		{
-			return btn == null ? string.Empty : btn.Text;
+			return button == null ? string.Empty : button.Text;
 		}
 
 		/// <summary>
@@ -666,7 +681,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 		private void Initialize()
 		{
 			//  If the control is not initialized.
-			if (!initialized)
+			if (!this.initialized)
 			{
 				// Select the first page or update the buttons.
 				if (this.Pages.Count > 0)
@@ -674,7 +689,7 @@ namespace Mercury.Windows.Controls.AeroWizard
 				else
 					this.OnUpdateButtons();
 				// Set the control as initialized.
-				initialized = true;
+				this.initialized = true;
 			}
 		}
 

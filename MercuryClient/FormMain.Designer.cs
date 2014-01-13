@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
 			this.wizardControl = new Mercury.Windows.Controls.AeroWizard.WizardControl();
 			this.wizardPageLocale = new Mercury.Windows.Controls.AeroWizard.WizardPage();
 			this.comboBoxCountry = new System.Windows.Forms.ComboBox();
@@ -86,7 +87,7 @@
 			this.comboBoxCountry.FormattingEnabled = true;
 			this.comboBoxCountry.Location = new System.Drawing.Point(80, 117);
 			this.comboBoxCountry.Name = "comboBoxCountry";
-			this.comboBoxCountry.Size = new System.Drawing.Size(360, 23);
+			this.comboBoxCountry.Size = new System.Drawing.Size(315, 23);
 			this.comboBoxCountry.TabIndex = 7;
 			this.comboBoxCountry.SelectedIndexChanged += new System.EventHandler(this.OnCountryChanged);
 			// 
@@ -98,7 +99,7 @@
 			this.comboBoxLanguage.FormattingEnabled = true;
 			this.comboBoxLanguage.Location = new System.Drawing.Point(80, 88);
 			this.comboBoxLanguage.Name = "comboBoxLanguage";
-			this.comboBoxLanguage.Size = new System.Drawing.Size(360, 23);
+			this.comboBoxLanguage.Size = new System.Drawing.Size(315, 23);
 			this.comboBoxLanguage.TabIndex = 6;
 			this.comboBoxLanguage.SelectedIndexChanged += new System.EventHandler(this.OnLanguageChanged);
 			// 
@@ -132,6 +133,7 @@
 			this.wizardPageRun.Size = new System.Drawing.Size(537, 257);
 			this.wizardPageRun.TabIndex = 1;
 			this.wizardPageRun.Text = "Measuring the Internet";
+			this.wizardPageRun.TextNext = "&Start";
 			this.wizardPageRun.Commit += new System.EventHandler<Mercury.Windows.Controls.AeroWizard.WizardPageConfirmEventArgs>(this.OnRunCommit);
 			this.wizardPageRun.Initialize += new System.EventHandler<Mercury.Windows.Controls.AeroWizard.WizardPageInitEventArgs>(this.OnRunInitialize);
 			// 
@@ -151,6 +153,7 @@
 			this.progressBar.Size = new System.Drawing.Size(531, 16);
 			this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
 			this.progressBar.TabIndex = 2;
+			this.progressBar.Visible = false;
 			// 
 			// labelInfo
 			// 
@@ -167,6 +170,7 @@
 			this.wizardPageFinish.HelpText = "";
 			this.wizardPageFinish.IsFinishPage = true;
 			this.wizardPageFinish.Name = "wizardPageFinish";
+			this.wizardPageFinish.ShowCancel = false;
 			this.wizardPageFinish.Size = new System.Drawing.Size(537, 256);
 			this.wizardPageFinish.TabIndex = 2;
 			this.wizardPageFinish.Text = "Finished";
@@ -195,8 +199,10 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(584, 412);
 			this.Controls.Add(this.wizardControl);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "FormMain";
 			this.Text = "Mercury Client";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnClosing);
 			((System.ComponentModel.ISupportInitialize)(this.wizardControl)).EndInit();
 			this.wizardPageLocale.ResumeLayout(false);
 			this.wizardPageLocale.PerformLayout();
