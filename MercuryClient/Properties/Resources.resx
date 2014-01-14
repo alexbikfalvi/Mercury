@@ -121,6 +121,90 @@
   <data name="AeroBackButtonStrip" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\AeroBackButtonStrip.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="CancelMessageText" xml:space="preserve">
+    <value>Cancelling the wizard will prevent uploading any measurement result. Do you want to continue?</value>
+  </data>
+  <data name="CancelMessageText.ca" xml:space="preserve">
+    <value>Cancel·lació de l'assistent evitarà pujar qualsevol resultat del mesurament. Vols continuar?</value>
+  </data>
+  <data name="CancelMessageText.de" xml:space="preserve">
+    <value>Abbrechen der Assistent Hochladen von Messergebnisses zu verhindern. Wollen Sie fortfahren?</value>
+  </data>
+  <data name="CancelMessageText.es" xml:space="preserve">
+    <value>Cancelación del asistente evitará subir cualquier resultado de las medidas. ¿Quieres continuar?</value>
+  </data>
+  <data name="CancelMessageText.fr" xml:space="preserve">
+    <value>Annulation de l'assistant d'empêcher le téléchargement de tout résultat de mesure. Voulez-vous continuer?</value>
+  </data>
+  <data name="CancelMessageText.pt" xml:space="preserve">
+    <value>Cancelando o assistente irá evitar carregar qualquer resultado de medição. Você quer continuar?</value>
+  </data>
+  <data name="CancelMessageText.ro" xml:space="preserve">
+    <value>Anularea expertul va preveni încărcarea orice rezultat de măsurare. Vreți să continuați?</value>
+  </data>
+  <data name="CancelMessageTitle" xml:space="preserve">
+    <value>Confirm Cancellation</value>
+  </data>
+  <data name="CancelMessageTitle.ca" xml:space="preserve">
+    <value>Confirmar cancel·lació</value>
+  </data>
+  <data name="CancelMessageTitle.de" xml:space="preserve">
+    <value>Stornierung bestätigen</value>
+  </data>
+  <data name="CancelMessageTitle.es" xml:space="preserve">
+    <value>Confirmar cancelación</value>
+  </data>
+  <data name="CancelMessageTitle.fr" xml:space="preserve">
+    <value>Confirmez annulation</value>
+  </data>
+  <data name="CancelMessageTitle.pt" xml:space="preserve">
+    <value>Confirmar cancelamento</value>
+  </data>
+  <data name="CancelMessageTitle.ro" xml:space="preserve">
+    <value>Confirmați anularea</value>
+  </data>
+  <data name="ConnectionMessageText" xml:space="preserve">
+    <value>Your computer does not have a network connection. Connect your computer to the Internet and then try again.</value>
+  </data>
+  <data name="ConnectionMessageText.ca" xml:space="preserve">
+    <value>El seu equip no té una connexió de xarxa. Connecteu l'ordinador a Internet i torneu a intentar.</value>
+  </data>
+  <data name="ConnectionMessageText.de" xml:space="preserve">
+    <value>Ihr Computer nicht über eine Netzwerkverbindung. Verbinden Sie Ihren Computer mit dem Internet und versuchen Sie erneut.</value>
+  </data>
+  <data name="ConnectionMessageText.es" xml:space="preserve">
+    <value>Su equipo no tiene una conexión de red. Conecte su ordenador a Internet y vuelva a intentarlo.</value>
+  </data>
+  <data name="ConnectionMessageText.fr" xml:space="preserve">
+    <value>Votre ordinateur ne dispose pas d'une connexion réseau. Connectez votre ordinateur à Internet, puis essayez à nouveau.</value>
+  </data>
+  <data name="ConnectionMessageText.pt" xml:space="preserve">
+    <value>O seu computador não tem uma conexão de rede. Conecte o seu computador à Internet e tente novamente.</value>
+  </data>
+  <data name="ConnectionMessageText.ro" xml:space="preserve">
+    <value>Computerul dumneavoastră nu are o conexiune la rețea. Conectați computerul la Internet și apoi încercați din nou.</value>
+  </data>
+  <data name="ConnectionMessageTitle" xml:space="preserve">
+    <value>No Network Connection</value>
+  </data>
+  <data name="ConnectionMessageTitle.ca" xml:space="preserve">
+    <value>Sense connexió a la xarxa</value>
+  </data>
+  <data name="ConnectionMessageTitle.de" xml:space="preserve">
+    <value>Keine Netzwerkverbindung</value>
+  </data>
+  <data name="ConnectionMessageTitle.es" xml:space="preserve">
+    <value>Sin conexión a la red</value>
+  </data>
+  <data name="ConnectionMessageTitle.fr" xml:space="preserve">
+    <value>Pas de connexion réseau</value>
+  </data>
+  <data name="ConnectionMessageTitle.pt" xml:space="preserve">
+    <value>Sem conexão de rede</value>
+  </data>
+  <data name="ConnectionMessageTitle.ro" xml:space="preserve">
+    <value>Nu există conexiune la rețea</value>
+  </data>
   <data name="HelpLocales" xml:space="preserve">
     <value>For what is this information?</value>
   </data>
@@ -264,47 +348,152 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
   <data name="LabelProgress.ro" xml:space="preserve">
     <value>{0} la sută finalizat (0 minute rămase)</value>
   </data>
-  <data name="LabelProgressDownloadFinish" xml:space="preserve">
-    <value>Running the Internet measurements using {0} web destinations...</value>
+  <data name="LabelProgressCancel" xml:space="preserve">
+    <value>The wizard is canceling the current operation and will close in a few seconds.</value>
   </data>
-  <data name="LabelProgressDownloadFinish.ca" xml:space="preserve">
-    <value>Execució de les mesures d'Internet utilitzant {0} destins web...</value>
+  <data name="LabelProgressCancel.ca" xml:space="preserve">
+    <value>L'assistent està cancel·lant l'operació en curs i es tancarà en uns segons.</value>
   </data>
-  <data name="LabelProgressDownloadFinish.de" xml:space="preserve">
-    <value>Ausführen der Internet-Messungen mit {0} Web-Destinationen...</value>
+  <data name="LabelProgressCancel.de" xml:space="preserve">
+    <value>Der Assistent bricht den aktuellen Betrieb und wird in wenigen Sekunden zu schließen.</value>
   </data>
-  <data name="LabelProgressDownloadFinish.es" xml:space="preserve">
-    <value>Ejecución de las medidas de Internet utilizando {0} destinos web...</value>
+  <data name="LabelProgressCancel.es" xml:space="preserve">
+    <value>El asistente está cancelando la operación en curso y se cerrará en unos segundos.</value>
   </data>
-  <data name="LabelProgressDownloadFinish.fr" xml:space="preserve">
-    <value>Exécution des mesures d'Internet en utilisant {0} des destinations web...</value>
+  <data name="LabelProgressCancel.fr" xml:space="preserve">
+    <value>L'assistant annule l'opération en cours et se terminera dans quelques secondes.</value>
   </data>
-  <data name="LabelProgressDownloadFinish.pt" xml:space="preserve">
-    <value>Correndo as medições de Internet com {0} destinos web...</value>
+  <data name="LabelProgressCancel.pt" xml:space="preserve">
+    <value>O assistente está a cancelar a operação atual e vai fechar em poucos segundos.</value>
   </data>
-  <data name="LabelProgressDownloadFinish.ro" xml:space="preserve">
-    <value>Rularea măsurătorilor de Internet folosind {0} destinatii web...</value>
+  <data name="LabelProgressCancel.ro" xml:space="preserve">
+    <value>Expertul anulează operațiunea curentă și se va închide în câteva secunde.</value>
   </data>
-  <data name="LabelProgressDownloadStart" xml:space="preserve">
+  <data name="LabelProgressCompleted" xml:space="preserve">
+    <value>Completed measurements to {0} out of {1} web destinations.</value>
+  </data>
+  <data name="LabelProgressCompleted.ca" xml:space="preserve">
+    <value>Medicions completades a {0} de {1} destinacions web.</value>
+  </data>
+  <data name="LabelProgressCompleted.de" xml:space="preserve">
+    <value>Abgeschlossene Messungen {0} von {1} Web-Destinationen.</value>
+  </data>
+  <data name="LabelProgressCompleted.es" xml:space="preserve">
+    <value>Medidas completadas a {0} de {1} destinos web.</value>
+  </data>
+  <data name="LabelProgressCompleted.fr" xml:space="preserve">
+    <value>Mesures terminées à {0} de {1} destinations Web.</value>
+  </data>
+  <data name="LabelProgressCompleted.pt" xml:space="preserve">
+    <value>Medições concluídas para {0} de {1} destinos da web.</value>
+  </data>
+  <data name="LabelProgressCompleted.ro" xml:space="preserve">
+    <value>Măsurători realizate la {0} din {1} destinații web.</value>
+  </data>
+  <data name="LabelProgressDownload" xml:space="preserve">
     <value>Downloading the list of web destinations...</value>
   </data>
-  <data name="LabelProgressDownloadStart.ca" xml:space="preserve">
+  <data name="LabelProgressDownload.ca" xml:space="preserve">
     <value>Descarregant la llista de destinacions web...</value>
   </data>
-  <data name="LabelProgressDownloadStart.de" xml:space="preserve">
+  <data name="LabelProgressDownload.de" xml:space="preserve">
     <value>Herunterladen der Liste von Web-Destinationen...</value>
   </data>
-  <data name="LabelProgressDownloadStart.es" xml:space="preserve">
+  <data name="LabelProgressDownload.es" xml:space="preserve">
     <value>Descargando la lista de destinos web...</value>
   </data>
-  <data name="LabelProgressDownloadStart.fr" xml:space="preserve">
+  <data name="LabelProgressDownload.fr" xml:space="preserve">
     <value>Téléchargement de la liste des destinations web...</value>
   </data>
-  <data name="LabelProgressDownloadStart.pt" xml:space="preserve">
+  <data name="LabelProgressDownload.pt" xml:space="preserve">
     <value>Baixando a lista de destinos da web...</value>
   </data>
-  <data name="LabelProgressDownloadStart.ro" xml:space="preserve">
+  <data name="LabelProgressDownload.ro" xml:space="preserve">
     <value>Descărcarea listei de destinații de web...</value>
+  </data>
+  <data name="LabelProgressSession" xml:space="preserve">
+    <value>Uploading the session information...</value>
+  </data>
+  <data name="LabelProgressSession.ca" xml:space="preserve">
+    <value>Carregant la informació de la sessió...</value>
+  </data>
+  <data name="LabelProgressSession.de" xml:space="preserve">
+    <value>Hochladen der Session-Informationen...</value>
+  </data>
+  <data name="LabelProgressSession.es" xml:space="preserve">
+    <value>Cargando la información de la sesión...</value>
+  </data>
+  <data name="LabelProgressSession.fr" xml:space="preserve">
+    <value>Télécharger les informations de session...</value>
+  </data>
+  <data name="LabelProgressSession.pt" xml:space="preserve">
+    <value>Enviando as informações da sessão...</value>
+  </data>
+  <data name="LabelProgressSession.ro" xml:space="preserve">
+    <value>Încărcarea informațiilor sesiunii...</value>
+  </data>
+  <data name="LabelProgressTraceroute" xml:space="preserve">
+    <value>Running the Internet measurements using {0} web destinations...</value>
+  </data>
+  <data name="LabelProgressTraceroute.ca" xml:space="preserve">
+    <value>Execució de les mesures d'Internet utilitzant {0} destins web...</value>
+  </data>
+  <data name="LabelProgressTraceroute.de" xml:space="preserve">
+    <value>Ausführen der Internet-Messungen mit {0} Web-Destinationen...</value>
+  </data>
+  <data name="LabelProgressTraceroute.es" xml:space="preserve">
+    <value>Ejecución de las medidas de Internet utilizando {0} destinos web...</value>
+  </data>
+  <data name="LabelProgressTraceroute.fr" xml:space="preserve">
+    <value>Exécution des mesures d'Internet en utilisant {0} des destinations web...</value>
+  </data>
+  <data name="LabelProgressTraceroute.pt" xml:space="preserve">
+    <value>Correndo as medições de Internet com {0} destinos web...</value>
+  </data>
+  <data name="LabelProgressTraceroute.ro" xml:space="preserve">
+    <value>Rularea măsurătorilor de Internet folosind {0} destinatii web...</value>
+  </data>
+  <data name="MercuryMessageText" xml:space="preserve">
+    <value>Cannot connect to the Mercury web server. Check your Internet connection and try again.{0}{1}Technical information: {2}</value>
+  </data>
+  <data name="MercuryMessageText.ca" xml:space="preserve">
+    <value>No es pot connectar al servidor web Mercury. Comprovi la seva connexió a Internet i torneu a intentar. {0} {1}Informació tècnica: {2}</value>
+  </data>
+  <data name="MercuryMessageText.de" xml:space="preserve">
+    <value>Kann nicht an den Mercury Web-Server zu verbinden. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut. {0} {1}Technische Informationen: {2}</value>
+  </data>
+  <data name="MercuryMessageText.es" xml:space="preserve">
+    <value>No se puede conectar al servidor web Mercury. Compruebe su conexión a Internet y vuelva a intentarlo. {0} {1}Información técnica: {2}</value>
+  </data>
+  <data name="MercuryMessageText.fr" xml:space="preserve">
+    <value>Impossible de se connecter au serveur Web Mercure. Vérifiez votre connexion Internet et essayez à nouveau. {0} {1}Informations techniques: {2}</value>
+  </data>
+  <data name="MercuryMessageText.pt" xml:space="preserve">
+    <value>Não é possível conectar-se ao servidor web Mercury. Verifique a sua conexão com a Internet e tente novamente. {0} {1}Informações técnicas: {2}</value>
+  </data>
+  <data name="MercuryMessageText.ro" xml:space="preserve">
+    <value>Nu se poate conecta la serverul de web Mercury. Verificați conexiunea la internet și încercați din nou. {0} {1}Informații tehnice: {2}</value>
+  </data>
+  <data name="MercuryMessageTitle" xml:space="preserve">
+    <value>Mercury Error</value>
+  </data>
+  <data name="MercuryMessageTitle.ca" xml:space="preserve">
+    <value>Error en Mercury</value>
+  </data>
+  <data name="MercuryMessageTitle.de" xml:space="preserve">
+    <value>Mercury Fehler</value>
+  </data>
+  <data name="MercuryMessageTitle.es" xml:space="preserve">
+    <value>Error de Mercury</value>
+  </data>
+  <data name="MercuryMessageTitle.fr" xml:space="preserve">
+    <value>Erreur de Mercury</value>
+  </data>
+  <data name="MercuryMessageTitle.pt" xml:space="preserve">
+    <value>Erro Mercury</value>
+  </data>
+  <data name="MercuryMessageTitle.ro" xml:space="preserve">
+    <value>Eroare de Mercury</value>
   </data>
   <data name="PageFinishTitle" xml:space="preserve">
     <value>Thank you!</value>

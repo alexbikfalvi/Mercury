@@ -30,9 +30,9 @@ namespace Mercury.Net.Core
 		private readonly int ttl;
 		private IPAddress address;
 		private int count = 0;
-		private long rttMin = long.MaxValue;
-		private long rttMax = long.MinValue;
-		private long rttSum = 0;
+		private double rttMin = double.MaxValue;
+		private double rttMax = double.MinValue;
+		private double rttSum = 0;
 
 		/// <summary>
 		/// Creates a new traceroute hop result instance.
@@ -60,15 +60,15 @@ namespace Mercury.Net.Core
 		/// <summary>
 		/// Gets the minimum round-trip time.
 		/// </summary>
-		public long MinimumRoundtripTime { get { return this.rttMin; } }
+		public double MinimumRoundtripTime { get { return this.rttMin; } }
 		/// <summary>
 		/// Gets the maximum round-trip time.
 		/// </summary>
-		public long MaximumRoundtripTime { get { return this.rttMax; } }
+		public double MaximumRoundtripTime { get { return this.rttMax; } }
 		/// <summary>
 		/// Gets the average round-trip time.
 		/// </summary>
-		public double AverageRoundtripTime { get { return this.count > 0 ? (double)this.rttSum / this.count : 0; } }
+		public double AverageRoundtripTime { get { return this.count > 0 ? this.rttSum / this.count : 0; } }
 
 		// Public methods.
 
@@ -76,8 +76,9 @@ namespace Mercury.Net.Core
 		/// Adds a new reply to this traceroute hop.
 		/// </summary>
 		/// <param name="reply">The reply.</param>
+		/// <param name="rtt">The measured RTT.</param>
 		/// <returns><b>True</b> if the reply was successful, or <b>false</b> otherwise.</returns>
-		public bool AddReply(PingReply reply)
+		public bool AddReply(PingReply reply, TimeSpan rtt)
 		{
 			// If the reply status is success or time-exceeded.
 			if ((reply.Status == IPStatus.Success) || (reply.Status == IPStatus.TtlExpired))
@@ -90,9 +91,9 @@ namespace Mercury.Net.Core
 				else if (reply.Address != this.address) return false;
 
 				// Compute the round-trip time.
-				if (this.rttMin > reply.RoundtripTime) this.rttMin = reply.RoundtripTime;
-				if (this.rttMax < reply.RoundtripTime) this.rttMax = reply.RoundtripTime;
-				this.rttSum += reply.RoundtripTime;
+				if (this.rttMin > reply.RoundtripTime) this.rttMin = rtt.TotalMilliseconds;
+				if (this.rttMax < reply.RoundtripTime) this.rttMax = rtt.TotalMilliseconds;
+				this.rttSum += rtt.TotalMilliseconds;
 				this.count++;
 
 				return true;

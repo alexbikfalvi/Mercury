@@ -58,14 +58,14 @@ namespace Mercury.Web
 	/// </summary>
 	public class AsyncWebRequest
 	{
-		public static TimeSpan TIMEOUT_DEFAULT = new TimeSpan(0, 0, 10);
+		public static TimeSpan defaultTimeout = new TimeSpan(0, 0, 10);
 
 		/// <summary>
 		/// Constructor of an asynchronous request.
 		/// </summary>
 		public AsyncWebRequest()
 		{
-			this.Timeout = AsyncWebRequest.TIMEOUT_DEFAULT;
+			this.Timeout = AsyncWebRequest.defaultTimeout;
 		}
 
 		/// <summary>

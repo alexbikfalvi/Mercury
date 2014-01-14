@@ -22,12 +22,15 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using Mercury.Collections.Generic;
 using Mercury.Globalization;
 using Mercury.Net.Core;
+using Mercury.Json;
 using Mercury.Threading;
 using Mercury.Web;
 using Mercury.Web.Location;
@@ -83,6 +86,8 @@ namespace Mercury
 		private readonly List<Territory> territories = new List<Territory>();
 
 		private static readonly string uriGetUrls = "http://inetanalytics.nets.upf.edu/getUrls?countryCode={0}";
+		private static readonly string uriUploadSession = "http://mercury.upf.edu/mercury/api/traceroute/addTracerouteSession";
+		private static readonly string uriUploadTrace = "http://mercury.upf.edu/mercury/api/traceroute/uploadTrace";
 
 		private bool countryUser = false;
 		private LocationResult location = null;
@@ -93,9 +98,11 @@ namespace Mercury
 		private IAsyncResult asyncWebResult = null;
 		private readonly ManualResetEvent waitAsync = new ManualResetEvent(true);
 
+		private const int tracerouteConcurrent = 20;
+		private const int tracerouteRetries = 3;
+
 		private readonly Traceroute traceroute;
 		private readonly TracerouteSettings tracerouteSettings;
-		private const int tracerouteConcurrent = 1;
 		private readonly Queue<TracerouteInfo> traceroutePending = new Queue<TracerouteInfo>();
 		private readonly HashSet<TracerouteInfo> tracerouteRunning = new HashSet<TracerouteInfo>();
 		private readonly HashSet<TracerouteInfo> tracerouteCompleted = new HashSet<TracerouteInfo>();
@@ -104,6 +111,9 @@ namespace Mercury
 		private bool completed = false;
 		private bool canceling = false;
 		private bool canceled = false;
+
+		private DateTime sessionTimestamp;
+		private Guid sessionId;
 
 		/// <summary>
 		/// Creates a new form instance.
@@ -188,6 +198,9 @@ namespace Mercury
 		/// </summary>
 		private void SetCountry()
 		{
+			// If there is no network connection, do nothing.
+			if (!NetworkInterface.GetIsNetworkAvailable()) return;
+
 			// Create a location request.
 			LocationRequest request = new LocationRequest();
 
@@ -311,8 +324,14 @@ namespace Mercury
 		/// <param name="e">The event arguments.</param>
 		private void OnClosing(object sender, FormClosingEventArgs e)
 		{
-			// Call the canceling event handler.
-			this.OnCanceling(sender, e);
+			lock (this.sync)
+			{
+				if (!this.completed)
+				{
+					// Call the canceling event handler.
+					this.OnCanceling(sender, e);
+				}
+			}
 		}
 
 		/// <summary>
@@ -339,17 +358,20 @@ namespace Mercury
 				if ((null != this.asyncWebResult) || (this.tracerouteRunning.Count > 0))
 				{
 					// Ask the user whether to cancel.
-					if (MessageBox.Show(this, "Cancelling the wizard will prevent uploading any measurement result. Do you want to continue?", "Confirm Cancellation", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+					if (MessageBox.Show(this, WizardResources.GetString("CancelMessageText"), WizardResources.GetString("CancelMessageTitle"), MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
 					{
-						// Cancel the close event.
-						e.Cancel = true;
 						// Set the canceling flag.
 						this.canceling = true;
-						// Disable the cancel button.
+						// Disable the cancel and back buttons.
+						this.wizardPageRun.AllowBack = false;
 						this.wizardPageRun.AllowCancel = false;
+						// Update the progress label.
+						this.labelProgress.Text = WizardResources.GetString("LabelProgressCancel");
 						// Cancel the asynchronous operations.
 						this.OnCancel();
 					}
+					// Cancel the close event.
+					e.Cancel = true;
 				}
 				else
 				{
@@ -369,6 +391,16 @@ namespace Mercury
 			// Execute the cancellation on the thread pool.
 			ThreadPool.QueueUserWorkItem((object state) =>
 				{
+					// Cancel the web request.
+					lock (this.sync)
+					{
+						if (null != this.asyncWebResult)
+						{
+							this.asyncWebRequest.Cancel(this.asyncWebResult);
+						}
+					}
+					// Cancel the traceroute.
+					this.tracerouteCancel.Cancel();
 					// Wait for the asynchronous handle.
 					this.waitAsync.WaitOne();
 
@@ -446,7 +478,7 @@ namespace Mercury
 		}
 
 		/// <summary>
-		/// An event raised when the user enterso on the run page.
+		/// An event raised when the user enters on the run page.
 		/// </summary>
 		/// <param name="sender">The sender object.</param>
 		/// <param name="e">The event arguments.</param>
@@ -462,12 +494,136 @@ namespace Mercury
 		/// <param name="e">The event arguments.</param>
 		private void OnRunCommit(object sender, WizardPageConfirmEventArgs e)
 		{
+			// Verify the network connection.
+			if (!NetworkInterface.GetIsNetworkAvailable())
+			{
+				// Show an error message.
+				MessageBox.Show(this, WizardResources.GetString("ConnectionMessageText"), WizardResources.GetString("ConnectionMessageTitle"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				// Cancel the page change.
+				e.Cancel = true;
+				// Return.
+				return;
+			}
+
+			// If the current location is not set.
+			if (null == this.location)
+			{
+				// Start a location request.
+				this.SetCountry();
+			}
+
+			// If the wizard is not completed.
 			if (!this.completed)
 			{
 				// Cancel the page change.
 				e.Cancel = true;
-				// Start the wizard.
-				this.OnStartDownload();
+				// Start the wizard session.
+				this.OnStartSession();
+			}
+		}
+
+		/// <summary>
+		/// Starts a session
+		/// </summary>
+		private void OnStartSession()
+		{
+			// Set the session identifier and timestamp.
+			this.sessionId = Guid.NewGuid();
+			this.sessionTimestamp = DateTime.Now;
+
+			// Disable the start button.
+			this.wizardPageRun.AllowNext = false;
+			// Update the progress.
+			this.progressBar.Visible = true;
+			this.progressBar.Style = ProgressBarStyle.Marquee;
+			this.labelProgress.Text = WizardResources.GetString("LabelProgressSession");
+
+			lock (this.sync)
+			{
+				try
+				{
+					// Reset the wait handle.
+					this.waitAsync.Reset();
+					
+					// Create the web request.
+					AsyncWebResult asyncState = AsyncWebRequest.Create(new Uri(FormMain.uriUploadSession), (AsyncWebResult asyncResult) =>
+						{
+							lock (this.sync)
+							{
+								this.asyncWebResult = null;
+							}
+
+							try
+							{
+								// Complete the web request.
+								string data;
+								this.asyncWebRequest.End(asyncResult, out data);
+								// Parse the list of sites.
+								string[] sites = data.Split(new char[] { '\n', '\r', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+								// Set the wait handle.
+								this.waitAsync.Set();
+
+								this.Invoke(() =>
+									{
+										// Begin the download of destination web sites.
+										this.OnStartDownload();
+									});
+							}
+							catch (Exception exception)
+							{
+								this.Invoke(() =>
+									{
+										// Set the wait handle.
+										this.waitAsync.Set();
+										// Show an error message.
+										MessageBox.Show(
+											this,
+											string.Format(WizardResources.GetString("MercuryMessageText"), Environment.NewLine, Environment.NewLine, exception.Message),
+											WizardResources.GetString("MercuryMessageTitle"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+										// Enable the start button.
+										this.wizardPageRun.AllowNext = true;
+										this.progressBar.Visible = false;
+										this.labelProgress.Text = string.Empty;
+									});
+							}
+						}, null);
+
+					// Set the request headers.
+					asyncState.Request.Method = "POST";
+					asyncState.Request.Accept = "text/html,application/xhtml+xml,application/xml";
+					asyncState.Request.ContentType = "application/json;charset=UTF-8";
+
+					// Create the traceroute JSON object.
+					JsonObject obj = new JsonObject(
+						new JsonProperty("sessionId", this.sessionId.ToString()),
+						new JsonProperty("author", Environment.UserName),
+						new JsonProperty("description", "MercuryClient"),
+						new JsonProperty("dateStart", this.sessionTimestamp.ToUniversalTime().ToString(@"yyyy-MM-ddTHH:mm:ss.fffZ"))
+						);
+
+					string val = obj.ToString();
+
+					// Append the data.
+					asyncState.SendData.Append(val, Encoding.UTF8);
+
+					// Execute the requesy.
+					this.asyncWebResult = this.asyncWebRequest.Begin(asyncState);
+				}
+				catch (Exception exception)
+				{
+					// Set the wait handle.
+					this.waitAsync.Set();
+					// Show an error message.
+					MessageBox.Show(
+						this,
+						string.Format(WizardResources.GetString("MercuryMessageText"), Environment.NewLine, Environment.NewLine, exception.Message),
+						WizardResources.GetString("MercuryMessageTitle"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+					// Enable the start button.
+					this.wizardPageRun.AllowNext = true;
+					this.progressBar.Visible = false;
+					this.labelProgress.Text = string.Empty;
+				}
 			}
 		}
 
@@ -476,17 +632,13 @@ namespace Mercury
 		/// </summary>
 		private void OnStartDownload()
 		{
+			// Update the progress.
+			this.labelProgress.Text = WizardResources.GetString("LabelProgressDownload");
+
 			// Get the selected country.
 			Territory country = this.comboBoxCountry.SelectedItem as Territory;
 			// Get the country.
 			string countryCode = country != null ? country.Type.ToUpperInvariant() : string.Empty;
-
-			// Disable the start button.
-			this.wizardPageRun.AllowNext = false;
-			// Show the progress.
-			this.progressBar.Visible = true;
-			this.progressBar.Style = ProgressBarStyle.Marquee;
-			this.labelProgress.Text = WizardResources.GetString("LabelProgressDownloadStart");
 
 			lock (this.sync)
 			{
@@ -528,10 +680,12 @@ namespace Mercury
 										// Show an error message.
 										MessageBox.Show(
 											this,
-											string.Format("Cannot connect to the Mercury web server. Check your Internet connection and try again.{0}{1}Technical information: {2}", Environment.NewLine, Environment.NewLine, exception.Message),
-											"Mercury Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+											string.Format(WizardResources.GetString("MercuryMessageText"), Environment.NewLine, Environment.NewLine, exception.Message),
+											WizardResources.GetString("MercuryMessageTitle"), MessageBoxButtons.OK, MessageBoxIcon.Error);
 										// Enable the start button.
 										this.wizardPageRun.AllowNext = true;
+										this.progressBar.Visible = false;
+										this.labelProgress.Text = string.Empty;
 									});
 							}
 						}, null);
@@ -543,10 +697,12 @@ namespace Mercury
 					// Show an error message.
 					MessageBox.Show(
 						this,
-						string.Format("Cannot connect to the Mercury web server. Check your Internet connection and try again.{0}{1}Technical information: {2}", Environment.NewLine, Environment.NewLine, exception.Message),
-						"Mercury Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+						string.Format(WizardResources.GetString("MercuryMessageText"), Environment.NewLine, Environment.NewLine, exception.Message),
+						WizardResources.GetString("MercuryMessageTitle"), MessageBoxButtons.OK, MessageBoxIcon.Error);
 					// Enable the start button.
 					this.wizardPageRun.AllowNext = true;
+					this.progressBar.Visible = false;
+					this.labelProgress.Text = string.Empty;
 				}
 			}
 		}
@@ -562,25 +718,10 @@ namespace Mercury
 			this.progressBar.Minimum = 0;
 			this.progressBar.Maximum = sites.Length;
 			this.progressBar.Value = 0;
-			this.labelProgress.Text = string.Format(WizardResources.GetString("LabelProgressDownloadFinish"), sites.Length);
+			this.labelProgress.Text = string.Format(WizardResources.GetString("LabelProgressTraceroute"), sites.Length);
 
-			// Set the pending traceroutes.
-			lock (this.sync)
-			{
-				this.traceroutePending.Clear();
-				this.tracerouteRunning.Clear();
-				this.tracerouteCompleted.Clear();
-
-				foreach (string site in sites)
-				{
-					this.traceroutePending.Enqueue(new TracerouteInfo(site));
-				}
-			}
-
-			// Reset the wait handle.
-			this.waitAsync.Reset();
-			// Reset the cancellation token.
-			this.tracerouteCancel.Reset();
+			// Initialize the traceroute state.
+			this.OnTracerouteInitialize(sites);
 
 			// For all the concurrent traceroutes.
 			for (int index = 0; index < FormMain.tracerouteConcurrent; index++)
@@ -604,24 +745,33 @@ namespace Mercury
 						// If the sites queue is empty.
 						if (this.traceroutePending.Count == 0)
 						{
-							this.Invoke(() =>
-								{
-									// If the wizard is not completed.
-									if (!this.completed)
+							if (this.tracerouteRunning.Count == 0)
+							{
+								this.Invoke(() =>
 									{
-										// Set the completed flag.
-										this.completed = true;
-										// Enable the start button.
-										this.wizardPageRun.AllowNext = true;
-									}
-								});
+										// If the wizard is not completed.
+										if (!this.completed)
+										{
+											// Set the completed flag.
+											this.completed = true;
+											// Enable the start button.
+											this.wizardPageRun.AllowNext = true;
+											this.progressBar.Visible = false;
+											this.labelProgress.Text = string.Empty;
+											// Switch to the finish page.
+											this.wizardControl.NextPage();
+										}
+									});
+							}
 							return;
 						}
-						// Get a site from the queue.
-						info = this.traceroutePending.Dequeue();
-						// Add the site to the running list.
-						this.tracerouteRunning.Add(info);
+
+						// Get a site from the pending list.
+						info = this.OnTraceroutePendingToRunning();
 					}
+
+					// Increment the traceroute information count.
+					info.Count++;
 
 					try
 					{
@@ -634,21 +784,212 @@ namespace Mercury
 							info.Address = ipAddresses[0];
 						}
 
-						// If the list of IP addresses has at least one address.
-						if (null != info.Address)
+						// Begin a traceroute for the specified destination.
+						TracerouteResult result = this.traceroute.Run(info.Address, this.tracerouteCancel);
+
+						if (this.tracerouteCancel.IsCanceled)
 						{
-							// Begin a traceroute for the specified destination.
-							TracerouteResult result = this.traceroute.Run(info.Address, this.tracerouteCancel);
+							// Set the traceroute as pending.
+							this.OnTracerouteRunningToPending(info);
+						}
+						else
+						{
+							// Update the progress.
+							this.Invoke(() =>
+							{
+								lock (this.sync)
+								{
+									this.progressBar.Value = this.tracerouteCompleted.Count;
+									this.labelProgress.Text = string.Format(WizardResources.GetString("LabelProgressCompleted"),
+										this.tracerouteCompleted.Count,
+										this.traceroutePending.Count + this.tracerouteRunning.Count + this.tracerouteCompleted.Count);
+								}
+							});
 
 							// Upload the result.
+							this.OnUploadTraceroute(info, result);
+
+							// Set the traceroute as completed.
+							this.OnTracerouteRunningToCompleted(info);
 						}
 					}
 					catch
 					{
-						// Start another traceroute.
-						this.OnStartTraceroute();
+						// If the traceroute count is less than the maximum retries.
+						if (info.Count < FormMain.tracerouteRetries)
+						{
+							// Add the traceroute to the pending list.
+							this.OnTracerouteRunningToPending(info);
+						}
+					}
+					finally
+					{
+						// If the wizard is not canceled.
+						if (!this.tracerouteCancel.IsCanceled)
+						{
+							// Start another traceroute.
+							this.OnStartTraceroute();
+						}
 					}
 				});
+		}
+
+		/// <summary>
+		/// Initializes the traceroute state.
+		/// </summary>
+		private void OnTracerouteInitialize(IEnumerable<string> sites)
+		{
+			lock (this.sync)
+			{
+				// Clear the traceroute lists.
+				this.traceroutePending.Clear();
+				this.tracerouteRunning.Clear();
+				this.tracerouteCompleted.Clear();
+
+				// Add the sites to the pending list.
+				foreach (string site in sites)
+				{
+					this.traceroutePending.Enqueue(new TracerouteInfo(site));
+				}
+
+				// Reset the wait handle.
+				this.waitAsync.Reset();
+				// Reset the cancellation token.
+				this.tracerouteCancel.Reset();
+			}
+		}
+
+		/// <summary>
+		/// Changes the state of a traceroute information from pending to running.
+		/// </summary>
+		/// <returns>The information of the next traceroute in the pending queue.</returns>
+		private TracerouteInfo OnTraceroutePendingToRunning()
+		{
+			lock (this.sync)
+			{
+				// Get a traceroute from the pending list.
+				TracerouteInfo info = this.traceroutePending.Dequeue();
+				// If there are no running traceroutes.
+				if (this.tracerouteRunning.Count == 0)
+				{
+					// Reset the wait handle.
+					this.waitAsync.Reset();
+				}
+				// Add the traceroute to the running list.
+				this.tracerouteRunning.Add(info);
+				// Return the traceroute information.
+				return info;
+			}
+		}
+
+		/// <summary>
+		/// Changes the state of a traceroute information from running to pending.
+		/// </summary>
+		/// <param name="info">The traceroute information.</param>
+		private void OnTracerouteRunningToPending(TracerouteInfo info)
+		{
+			lock (this.sync)
+			{
+				// Remove the traceroute from the running list.
+				this.tracerouteRunning.Remove(info);
+				// Add the traceroute to the completed list.
+				this.traceroutePending.Enqueue(info);
+
+				// If there are no running traceroutes.
+				if (this.tracerouteRunning.Count == 0)
+				{
+					// Set the wait handle.
+					this.waitAsync.Set();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Changes the state of a traceroute information from running to completed.
+		/// </summary>
+		/// <param name="info">The traceroute information.</param>
+		private void OnTracerouteRunningToCompleted(TracerouteInfo info)
+		{
+			lock (this.sync)
+			{
+				// Remove the traceroute from the running list.
+				this.tracerouteRunning.Remove(info);
+				// Add the traceroute to the completed list.
+				this.tracerouteCompleted.Add(info);
+				
+				// If there are no running traceroutes.
+				if (this.tracerouteRunning.Count == 0)
+				{
+					// Set the wait handle.
+					this.waitAsync.Set();
+				}
+			}
+		}
+
+		/// <summary>
+		/// An event handler called when the user rolls-back the finish page.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnFinishRollback(object sender, WizardPageConfirmEventArgs e)
+		{
+			this.completed = false;
+		}
+
+		/// <summary>
+		/// Uploads a traceroute to the Mercury web server.
+		/// </summary>
+		/// <param name="info">The traceroute information.</param>
+		/// <param name="result">The traceroute result.</param>
+		/// <returns><b>True</b> if the upload was successful, <b>false</b> otherwise.</returns>
+		private bool OnUploadTraceroute(TracerouteInfo info, TracerouteResult result)
+		{
+			try
+			{
+				// Create a web request.
+				HttpWebRequest request = (HttpWebRequest)WebRequest.Create(FormMain.uriUploadTrace);
+
+				// Set the request headers.
+				request.Method = "POST";
+				request.Accept = "text/html,application/xhtml+xml,application/xml";
+				request.ContentType = "application/json;charset=UTF-8";
+
+				// Create the hops JSON object.
+				JsonArray hops = new JsonArray();
+
+				foreach (TracerouteHopResult hop in result.Hops)
+				{
+					hops.Add(new JsonObject(
+						new JsonProperty("id", hop.TimeToLive.ToString()),
+						new JsonProperty("ip", hop.Address != null ? hop.Address.ToString() : "none"),
+						new JsonProperty("asn", new JsonArray()),
+						new JsonProperty("rtt", new JsonArray(hop.AverageRoundtripTime.ToString()))
+						));
+				}
+
+				// Create the traceroute JSON object.
+				JsonObject obj = new JsonObject(
+					new JsonProperty("sessionId", this.sessionId.ToString()),
+					new JsonProperty("srcIp", this.location != null ? this.location.Address : "none"),
+					new JsonProperty("dstIp", result.Destination.ToString()),
+					new JsonProperty("srcName", Dns.GetHostName()),
+					new JsonProperty("dstName", info.Site),
+					new JsonProperty("hops", hops));
+
+				using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
+				{
+					writer.Write(obj.ToString());
+				}
+
+				// Execute the request.
+				HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+
+				return response.StatusCode == HttpStatusCode.OK;
+			}
+			catch
+			{
+				return false;
+			}
 		}
 	}
 }

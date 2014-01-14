@@ -27,10 +27,9 @@ namespace Mercury.Net.Core
 	/// <summary>
 	/// A class representing a traceroute for the Internet Protocol.
 	/// </summary>
-	public sealed class Traceroute : IDisposable
+	public sealed class Traceroute
 	{
 		private readonly TracerouteSettings settings;
-		private readonly Ping ping = new Ping();
 
 		/// <summary>
 		/// Creates a new traceroute instance.
@@ -42,17 +41,6 @@ namespace Mercury.Net.Core
 		}
 
 		// Public methods.
-
-		/// <summary>
-		/// Disposes the current object.
-		/// </summary>
-		public void Dispose()
-		{
-			// Dispose the ping object.
-			this.ping.Dispose();
-			// Suppress the finalizer.
-			GC.SuppressFinalize(this);
-		}
 
 		/// <summary>
 		/// Runs a traceroute to the specified destination.
@@ -89,20 +77,27 @@ namespace Mercury.Net.Core
 
 					try
 					{
-						// Send a ping request.
-						PingReply reply = this.ping.Send(destination, this.settings.Timeout, data, new PingOptions(ttl, this.settings.DontFragment));
-						// Add the reply to the current hop result.
-						success = success || hopResult.AddReply(reply);
-						
-						// If the hop was successful and the stop on hop success flag is set, stop the hop loop.
-						if (this.settings.StopHopOnSuccess && success)
+						using (Ping ping = new Ping())
 						{
-							attempt = this.settings.MaximumAttempts;
-						}
+							// Set the beginning time.
+							DateTime timestampStart = DateTime.Now;
+							// Send a ping request.
+							PingReply reply = ping.Send(destination, this.settings.Timeout, data, new PingOptions(ttl, this.settings.DontFragment));
+							// Set the end time.
+							DateTime timestampFinish = DateTime.Now;
+							// Add the reply to the current hop result.
+							success = success || hopResult.AddReply(reply, timestampFinish - timestampStart);
 
-						if (reply.Status == IPStatus.Success)
-						{
-							completed = true;
+							// If the hop was successful and the stop on hop success flag is set, stop the hop loop.
+							if (this.settings.StopHopOnSuccess && success)
+							{
+								attempt = this.settings.MaximumAttempts;
+							}
+
+							if (reply.Status == IPStatus.Success)
+							{
+								completed = true;
+							}
 						}
 					}
 					catch { }

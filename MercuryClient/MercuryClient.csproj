@@ -79,6 +79,10 @@
     <Compile Include="Globalization\Territory.cs" />
     <Compile Include="Globalization\TerritoryCollection.cs" />
     <Compile Include="Globalization\Resources.cs" />
+    <Compile Include="Json\JsonArray.cs" />
+    <Compile Include="Json\JsonObject.cs" />
+    <Compile Include="Json\JsonProperty.cs" />
+    <Compile Include="Json\JsonSerialize.cs" />
     <Compile Include="Locales.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -116,7 +120,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\AeroWizard\StepWizardControl.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\AeroWizard\ThemedImageButton.cs">
       <SubType>Component</SubType>
@@ -132,7 +136,7 @@
     </Compile>
     <Compile Include="Windows\VisualStyles\VisualStyleElementEx.cs" />
     <Compile Include="Windows\Controls\AeroWizard\WizardControl.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\AeroWizard\Design\WizardControlDesigner.cs" />
     <Compile Include="Windows\Controls\AeroWizard\WizardPage.cs">

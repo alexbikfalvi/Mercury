@@ -87,7 +87,7 @@
 			this.comboBoxCountry.FormattingEnabled = true;
 			this.comboBoxCountry.Location = new System.Drawing.Point(80, 117);
 			this.comboBoxCountry.Name = "comboBoxCountry";
-			this.comboBoxCountry.Size = new System.Drawing.Size(315, 23);
+			this.comboBoxCountry.Size = new System.Drawing.Size(330, 23);
 			this.comboBoxCountry.TabIndex = 7;
 			this.comboBoxCountry.SelectedIndexChanged += new System.EventHandler(this.OnCountryChanged);
 			// 
@@ -99,7 +99,7 @@
 			this.comboBoxLanguage.FormattingEnabled = true;
 			this.comboBoxLanguage.Location = new System.Drawing.Point(80, 88);
 			this.comboBoxLanguage.Name = "comboBoxLanguage";
-			this.comboBoxLanguage.Size = new System.Drawing.Size(315, 23);
+			this.comboBoxLanguage.Size = new System.Drawing.Size(330, 23);
 			this.comboBoxLanguage.TabIndex = 6;
 			this.comboBoxLanguage.SelectedIndexChanged += new System.EventHandler(this.OnLanguageChanged);
 			// 
@@ -171,9 +171,10 @@
 			this.wizardPageFinish.IsFinishPage = true;
 			this.wizardPageFinish.Name = "wizardPageFinish";
 			this.wizardPageFinish.ShowCancel = false;
-			this.wizardPageFinish.Size = new System.Drawing.Size(537, 256);
+			this.wizardPageFinish.Size = new System.Drawing.Size(537, 257);
 			this.wizardPageFinish.TabIndex = 2;
 			this.wizardPageFinish.Text = "Finished";
+			this.wizardPageFinish.Rollback += new System.EventHandler<Mercury.Windows.Controls.AeroWizard.WizardPageConfirmEventArgs>(this.OnFinishRollback);
 			// 
 			// labelFinish
 			// 
