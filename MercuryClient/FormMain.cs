@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
@@ -36,11 +37,6 @@ using Mercury.Web;
 using Mercury.Web.Location;
 using Mercury.Windows.Controls.AeroWizard;
 using Mercury.Windows.Forms;
-
-using System.IO;
-using System.Resources;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Mercury
 {
@@ -90,6 +86,7 @@ namespace Mercury
 		private static readonly string uriUploadTrace = "http://mercury.upf.edu/mercury/api/traceroute/uploadTrace";
 
 		private bool countryUser = false;
+		private bool cityUser = false;
 		private LocationResult location = null;
 
 		private readonly object sync = new object();
@@ -115,7 +112,17 @@ namespace Mercury
 		private bool canceled = false;
 
 		private DateTime sessionTimestamp;
-		private Guid sessionId;
+		private string sessionId;
+
+		private string timeSecondRemaining;
+		private string timeSecondsRemaining;
+		private string timeMinuteRemaining;
+		private string timeMinutesRemaining;
+		private string timeMinutesSecondsRemaining;
+		private string timeSecond;
+		private string timeSeconds;
+		private string timeMinute;
+		private string timeMinutes;
 
 		/// <summary>
 		/// Creates a new form instance.
@@ -206,6 +213,12 @@ namespace Mercury
 			// Create a location request.
 			LocationRequest request = new LocationRequest();
 
+			if (!this.countryUser)
+			{
+				this.pictureBoxCountry.Image = WizardResources.Busy;
+				this.pictureBoxCountry.Visible = true;
+			}
+
 			try
 			{
 				// Begin an asynchronous request.
@@ -221,6 +234,8 @@ namespace Mercury
 
 							this.Invoke(() =>
 								{
+									// Hide the busy picture.
+									this.pictureBoxCountry.Visible = false;
 									// If the user did not select a country.
 									if (!this.countryUser)
 									{
@@ -228,6 +243,12 @@ namespace Mercury
 										Territory territory = new Territory(this.location.CountryCode, this.location.CountryName);
 										// Select the current country.
 										this.comboBoxCountry.SelectedIndex = this.comboBoxCountry.Items.IndexOf(territory);
+									}
+									// If the user did not select a city.
+									if (!this.cityUser)
+									{
+										// Select the current city.
+										this.textBoxCity.Text = this.location.City;
 									}
 								});
 						}
@@ -309,14 +330,36 @@ namespace Mercury
 			// Set the controls.
 			this.wizardControl.Culture = culture;
 			this.wizardPageLocale.Text = WizardResources.GetString("PageLocalesTitle");
+			this.wizardPageForm.Text = WizardResources.GetString("PageFormTitle");
 			this.wizardPageRun.Text = WizardResources.GetString("PageRunTitle");
 			this.wizardPageFinish.Text = WizardResources.GetString("PageFinishTitle");
-			this.wizardPageLocale.HelpText = WizardResources.GetString("HelpLocales");
+			this.wizardPageLocale.HelpText = WizardResources.GetString("Help");
+			this.wizardPageForm.HelpText = WizardResources.GetString("Help");
+
+			this.wizardPageLocale.TextNext = WizardResources.GetString("WizardNextText");
+			this.wizardPageForm.TextNext = WizardResources.GetString("WizardNextText");
+			this.wizardPageRun.TextNext = WizardResources.GetString("WizardStartText");
+			this.wizardPageFinish.TextFinish = WizardResources.GetString("WizardFinishText");
+
 			this.labelLanguage.Text = WizardResources.GetString("LabelLanguage");
 			this.labelCountry.Text = WizardResources.GetString("LabelCountry");
+			this.labelForm.Text = WizardResources.GetString("LabelForm");
+			this.labelProvider.Text = WizardResources.GetString("LabelProvider");
+			this.labelProviderExample.Text = WizardResources.GetString("LabelProviderExample");
+			this.labelCity.Text = WizardResources.GetString("LabelCity");
 			this.labelInfo.Text = WizardResources.GetString("LabelInfo");
 			this.labelFinish.Text = WizardResources.GetString("LabelFinish");
 			this.wizardPageRun.TextNext = WizardResources.GetString("WizardStartText");
+
+			this.timeSecondRemaining = WizardResources.GetString("TimeSecondRemaining");
+			this.timeSecondsRemaining = WizardResources.GetString("TimeSecondsRemaining");
+			this.timeMinuteRemaining = WizardResources.GetString("TimeMinuteRemaining");
+			this.timeMinutesRemaining = WizardResources.GetString("TimeMinutesRemaining");
+			this.timeMinutesSecondsRemaining = WizardResources.GetString("TimeMinutesSecondsRemaining");
+			this.timeSecond = WizardResources.GetString("TimeSecond");
+			this.timeSeconds = WizardResources.GetString("TimeSeconds");
+			this.timeMinute = WizardResources.GetString("TimeMinute");
+			this.timeMinutes = WizardResources.GetString("TimeMinutes");
 		}
 
 		/// <summary>
@@ -367,8 +410,11 @@ namespace Mercury
 						// Disable the cancel and back buttons.
 						this.wizardPageRun.AllowBack = false;
 						this.wizardPageRun.AllowCancel = false;
+						// Disable the progress timer.
+						this.timer.Enabled = false;
 						// Update the progress label.
 						this.labelProgress.Text = WizardResources.GetString("LabelProgressCancel");
+						this.labelTime.Text = string.Empty;
 						// Cancel the asynchronous operations.
 						this.OnCancel();
 					}
@@ -390,6 +436,9 @@ namespace Mercury
 		/// </summary>
 		private void OnCancel()
 		{
+			// Cancel the traceroute.
+			this.tracerouteCancel.Cancel();
+
 			// Execute the cancellation on the thread pool.
 			ThreadPool.QueueUserWorkItem((object state) =>
 				{
@@ -401,8 +450,6 @@ namespace Mercury
 							this.asyncWebRequest.Cancel(this.asyncWebResult);
 						}
 					}
-					// Cancel the traceroute.
-					this.tracerouteCancel.Cancel();
 					// Wait for the asynchronous handle.
 					this.waitAsync.WaitOne();
 
@@ -431,11 +478,11 @@ namespace Mercury
 		}
 
 		/// <summary>
-		/// An event handler called when the user clicks on the locale help link.
+		/// An event handler called when the user clicks on the help link.
 		/// </summary>
 		/// <param name="sender">The sender object.</param>
 		/// <param name="e">The event arguments.</param>
-		private void OnLocaleHelp(object sender, EventArgs e)
+		private void OnHelp(object sender, EventArgs e)
 		{
 			Process.Start("http://inetanalytics.nets.upf.edu/mercury/faq");
 		}
@@ -491,7 +538,7 @@ namespace Mercury
 		private void OnStartSession()
 		{
 			// Set the session identifier and timestamp.
-			this.sessionId = Guid.NewGuid();
+			this.sessionId = this.GetSession();
 			this.sessionTimestamp = DateTime.Now;
 
 			// Disable the start button.
@@ -766,18 +813,33 @@ namespace Mercury
 							{
 								lock (this.sync)
 								{
-									this.progressBar.Value = this.tracerouteCompleted.Count;
-									this.labelProgress.Text = string.Format(WizardResources.GetString("LabelProgressCompleted"),
-										this.tracerouteCompleted.Count,
-										this.traceroutePending.Count + this.tracerouteRunning.Count + this.tracerouteCompleted.Count + this.tracerouteFailed.Count);
+									if (!this.tracerouteCancel.IsCanceled)
+									{
+										this.progressBar.Value = this.tracerouteCompleted.Count;
+										this.labelProgress.Text = string.Format(WizardResources.GetString("LabelProgressCompleted"),
+											this.tracerouteCompleted.Count,
+											this.traceroutePending.Count + this.tracerouteRunning.Count + this.tracerouteCompleted.Count + this.tracerouteFailed.Count);
+									}
 								}
 							});
 
 							// Upload the result.
-							this.OnUploadTraceroute(info, result);
+							bool success = false;
 
-							// Set the traceroute as completed.
-							this.OnTracerouteRunningToCompleted(info);
+							for (int attempt = 0; (attempt < 3) && (!success); attempt++)
+							{
+								success = this.OnUploadTraceroute(info, result);
+							}
+
+							if (success)
+							{
+								// Set the traceroute as completed.
+								this.OnTracerouteRunningToCompleted(info);
+							}
+							else
+							{
+								throw new Exception();
+							}
 						}
 					}
 					catch
@@ -1022,8 +1084,71 @@ namespace Mercury
 				// Compute the remaining time.
 				TimeSpan remainingTime = TimeSpan.FromTicks(elapsedTime.Ticks * pending / completed);
 				// Set the label.
-				this.labelTime.Text = remainingTime.ToString();
+				this.labelTime.Text = this.GetDuration(remainingTime);
 			}
+		}
+
+		/// <summary>
+		/// Generates the session identifier.
+		/// </summary>
+		/// <returns>The session identifier.</returns>
+		private string GetSession()
+		{
+			// Get the country.
+			Territory country = this.comboBoxCountry.SelectedItem as Territory;
+
+			// Create the identifier.
+			return string.Format("{0}-{1}-{2}",
+				country != null ? country.Type : string.Empty,
+				this.textBoxCity.Text,
+				this.textBoxProvider.Text);
+		}
+
+		/// <summary>
+		/// Returns the string for the specified duration.
+		/// </summary>
+		/// <param name="duration">The duration.</param>
+		/// <returns>The duration string.</returns>
+		private string GetDuration(TimeSpan duration)
+		{
+			// Get the number of minutes.
+			int minutes = (int)Math.Round(duration.TotalSeconds) / 60;
+			int seconds = (int)Math.Round(duration.TotalSeconds) - minutes * 60;
+
+			if (minutes > 0 && seconds > 0)
+			{
+				return string.Format(this.timeMinutesSecondsRemaining,
+					minutes, minutes == 1 ? this.timeMinute : this.timeMinutes, seconds, seconds == 1 ? this.timeSecond : this.timeSeconds);
+			}
+			else if (minutes > 0)
+			{
+				return minutes == 1 ? string.Format(this.timeMinuteRemaining, minutes) : string.Format(this.timeMinutesRemaining, minutes);
+			}
+			else if (seconds > 0)
+			{
+				return seconds == 1 ? string.Format(this.timeSecondRemaining, seconds) : string.Format(this.timeSecondsRemaining, seconds);
+			}
+			else return string.Empty;
+		}
+
+		/// <summary>
+		/// An event handler called when the network provider has changed.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnProviderChanged(object sender, EventArgs e)
+		{
+
+		}
+
+		/// <summary>
+		/// An event handler called when the city has changed.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnCityChanged(object sender, EventArgs e)
+		{
+			this.cityUser = true;
 		}
 	}
 }

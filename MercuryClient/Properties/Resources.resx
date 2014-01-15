@@ -121,6 +121,9 @@
   <data name="AeroBackButtonStrip" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\AeroBackButtonStrip.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Busy" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Busy.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="CancelMessageText" xml:space="preserve">
     <value>Cancelling the wizard will prevent uploading any measurement result. Do you want to continue?</value>
   </data>
@@ -128,7 +131,7 @@
     <value>Cancel·lació de l'assistent evitarà pujar qualsevol resultat del mesurament. Vols continuar?</value>
   </data>
   <data name="CancelMessageText.de" xml:space="preserve">
-    <value>Abbrechen der Assistent Hochladen von Messergebnisses zu verhindern. Wollen Sie fortfahren?</value>
+    <value>Ein Abbruch des Assistenten verhindert das Hochladen von Ergebnissen. Wollen Sie fortfahren?</value>
   </data>
   <data name="CancelMessageText.es" xml:space="preserve">
     <value>Cancelación del asistente evitará subir cualquier resultado de las medidas. ¿Quieres continuar?</value>
@@ -140,7 +143,7 @@
     <value>Cancelando o assistente irá evitar carregar qualquer resultado de medição. Você quer continuar?</value>
   </data>
   <data name="CancelMessageText.ro" xml:space="preserve">
-    <value>Anularea expertul va preveni încărcarea orice rezultat de măsurare. Vreți să continuați?</value>
+    <value>Anularea expertului va preveni încărcarea oricărui rezultat de măsurare. Vreți să continuați?</value>
   </data>
   <data name="CancelMessageTitle" xml:space="preserve">
     <value>Confirm Cancellation</value>
@@ -149,7 +152,7 @@
     <value>Confirmar cancel·lació</value>
   </data>
   <data name="CancelMessageTitle.de" xml:space="preserve">
-    <value>Stornierung bestätigen</value>
+    <value>Abbruch bestätigen</value>
   </data>
   <data name="CancelMessageTitle.es" xml:space="preserve">
     <value>Confirmar cancelación</value>
@@ -170,7 +173,7 @@
     <value>El seu equip no té una connexió de xarxa. Connecteu l'ordinador a Internet i torneu a intentar.</value>
   </data>
   <data name="ConnectionMessageText.de" xml:space="preserve">
-    <value>Ihr Computer nicht über eine Netzwerkverbindung. Verbinden Sie Ihren Computer mit dem Internet und versuchen Sie erneut.</value>
+    <value>Ihr Computer verfügt über keine Netzwerkverbindung. Verbinden Sie Ihren Computer mit dem Internet und versuchen Sie es erneut.</value>
   </data>
   <data name="ConnectionMessageText.es" xml:space="preserve">
     <value>Su equipo no tiene una conexión de red. Conecte su ordenador a Internet y vuelva a intentarlo.</value>
@@ -205,29 +208,50 @@
   <data name="ConnectionMessageTitle.ro" xml:space="preserve">
     <value>Nu există conexiune la rețea</value>
   </data>
-  <data name="HelpLocales" xml:space="preserve">
+  <data name="Help" xml:space="preserve">
     <value>For what is this information?</value>
   </data>
-  <data name="HelpLocales.ca" xml:space="preserve">
+  <data name="Help.ca" xml:space="preserve">
     <value>Per a què és aquesta informació?</value>
   </data>
-  <data name="HelpLocales.de" xml:space="preserve">
-    <value>Denn was ist diese Information?</value>
+  <data name="Help.de" xml:space="preserve">
+    <value>Wozu dient diese Information?</value>
   </data>
-  <data name="HelpLocales.es" xml:space="preserve">
+  <data name="Help.es" xml:space="preserve">
     <value>¿Para qué es esta información?</value>
   </data>
-  <data name="HelpLocales.fr" xml:space="preserve">
+  <data name="Help.fr" xml:space="preserve">
     <value>Pour ce qui est de cette information?</value>
   </data>
-  <data name="HelpLocales.pt" xml:space="preserve">
+  <data name="Help.pt" xml:space="preserve">
     <value>Pois o que é essa informação?</value>
   </data>
-  <data name="HelpLocales.ro" xml:space="preserve">
+  <data name="Help.ro" xml:space="preserve">
     <value>Pentru ce este această informație?</value>
   </data>
   <data name="Icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icon.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="LabelCity" xml:space="preserve">
+    <value>&amp;City:</value>
+  </data>
+  <data name="LabelCity.ca" xml:space="preserve">
+    <value>&amp;Ciutat:</value>
+  </data>
+  <data name="LabelCity.de" xml:space="preserve">
+    <value>&amp;Stadt:</value>
+  </data>
+  <data name="LabelCity.es" xml:space="preserve">
+    <value>&amp;Ciudad:</value>
+  </data>
+  <data name="LabelCity.fr" xml:space="preserve">
+    <value>&amp;Ville:</value>
+  </data>
+  <data name="LabelCity.pt" xml:space="preserve">
+    <value>&amp;Cidade:</value>
+  </data>
+  <data name="LabelCity.ro" xml:space="preserve">
+    <value>&amp;Oraș:</value>
   </data>
   <data name="LabelCountry" xml:space="preserve">
     <value>&amp;Country:</value>
@@ -263,7 +287,7 @@ Per tancar, feu clic a Finalitza.</value>
   <data name="LabelFinish.de" xml:space="preserve">
     <value>Der Assistent hat die Internet-Messungen beendet.
 
-Um zu schließen, klicken Sie auf Abschließen stellen.</value>
+Zum Beenden klicken Sie auf Abschließen.</value>
   </data>
   <data name="LabelFinish.es" xml:space="preserve">
     <value>El asistente ha terminado las mediciones de Internet.
@@ -284,6 +308,27 @@ Para fechar, clique em Concluir.</value>
     <value>Expertul a terminat măsurătorile de Internet.
 
 Pentru a închide, faceți clic pe &amp;Termină.</value>
+  </data>
+  <data name="LabelForm" xml:space="preserve">
+    <value>We use this to learn more about your Internet connection. We do not collect any personal information without your consent, and all fields are optional.</value>
+  </data>
+  <data name="LabelForm.ca" xml:space="preserve">
+    <value>Fem servir això per aprendre més sobre la seva connexió a Internet. Nosaltres no recollim cap informació personal sense el seu consentiment, i tots els camps són opcionals.</value>
+  </data>
+  <data name="LabelForm.de" xml:space="preserve">
+    <value>Wir nutzen diese Information, um mehr über Ihre Internetverbindung zu erfahren. Wir sammeln keine persönlichen Informationen ohne Ihre Zustimmung, und alle Felder sind optional.</value>
+  </data>
+  <data name="LabelForm.es" xml:space="preserve">
+    <value>Usamos esto para aprender más acerca de su conexión a Internet. Nosotros no recogemos ninguna información personal sin su consentimiento, y todos los campos son opcionales.</value>
+  </data>
+  <data name="LabelForm.fr" xml:space="preserve">
+    <value>Nous l'utilisons pour en savoir plus sur votre connexion Internet. Nous ne collectons aucune information personnelle sans votre consentement, et tous les champs sont facultatifs.</value>
+  </data>
+  <data name="LabelForm.pt" xml:space="preserve">
+    <value>Usamos isso para aprender mais sobre a sua conexão com a Internet. Nós não coletamos informações pessoais sem o seu consentimento, e todos os campos são opcionais.</value>
+  </data>
+  <data name="LabelForm.ro" xml:space="preserve">
+    <value>Noi folosim acest lucru pentru a afla mai multe despre conexiunea la Internet. Noi nu colectăm informații personale fără consimțământul dumneavoastră, iar toate câmpurile sunt opționale.</value>
   </data>
   <data name="LabelInfo" xml:space="preserve">
     <value>The wizard is ready to start the Internet measurements. This may take several minutes, depending on the speed of your Internet connection. To continue, click Start.</value>
@@ -327,27 +372,6 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
   <data name="LabelLanguage.ro" xml:space="preserve">
     <value>&amp;Limba:</value>
   </data>
-  <data name="LabelProgress" xml:space="preserve">
-    <value>{0} percent completed ({1} minutes remaining)</value>
-  </data>
-  <data name="LabelProgress.ca" xml:space="preserve">
-    <value>{0} per cent acabats ({1} minuts per al final)</value>
-  </data>
-  <data name="LabelProgress.de" xml:space="preserve">
-    <value>{0} Prozent abgeschlossen ({1} Minuten vor)</value>
-  </data>
-  <data name="LabelProgress.es" xml:space="preserve">
-    <value>{0} por ciento terminados ({1} minutos para el final)</value>
-  </data>
-  <data name="LabelProgress.fr" xml:space="preserve">
-    <value>{0} pour cent terminé ({1} minutes restantes)</value>
-  </data>
-  <data name="LabelProgress.pt" xml:space="preserve">
-    <value>{0} por cento concluído ({1} minutos restantes)</value>
-  </data>
-  <data name="LabelProgress.ro" xml:space="preserve">
-    <value>{0} la sută finalizat (0 minute rămase)</value>
-  </data>
   <data name="LabelProgressCancel" xml:space="preserve">
     <value>The wizard is canceling the current operation and will close in a few seconds.</value>
   </data>
@@ -355,7 +379,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>L'assistent està cancel·lant l'operació en curs i es tancarà en uns segons.</value>
   </data>
   <data name="LabelProgressCancel.de" xml:space="preserve">
-    <value>Der Assistent bricht den aktuellen Betrieb und wird in wenigen Sekunden zu schließen.</value>
+    <value>Der Assistent bricht die aktuelle Operation ab und wird in wenigen Sekunden geschlossen.</value>
   </data>
   <data name="LabelProgressCancel.es" xml:space="preserve">
     <value>El asistente está cancelando la operación en curso y se cerrará en unos segundos.</value>
@@ -376,7 +400,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Medicions completades a {0} de {1} destinacions web.</value>
   </data>
   <data name="LabelProgressCompleted.de" xml:space="preserve">
-    <value>Abgeschlossene Messungen {0} von {1} Web-Destinationen.</value>
+    <value>Messungen zu {0} von {1} Web-Zielen abgeschlossen.</value>
   </data>
   <data name="LabelProgressCompleted.es" xml:space="preserve">
     <value>Medidas completadas a {0} de {1} destinos web.</value>
@@ -397,7 +421,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Descarregant la llista de destinacions web...</value>
   </data>
   <data name="LabelProgressDownload.de" xml:space="preserve">
-    <value>Herunterladen der Liste von Web-Destinationen...</value>
+    <value>Herunterladen der Liste von Web-Zielen...</value>
   </data>
   <data name="LabelProgressDownload.es" xml:space="preserve">
     <value>Descargando la lista de destinos web...</value>
@@ -439,7 +463,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Execució de les mesures d'Internet utilitzant {0} destins web...</value>
   </data>
   <data name="LabelProgressTraceroute.de" xml:space="preserve">
-    <value>Ausführen der Internet-Messungen mit {0} Web-Destinationen...</value>
+    <value>Ausführen der Internet-Messungen mit {0} Web-Zielen...</value>
   </data>
   <data name="LabelProgressTraceroute.es" xml:space="preserve">
     <value>Ejecución de las medidas de Internet utilizando {0} destinos web...</value>
@@ -453,26 +477,47 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
   <data name="LabelProgressTraceroute.ro" xml:space="preserve">
     <value>Rularea măsurătorilor de Internet folosind {0} destinatii web...</value>
   </data>
-  <data name="LabelTime" xml:space="preserve">
-    <value>{0} {1} and {2} {3} remaining</value>
+  <data name="LabelProvider" xml:space="preserve">
+    <value>&amp;Internet provider:</value>
   </data>
-  <data name="LabelTime.ca" xml:space="preserve">
-    <value />
+  <data name="LabelProvider.ca" xml:space="preserve">
+    <value>Proveïdor d'&amp;Internet:</value>
   </data>
-  <data name="LabelTime.de" xml:space="preserve">
-    <value />
+  <data name="LabelProvider.de" xml:space="preserve">
+    <value>&amp;Internetdienstanbieter:</value>
   </data>
-  <data name="LabelTime.es" xml:space="preserve">
-    <value />
+  <data name="LabelProvider.es" xml:space="preserve">
+    <value>Proveedor de &amp;Internet:</value>
   </data>
-  <data name="LabelTime.fr" xml:space="preserve">
-    <value />
+  <data name="LabelProvider.fr" xml:space="preserve">
+    <value>Fournisseur d'&amp;Internet:</value>
   </data>
-  <data name="LabelTime.pt" xml:space="preserve">
-    <value />
+  <data name="LabelProvider.pt" xml:space="preserve">
+    <value>Fornecedor de &amp;Internet:</value>
   </data>
-  <data name="LabelTime.ro" xml:space="preserve">
-    <value />
+  <data name="LabelProvider.ro" xml:space="preserve">
+    <value>Furnizor de &amp;Internet:</value>
+  </data>
+  <data name="LabelProviderExample" xml:space="preserve">
+    <value>Example: AT&amp;T, Comcast, Verizon, or the name of your company.</value>
+  </data>
+  <data name="LabelProviderExample.ca" xml:space="preserve">
+    <value>Exemple: Movistar, Orange, Vodafone, o el nom de la seva empresa.</value>
+  </data>
+  <data name="LabelProviderExample.de" xml:space="preserve">
+    <value>Beispiel: T-Online, United Internet, oder der Name Ihres Anbieters.</value>
+  </data>
+  <data name="LabelProviderExample.es" xml:space="preserve">
+    <value>Ejemplo: Movistar, Orange, Vodafone, o el nombre de su empresa.</value>
+  </data>
+  <data name="LabelProviderExample.fr" xml:space="preserve">
+    <value>Exemple: Orange, Free, SFR, ou le nom de votre entreprise.</value>
+  </data>
+  <data name="LabelProviderExample.pt" xml:space="preserve">
+    <value>Exemplo: Optimus, Vodafone, Embratel, ou o nome de sua empresa.</value>
+  </data>
+  <data name="LabelProviderExample.ro" xml:space="preserve">
+    <value>Exemplu: RomTelecom, RDS, UPC, sau numele companiei dumneavoastră.</value>
   </data>
   <data name="MercuryMessageText" xml:space="preserve">
     <value>Cannot connect to the Mercury web server. Check your Internet connection and try again.{0}{1}Technical information: {2}</value>
@@ -481,7 +526,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>No es pot connectar al servidor web Mercury. Comprovi la seva connexió a Internet i torneu a intentar. {0} {1}Informació tècnica: {2}</value>
   </data>
   <data name="MercuryMessageText.de" xml:space="preserve">
-    <value>Kann nicht an den Mercury Web-Server zu verbinden. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut. {0} {1}Technische Informationen: {2}</value>
+    <value>Verbindung zum Mercury Web-Server fehlgeschlagen. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut. {0} {1}Technische Informationen: {2}</value>
   </data>
   <data name="MercuryMessageText.es" xml:space="preserve">
     <value>No se puede conectar al servidor web Mercury. Compruebe su conexión a Internet y vuelva a intentarlo. {0} {1}Información técnica: {2}</value>
@@ -537,6 +582,27 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
   <data name="PageFinishTitle.ro" xml:space="preserve">
     <value>Vă mulțumim!</value>
   </data>
+  <data name="PageFormTitle" xml:space="preserve">
+    <value>Tell us about your Internet connection</value>
+  </data>
+  <data name="PageFormTitle.ca" xml:space="preserve">
+    <value>Parli'ns de la seva connexió a Internet</value>
+  </data>
+  <data name="PageFormTitle.de" xml:space="preserve">
+    <value>Daten zu Ihrer Internet-Verbindung</value>
+  </data>
+  <data name="PageFormTitle.es" xml:space="preserve">
+    <value>Cuéntenos sobre su conexión a Internet</value>
+  </data>
+  <data name="PageFormTitle.fr" xml:space="preserve">
+    <value>Parlez-nous de votre connexion Internet</value>
+  </data>
+  <data name="PageFormTitle.pt" xml:space="preserve">
+    <value>Conte-nos sobre a sua conexão com a Internet</value>
+  </data>
+  <data name="PageFormTitle.ro" xml:space="preserve">
+    <value>Spune-ne despre conexiunea la Internet</value>
+  </data>
   <data name="PageLocalesTitle" xml:space="preserve">
     <value>Select your language and country</value>
   </data>
@@ -579,6 +645,195 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
   <data name="PageRunTitle.ro" xml:space="preserve">
     <value>Începe măsurătorile de Internet</value>
   </data>
+  <data name="TimeMinute" xml:space="preserve">
+    <value>minute</value>
+  </data>
+  <data name="TimeMinute.ca" xml:space="preserve">
+    <value>minut</value>
+  </data>
+  <data name="TimeMinute.de" xml:space="preserve">
+    <value>Minute</value>
+  </data>
+  <data name="TimeMinute.es" xml:space="preserve">
+    <value>minuto</value>
+  </data>
+  <data name="TimeMinute.fr" xml:space="preserve">
+    <value>minute</value>
+  </data>
+  <data name="TimeMinute.pt" xml:space="preserve">
+    <value>minuto</value>
+  </data>
+  <data name="TimeMinute.ro" xml:space="preserve">
+    <value>minut</value>
+  </data>
+  <data name="TimeMinuteRemaining" xml:space="preserve">
+    <value>{0} minute remaining</value>
+  </data>
+  <data name="TimeMinuteRemaining.ca" xml:space="preserve">
+    <value>{0} minut restants</value>
+  </data>
+  <data name="TimeMinuteRemaining.de" xml:space="preserve">
+    <value>{0} Minute verbleibend</value>
+  </data>
+  <data name="TimeMinuteRemaining.es" xml:space="preserve">
+    <value>{0} minuto restante</value>
+  </data>
+  <data name="TimeMinuteRemaining.fr" xml:space="preserve">
+    <value>{0} minute restante</value>
+  </data>
+  <data name="TimeMinuteRemaining.pt" xml:space="preserve">
+    <value>{0} minuto restante</value>
+  </data>
+  <data name="TimeMinuteRemaining.ro" xml:space="preserve">
+    <value>{0} minut rămas</value>
+  </data>
+  <data name="TimeMinutes" xml:space="preserve">
+    <value>minutes</value>
+  </data>
+  <data name="TimeMinutes.ca" xml:space="preserve">
+    <value>minuts</value>
+  </data>
+  <data name="TimeMinutes.de" xml:space="preserve">
+    <value>Minuten</value>
+  </data>
+  <data name="TimeMinutes.es" xml:space="preserve">
+    <value>minutos</value>
+  </data>
+  <data name="TimeMinutes.fr" xml:space="preserve">
+    <value>minutes</value>
+  </data>
+  <data name="TimeMinutes.pt" xml:space="preserve">
+    <value>minutos</value>
+  </data>
+  <data name="TimeMinutes.ro" xml:space="preserve">
+    <value>minute</value>
+  </data>
+  <data name="TimeMinutesRemaining" xml:space="preserve">
+    <value>{0} minutes remaining</value>
+  </data>
+  <data name="TimeMinutesRemaining.ca" xml:space="preserve">
+    <value>{0} minuts restants</value>
+  </data>
+  <data name="TimeMinutesRemaining.de" xml:space="preserve">
+    <value>{0} Minuten verbleibend</value>
+  </data>
+  <data name="TimeMinutesRemaining.es" xml:space="preserve">
+    <value>{0} minutos restantes</value>
+  </data>
+  <data name="TimeMinutesRemaining.fr" xml:space="preserve">
+    <value>{0} minutes restantes</value>
+  </data>
+  <data name="TimeMinutesRemaining.pt" xml:space="preserve">
+    <value>{0} minutos restantes</value>
+  </data>
+  <data name="TimeMinutesRemaining.ro" xml:space="preserve">
+    <value>{0} minute rămase</value>
+  </data>
+  <data name="TimeMinutesSecondsRemaining" xml:space="preserve">
+    <value>{0} {1} and {2} {3} remaining</value>
+  </data>
+  <data name="TimeMinutesSecondsRemaining.ca" xml:space="preserve">
+    <value>{0} {1} i {2} {3} restants</value>
+  </data>
+  <data name="TimeMinutesSecondsRemaining.de" xml:space="preserve">
+    <value>{0} {1} und {2} {3} verbleibend</value>
+  </data>
+  <data name="TimeMinutesSecondsRemaining.es" xml:space="preserve">
+    <value>{0} {1} y {2} {3} restantes</value>
+  </data>
+  <data name="TimeMinutesSecondsRemaining.fr" xml:space="preserve">
+    <value>{0} {1} et {2} {3} restantes</value>
+  </data>
+  <data name="TimeMinutesSecondsRemaining.pt" xml:space="preserve">
+    <value>{0} {1} e {2} {3} restantes</value>
+  </data>
+  <data name="TimeMinutesSecondsRemaining.ro" xml:space="preserve">
+    <value>{0} {1} și {2} {3} rămase</value>
+  </data>
+  <data name="TimeSecond" xml:space="preserve">
+    <value>second</value>
+  </data>
+  <data name="TimeSecond.ca" xml:space="preserve">
+    <value>segon</value>
+  </data>
+  <data name="TimeSecond.de" xml:space="preserve">
+    <value>Sekunde</value>
+  </data>
+  <data name="TimeSecond.es" xml:space="preserve">
+    <value>segundo</value>
+  </data>
+  <data name="TimeSecond.fr" xml:space="preserve">
+    <value>seconde</value>
+  </data>
+  <data name="TimeSecond.pt" xml:space="preserve">
+    <value>segundo</value>
+  </data>
+  <data name="TimeSecond.ro" xml:space="preserve">
+    <value>secundă</value>
+  </data>
+  <data name="TimeSecondRemaining" xml:space="preserve">
+    <value>{0} second remaining</value>
+  </data>
+  <data name="TimeSecondRemaining.ca" xml:space="preserve">
+    <value>{0} segon restants</value>
+  </data>
+  <data name="TimeSecondRemaining.de" xml:space="preserve">
+    <value>{0} Sekunde verbleibend</value>
+  </data>
+  <data name="TimeSecondRemaining.es" xml:space="preserve">
+    <value>{0} segundo restante</value>
+  </data>
+  <data name="TimeSecondRemaining.fr" xml:space="preserve">
+    <value>{0} seconde restante</value>
+  </data>
+  <data name="TimeSecondRemaining.pt" xml:space="preserve">
+    <value>{0} segundo restante</value>
+  </data>
+  <data name="TimeSecondRemaining.ro" xml:space="preserve">
+    <value>{0} secundă rămasă</value>
+  </data>
+  <data name="TimeSeconds" xml:space="preserve">
+    <value>seconds</value>
+  </data>
+  <data name="TimeSeconds.ca" xml:space="preserve">
+    <value>segons</value>
+  </data>
+  <data name="TimeSeconds.de" xml:space="preserve">
+    <value>Sekunden</value>
+  </data>
+  <data name="TimeSeconds.es" xml:space="preserve">
+    <value>segundos</value>
+  </data>
+  <data name="TimeSeconds.fr" xml:space="preserve">
+    <value>secondes</value>
+  </data>
+  <data name="TimeSeconds.pt" xml:space="preserve">
+    <value>segundos</value>
+  </data>
+  <data name="TimeSeconds.ro" xml:space="preserve">
+    <value>secunde</value>
+  </data>
+  <data name="TimeSecondsRemaining" xml:space="preserve">
+    <value>{0} seconds remaining</value>
+  </data>
+  <data name="TimeSecondsRemaining.ca" xml:space="preserve">
+    <value>{0} segons restants</value>
+  </data>
+  <data name="TimeSecondsRemaining.de" xml:space="preserve">
+    <value>{0} Sekunden verbleibend</value>
+  </data>
+  <data name="TimeSecondsRemaining.es" xml:space="preserve">
+    <value>{0} segundos restantes</value>
+  </data>
+  <data name="TimeSecondsRemaining.fr" xml:space="preserve">
+    <value>{0} secondes restantes</value>
+  </data>
+  <data name="TimeSecondsRemaining.pt" xml:space="preserve">
+    <value>{0} segundo restantes</value>
+  </data>
+  <data name="TimeSecondsRemaining.ro" xml:space="preserve">
+    <value>{0} secunde rămase</value>
+  </data>
   <data name="WizardBackButtonToolTip" xml:space="preserve">
     <value>Returns to a previous page</value>
   </data>
@@ -586,7 +841,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Torna a la pàgina anterior</value>
   </data>
   <data name="WizardBackButtonToolTip.de" xml:space="preserve">
-    <value>Rückkehr zur vorherigen Seite</value>
+    <value>Zurück zur vorherigen Seite</value>
   </data>
   <data name="WizardBackButtonToolTip.es" xml:space="preserve">
     <value>Vuelve a la página anterior</value>
@@ -649,7 +904,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>&amp;Finalitzar</value>
   </data>
   <data name="WizardFinishText.de" xml:space="preserve">
-    <value>&amp;Abschließen</value>
+    <value>&amp;Beenden</value>
   </data>
   <data name="WizardFinishText.es" xml:space="preserve">
     <value>&amp;Finalizar</value>
@@ -718,7 +973,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Client per Mercury</value>
   </data>
   <data name="WizardTitle.de" xml:space="preserve">
-    <value>Klient für Mercury</value>
+    <value>Mercury Client</value>
   </data>
   <data name="WizardTitle.es" xml:space="preserve">
     <value>Cliente para Mercury</value>

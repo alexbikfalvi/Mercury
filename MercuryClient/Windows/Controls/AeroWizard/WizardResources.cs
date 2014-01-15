@@ -78,6 +78,18 @@ namespace Mercury.Windows.Controls.AeroWizard
 		}
 
 		/// <summary>
+		///   Looks up a localized resource of type Bitmap.
+		/// </summary>
+		internal static Bitmap Busy
+		{
+			get
+			{
+				object obj = WizardResources.resources.GetObject("Busy", WizardResources.culture);
+				return ((Bitmap)(obj));
+			}
+		}
+
+		/// <summary>
 		///   Looks up a localized string similar to Returns to a previous page.
 		/// </summary>
 		internal static string WizardBackButtonToolTip
