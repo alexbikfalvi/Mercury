@@ -453,6 +453,27 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
   <data name="LabelProgressTraceroute.ro" xml:space="preserve">
     <value>Rularea măsurătorilor de Internet folosind {0} destinatii web...</value>
   </data>
+  <data name="LabelTime" xml:space="preserve">
+    <value>{0} {1} and {2} {3} remaining</value>
+  </data>
+  <data name="LabelTime.ca" xml:space="preserve">
+    <value />
+  </data>
+  <data name="LabelTime.de" xml:space="preserve">
+    <value />
+  </data>
+  <data name="LabelTime.es" xml:space="preserve">
+    <value />
+  </data>
+  <data name="LabelTime.fr" xml:space="preserve">
+    <value />
+  </data>
+  <data name="LabelTime.pt" xml:space="preserve">
+    <value />
+  </data>
+  <data name="LabelTime.ro" xml:space="preserve">
+    <value />
+  </data>
   <data name="MercuryMessageText" xml:space="preserve">
     <value>Cannot connect to the Mercury web server. Check your Internet connection and try again.{0}{1}Technical information: {2}</value>
   </data>

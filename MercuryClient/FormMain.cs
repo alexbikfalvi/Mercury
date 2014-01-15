@@ -106,7 +106,9 @@ namespace Mercury
 		private readonly Queue<TracerouteInfo> traceroutePending = new Queue<TracerouteInfo>();
 		private readonly HashSet<TracerouteInfo> tracerouteRunning = new HashSet<TracerouteInfo>();
 		private readonly HashSet<TracerouteInfo> tracerouteCompleted = new HashSet<TracerouteInfo>();
+		private readonly HashSet<TracerouteInfo> tracerouteFailed = new HashSet<TracerouteInfo>();
 		private readonly CancellationToken tracerouteCancel = new CancellationToken();
+		private DateTime tracerouteTimestamp;
 
 		private bool completed = false;
 		private bool canceling = false;
@@ -428,45 +430,6 @@ namespace Mercury
 			this.Close();
 		}
 
-
-		/// <summary>
-		/// Loads the locales from the specified XML file and saves them to a resource file.
-		/// </summary>
-		private void OnLoadLocales()
-		{
-			if (this.openFileDialog.ShowDialog(this) == DialogResult.OK)
-			{
-				try
-				{
-					using (FileStream file = new FileStream(this.openFileDialog.FileName, FileMode.Open))
-					{
-						using (LocaleReader reader = new LocaleReader(file))
-						{
-							LocaleCollection locales = reader.ReadLocaleCollection();
-
-							if (this.saveFileDialog.ShowDialog(this) == DialogResult.OK)
-							{
-								using (ResXResourceWriter writer = new ResXResourceWriter(this.saveFileDialog.FileName))
-								{
-									BinaryFormatter formatter = new BinaryFormatter();
-
-									using (MemoryStream stream = new MemoryStream())
-									{
-										formatter.Serialize(stream, locales);
-										writer.AddResource("Collection", stream.ToArray());
-									}
-								}
-							}
-						}
-					}
-				}
-				catch (Exception exception)
-				{
-					MessageBox.Show(this, exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				}
-			}
-		}
-
 		/// <summary>
 		/// An event handler called when the user clicks on the locale help link.
 		/// </summary>
@@ -533,6 +496,7 @@ namespace Mercury
 
 			// Disable the start button.
 			this.wizardPageRun.AllowNext = false;
+			this.wizardPageRun.AllowBack = false;
 			// Update the progress.
 			this.progressBar.Visible = true;
 			this.progressBar.Style = ProgressBarStyle.Marquee;
@@ -756,8 +720,11 @@ namespace Mercury
 											this.completed = true;
 											// Enable the start button.
 											this.wizardPageRun.AllowNext = true;
+											this.wizardPageRun.AllowBack = true;
 											this.progressBar.Visible = false;
 											this.labelProgress.Text = string.Empty;
+											this.labelTime.Text = string.Empty;
+											this.timer.Enabled = false;
 											// Switch to the finish page.
 											this.wizardControl.NextPage();
 										}
@@ -802,7 +769,7 @@ namespace Mercury
 									this.progressBar.Value = this.tracerouteCompleted.Count;
 									this.labelProgress.Text = string.Format(WizardResources.GetString("LabelProgressCompleted"),
 										this.tracerouteCompleted.Count,
-										this.traceroutePending.Count + this.tracerouteRunning.Count + this.tracerouteCompleted.Count);
+										this.traceroutePending.Count + this.tracerouteRunning.Count + this.tracerouteCompleted.Count + this.tracerouteFailed.Count);
 								}
 							});
 
@@ -820,6 +787,11 @@ namespace Mercury
 						{
 							// Add the traceroute to the pending list.
 							this.OnTracerouteRunningToPending(info);
+						}
+						else
+						{
+							// Add the traceroute to the failed list.
+							this.OnTracerouteRunningToFailed(info);
 						}
 					}
 					finally
@@ -845,6 +817,7 @@ namespace Mercury
 				this.traceroutePending.Clear();
 				this.tracerouteRunning.Clear();
 				this.tracerouteCompleted.Clear();
+				this.tracerouteFailed.Clear();
 
 				// Add the sites to the pending list.
 				foreach (string site in sites)
@@ -856,6 +829,10 @@ namespace Mercury
 				this.waitAsync.Reset();
 				// Reset the cancellation token.
 				this.tracerouteCancel.Reset();
+				// Set the traceroute timestamp.
+				this.tracerouteTimestamp = DateTime.Now;
+				// Enable the timer.
+				this.timer.Enabled = true;
 			}
 		}
 
@@ -927,6 +904,28 @@ namespace Mercury
 		}
 
 		/// <summary>
+		/// Changes the state of a traceroute information from running to failed.
+		/// </summary>
+		/// <param name="info">The traceroute information.</param>
+		private void OnTracerouteRunningToFailed(TracerouteInfo info)
+		{
+			lock (this.sync)
+			{
+				// Remove the traceroute from the running list.
+				this.tracerouteRunning.Remove(info);
+				// Add the traceroute to the failed list.
+				this.tracerouteFailed.Add(info);
+
+				// If there are no running traceroutes.
+				if (this.tracerouteRunning.Count == 0)
+				{
+					// Set the wait handle.
+					this.waitAsync.Set();
+				}
+			}
+		}
+
+		/// <summary>
 		/// An event handler called when the user rolls-back the finish page.
 		/// </summary>
 		/// <param name="sender">The sender object.</param>
@@ -982,13 +981,48 @@ namespace Mercury
 				}
 
 				// Execute the request.
-				HttpWebResponse response = request.GetResponse() as HttpWebResponse;
-
-				return response.StatusCode == HttpStatusCode.OK;
+				using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+				{
+					return response.StatusCode == HttpStatusCode.OK;
+				}
 			}
 			catch
 			{
 				return false;
+			}
+		}
+
+		/// <summary>
+		/// An event handler called when the timer expires.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnTimer(object sender, EventArgs e)
+		{
+			int pending;
+			int completed;
+
+			lock (this.sync)
+			{
+				// Compute the number of completed traceroutes.
+				pending = this.traceroutePending.Count + this.tracerouteRunning.Count;
+				completed = this.tracerouteCompleted.Count + this.tracerouteFailed.Count;
+			}
+
+			// If any of the completed 
+			if (0 == completed)
+			{
+				// Clear the time remaining label.
+				this.labelTime.Text = string.Empty;
+			}
+			else
+			{
+				// Compute the elapsed time.
+				TimeSpan elapsedTime = DateTime.Now - this.tracerouteTimestamp;
+				// Compute the remaining time.
+				TimeSpan remainingTime = TimeSpan.FromTicks(elapsedTime.Ticks * pending / completed);
+				// Set the label.
+				this.labelTime.Text = remainingTime.ToString();
 			}
 		}
 	}

@@ -13,9 +13,13 @@
 		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing && (components != null))
+			if (disposing)
 			{
-				components.Dispose();
+				if (components != null)
+				{
+					this.components.Dispose();
+				}
+				this.waitAsync.Close();
 			}
 			base.Dispose(disposing);
 		}
@@ -28,6 +32,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
 			this.wizardControl = new Mercury.Windows.Controls.AeroWizard.WizardControl();
 			this.wizardPageLocale = new Mercury.Windows.Controls.AeroWizard.WizardPage();
@@ -36,13 +41,15 @@
 			this.labelCountry = new System.Windows.Forms.Label();
 			this.labelLanguage = new System.Windows.Forms.Label();
 			this.wizardPageRun = new Mercury.Windows.Controls.AeroWizard.WizardPage();
-			this.labelProgress = new System.Windows.Forms.Label();
 			this.progressBar = new System.Windows.Forms.ProgressBar();
 			this.labelInfo = new System.Windows.Forms.Label();
 			this.wizardPageFinish = new Mercury.Windows.Controls.AeroWizard.WizardPage();
 			this.labelFinish = new System.Windows.Forms.Label();
 			this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
 			this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+			this.labelTime = new System.Windows.Forms.Label();
+			this.labelProgress = new System.Windows.Forms.Label();
+			this.timer = new System.Windows.Forms.Timer(this.components);
 			((System.ComponentModel.ISupportInitialize)(this.wizardControl)).BeginInit();
 			this.wizardPageLocale.SuspendLayout();
 			this.wizardPageRun.SuspendLayout();
@@ -87,7 +94,7 @@
 			this.comboBoxCountry.FormattingEnabled = true;
 			this.comboBoxCountry.Location = new System.Drawing.Point(80, 117);
 			this.comboBoxCountry.Name = "comboBoxCountry";
-			this.comboBoxCountry.Size = new System.Drawing.Size(330, 23);
+			this.comboBoxCountry.Size = new System.Drawing.Size(345, 23);
 			this.comboBoxCountry.TabIndex = 7;
 			this.comboBoxCountry.SelectedIndexChanged += new System.EventHandler(this.OnCountryChanged);
 			// 
@@ -99,7 +106,7 @@
 			this.comboBoxLanguage.FormattingEnabled = true;
 			this.comboBoxLanguage.Location = new System.Drawing.Point(80, 88);
 			this.comboBoxLanguage.Name = "comboBoxLanguage";
-			this.comboBoxLanguage.Size = new System.Drawing.Size(330, 23);
+			this.comboBoxLanguage.Size = new System.Drawing.Size(345, 23);
 			this.comboBoxLanguage.TabIndex = 6;
 			this.comboBoxLanguage.SelectedIndexChanged += new System.EventHandler(this.OnLanguageChanged);
 			// 
@@ -126,6 +133,7 @@
 			// wizardPageRun
 			// 
 			this.wizardPageRun.Controls.Add(this.labelProgress);
+			this.wizardPageRun.Controls.Add(this.labelTime);
 			this.wizardPageRun.Controls.Add(this.progressBar);
 			this.wizardPageRun.Controls.Add(this.labelInfo);
 			this.wizardPageRun.Name = "wizardPageRun";
@@ -136,14 +144,6 @@
 			this.wizardPageRun.TextNext = "&Start";
 			this.wizardPageRun.Commit += new System.EventHandler<Mercury.Windows.Controls.AeroWizard.WizardPageConfirmEventArgs>(this.OnRunCommit);
 			this.wizardPageRun.Initialize += new System.EventHandler<Mercury.Windows.Controls.AeroWizard.WizardPageInitEventArgs>(this.OnRunInitialize);
-			// 
-			// labelProgress
-			// 
-			this.labelProgress.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.labelProgress.Location = new System.Drawing.Point(0, 157);
-			this.labelProgress.Name = "labelProgress";
-			this.labelProgress.Size = new System.Drawing.Size(537, 100);
-			this.labelProgress.TabIndex = 3;
 			// 
 			// progressBar
 			// 
@@ -171,7 +171,7 @@
 			this.wizardPageFinish.IsFinishPage = true;
 			this.wizardPageFinish.Name = "wizardPageFinish";
 			this.wizardPageFinish.ShowCancel = false;
-			this.wizardPageFinish.Size = new System.Drawing.Size(537, 257);
+			this.wizardPageFinish.Size = new System.Drawing.Size(537, 256);
 			this.wizardPageFinish.TabIndex = 2;
 			this.wizardPageFinish.Text = "Finished";
 			this.wizardPageFinish.Rollback += new System.EventHandler<Mercury.Windows.Controls.AeroWizard.WizardPageConfirmEventArgs>(this.OnFinishRollback);
@@ -193,6 +193,27 @@
 			// 
 			this.saveFileDialog.Filter = "Resource files (*.resx)|*.resx";
 			this.saveFileDialog.Title = "Save Resource File";
+			// 
+			// labelTime
+			// 
+			this.labelTime.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.labelTime.Location = new System.Drawing.Point(0, 207);
+			this.labelTime.Name = "labelTime";
+			this.labelTime.Size = new System.Drawing.Size(537, 50);
+			this.labelTime.TabIndex = 4;
+			// 
+			// labelProgress
+			// 
+			this.labelProgress.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.labelProgress.Location = new System.Drawing.Point(0, 157);
+			this.labelProgress.Name = "labelProgress";
+			this.labelProgress.Size = new System.Drawing.Size(537, 50);
+			this.labelProgress.TabIndex = 5;
+			// 
+			// timer
+			// 
+			this.timer.Interval = 1000;
+			this.timer.Tick += new System.EventHandler(this.OnTimer);
 			// 
 			// FormMain
 			// 
@@ -227,9 +248,11 @@
 		private System.Windows.Forms.ComboBox comboBoxLanguage;
 		private System.Windows.Forms.ComboBox comboBoxCountry;
 		private System.Windows.Forms.Label labelInfo;
-		private System.Windows.Forms.Label labelProgress;
 		private System.Windows.Forms.ProgressBar progressBar;
 		private System.Windows.Forms.Label labelFinish;
+		private System.Windows.Forms.Label labelProgress;
+		private System.Windows.Forms.Label labelTime;
+		private System.Windows.Forms.Timer timer;
 
 	}
 }
