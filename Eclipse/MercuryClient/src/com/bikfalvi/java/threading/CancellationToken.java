@@ -1,5 +1,5 @@
-/** 
- * Copyright (C) 2013 Alex Bikfalvi
+﻿/* 
+ * Copyright (C) 2014 Alex Bikfalvi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,30 +18,50 @@
 
 package com.bikfalvi.java.threading;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
- * A class representing a cached thread pool.
+ * A class representing a cancellation token.
  * @author Alex Bikfalvi
  *
  */
-public final class ThreadPool {
-	private static ExecutorService threadPool;
-	
+public final class CancellationToken
+{
+	private volatile boolean canceled = false;
+	private final Object sync = new Object();
+
 	/**
-	 * Initializes the static field.
+	 * Creates a new cancellation token instance.
 	 */
-	static {
-		// Create the thread pool.
-		ThreadPool.threadPool = Executors.newCachedThreadPool();
+	public CancellationToken()
+	{
 	}
 
 	/**
-	 * Executes the specified task on the thread pool.
-	 * @param task
+	 * Gets whether there was a cancellation requested.
+	 * @return True if a cancellation was requested, false otherwise.
 	 */
-	public static void execute(Runnable task) {
-		ThreadPool.threadPool.execute(task);
+	public boolean isCanceled() {
+		synchronized (this.sync) {
+			return this.canceled;
+		}
+	}
+
+	/**
+	 * Resets the cancellation token.
+	 */
+	public void reset()
+	{
+		synchronized (this.sync) {
+			this.canceled = false;
+		}
+	}
+
+	/**
+	 * Cancels the token.
+	 */
+	public void cancel()
+	{
+		synchronized (this.sync) {
+			this.canceled = true;
+		}
 	}
 }

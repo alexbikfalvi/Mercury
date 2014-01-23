@@ -282,12 +282,12 @@ To close, click on Finish.</value>
   <data name="LabelFinish.ca" xml:space="preserve">
     <value>L'assistent ha acabat els mesuraments d'Internet.
 
-Per tancar, feu clic a Finalitza.</value>
+Per tancar, feu clic a Finalitzar.</value>
   </data>
   <data name="LabelFinish.de" xml:space="preserve">
     <value>Der Assistent hat die Internet-Messungen beendet.
 
-Zum Beenden klicken Sie auf Abschließen.</value>
+Zum Beenden klicken Sie auf Beenden.</value>
   </data>
   <data name="LabelFinish.es" xml:space="preserve">
     <value>El asistente ha terminado las mediciones de Internet.
@@ -859,22 +859,22 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>&amp;Back</value>
   </data>
   <data name="WizardBackText.ca" xml:space="preserve">
-    <value>Títol assistent</value>
+    <value>&amp;Endarrere</value>
   </data>
   <data name="WizardBackText.de" xml:space="preserve">
-    <value>Assistent Titel</value>
+    <value>&amp;Zurück</value>
   </data>
   <data name="WizardBackText.es" xml:space="preserve">
-    <value>Título asistente</value>
+    <value>&amp;Atrás</value>
   </data>
   <data name="WizardBackText.fr" xml:space="preserve">
-    <value>Titre assistant</value>
+    <value>A&amp;rrière</value>
   </data>
   <data name="WizardBackText.pt" xml:space="preserve">
-    <value>Título assistente</value>
+    <value>&amp;Atrás</value>
   </data>
   <data name="WizardBackText.ro" xml:space="preserve">
-    <value>Titlu expert</value>
+    <value>Î&amp;napoi</value>
   </data>
   <data name="WizardCancelText" xml:space="preserve">
     <value>&amp;Cancel</value>

@@ -16,8 +16,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-package edu.upf.mercury;
+package edu.upf.mercury.client;
 
+import java.awt.AWTEvent;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -51,17 +52,20 @@ import com.bikfalvi.java.globalization.CultureCollection;
 import com.bikfalvi.java.globalization.CultureReader;
 import com.bikfalvi.java.globalization.Language;
 import com.bikfalvi.java.globalization.Territory;
+import com.bikfalvi.java.threading.CancellationToken;
 import com.bikfalvi.java.web.WebCallback;
 import com.bikfalvi.java.web.WebResult;
 import com.bikfalvi.java.web.location.LocationRequest;
 import com.bikfalvi.java.web.location.LocationResult;
 
-import edu.upf.mercury.resources.Resources;
+import edu.upf.mercury.client.resources.Resources;
+import edu.upf.mercury.client.wizard.Wizard;
+import edu.upf.mercury.client.wizard.WizardPage;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import com.bikfalvi.java.windows.controls.Wizard;
-import java.awt.BorderLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  * A class representing the Mercury client main frame.
@@ -87,13 +91,30 @@ public class FrameMain extends JFrame {
 	private static final String uriUploadSession = "http://mercury.upf.edu/mercury/api/traceroute/addTracerouteSession";
 	private static final String uriUploadTrace = "http://mercury.upf.edu/mercury/api/traceroute/uploadTrace";
 	
+	private final Wizard wizard;
+	
+	private boolean completed = false;
+	private boolean canceling = false;
+	private boolean canceled = false;
+
 	private boolean countryUser = false;
 	private boolean cityUser = false;
 	private final LocationRequest locationRequest = new LocationRequest();
 	private LocationResult locationResult = null;
+
+	private final CancellationToken tracerouteCancel = new CancellationToken(); 
+	
+	private String timeSecondRemaining;
+	private String timeSecondsRemaining;
+	private String timeMinuteRemaining;
+	private String timeMinutesRemaining;
+	private String timeMinutesSecondsRemaining;
+	private String timeSecond;
+	private String timeSeconds;
+	private String timeMinute;
+	private String timeMinutes;	
 	
 	private JPanel contentPane;
-	private JTextField textFieldProvider;
 	private JTextField textFieldCity;
 	private JComboBox comboBoxLanguage;
 	private JComboBox comboBoxCountry;
@@ -104,6 +125,20 @@ public class FrameMain extends JFrame {
 	private JButton buttonBack;
 	private JButton buttonNext;
 	private JButton buttonCancel;
+	private JPanel panelWizard;
+	private WizardPage pageLocale;
+	private WizardPage pageForm;
+	private WizardPage pageRun;
+	private WizardPage pageFinish;
+	private JTextPane textForm;
+	private JLabel labelProvider;
+	private JLabel labelCity;
+	private JTextPane labelProviderExample;
+	private JTextField textFieldProvider;
+	private JTextPane textInfo;
+	private JTextPane textProgress;
+	private JTextPane textTime;
+	private JTextPane textFinish;
 	
 	/**
 	 * Launch the application.
@@ -150,11 +185,18 @@ public class FrameMain extends JFrame {
 	 */
 	public FrameMain() {
 		final FrameMain frame = this;
+
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				frame.onClosing(e);
+			}
+		});
 		
 		setResizable(false);
 		setTitle("Mercury Client");
-		setIconImage(Toolkit.getDefaultToolkit().getImage(FrameMain.class.getResource("/edu/upf/mercury/resources/GraphBarColor_16.png")));
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setIconImage(Toolkit.getDefaultToolkit().getImage(FrameMain.class.getResource("/edu/upf/mercury/client/resources/GraphBarColor_16.png")));
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setBounds(100, 100, 600, 450);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
@@ -173,27 +215,29 @@ public class FrameMain extends JFrame {
 		contentPane.add(buttonNext);
 		
 		buttonBack = new JButton("Back");
-		buttonBack.setEnabled(false);
 		buttonBack.setMnemonic('B');
 		buttonBack.setBounds(297, 388, 89, 23);
 		contentPane.add(buttonBack);
 		
-		JPanel panelWizard = new JPanel();
+		panelWizard = new JPanel();
 		panelWizard.setBackground(Color.WHITE);
 		panelWizard.setBounds(0, 86, 594, 291);
 		contentPane.add(panelWizard);
 		panelWizard.setLayout(new CardLayout(0, 0));
 		
-		JPanel panelLocale = new JPanel();
-		panelLocale.setBackground(Color.WHITE);
-		panelWizard.add(panelLocale, "name_13364620740774");
-		panelLocale.setLayout(null);
+		pageLocale = new WizardPage();
+		pageLocale.setAllowNext(false);
+		pageLocale.setAllowBack(false);
+		pageLocale.setName("pageLocale");
+		pageLocale.setBackground(Color.WHITE);
+		panelWizard.add(pageLocale, "pageLocale");
+		pageLocale.setLayout(null);
 		
 		labelLanguage = new JLabel("Language:");
 		labelLanguage.setDisplayedMnemonic('L');
 		labelLanguage.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		labelLanguage.setBounds(10, 111, 130, 20);
-		panelLocale.add(labelLanguage);
+		pageLocale.add(labelLanguage);
 		
 		comboBoxLanguage = new JComboBox();
 		comboBoxLanguage.addActionListener(new ActionListener() {
@@ -203,18 +247,23 @@ public class FrameMain extends JFrame {
 		});
 		labelLanguage.setLabelFor(comboBoxLanguage);
 		comboBoxLanguage.setBounds(150, 112, 300, 20);
-		panelLocale.add(comboBoxLanguage);
+		pageLocale.add(comboBoxLanguage);
 		
 		comboBoxCountry = new JComboBox();
+		comboBoxCountry.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.onCountryChanged();
+			}
+		});
 		comboBoxCountry.setBounds(150, 143, 300, 20);
-		panelLocale.add(comboBoxCountry);
+		pageLocale.add(comboBoxCountry);
 		
 		labelCountry = new JLabel("Country:");
 		labelCountry.setLabelFor(comboBoxCountry);
 		labelCountry.setDisplayedMnemonic('o');
 		labelCountry.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		labelCountry.setBounds(10, 142, 130, 20);
-		panelLocale.add(labelCountry);
+		pageLocale.add(labelCountry);
 		
 		labelCountryBusy = new JLabel("");
 		labelCountryBusy.setVisible(false);
@@ -223,88 +272,92 @@ public class FrameMain extends JFrame {
 		labelCountryBusy.setPreferredSize(new Dimension(48, 48));
 		labelCountryBusy.setMinimumSize(new Dimension(48, 48));
 		labelCountryBusy.setMaximumSize(new Dimension(48, 48));
-		labelCountryBusy.setIcon(new ImageIcon(FrameMain.class.getResource("/edu/upf/mercury/resources/Busy.gif")));
+		labelCountryBusy.setIcon(new ImageIcon(FrameMain.class.getResource("/edu/upf/mercury/client/resources/Busy.gif")));
 		labelCountryBusy.setBounds(460, 130, 48, 48);
-		panelLocale.add(labelCountryBusy);
+		pageLocale.add(labelCountryBusy);
 		
-		JPanel panelForm = new JPanel();
-		panelForm.setBackground(Color.WHITE);
-		panelWizard.add(panelForm, "name_13378861805415");
-		panelForm.setLayout(null);
+		pageForm = new WizardPage();
+		pageForm.setName("pageForm");
+		pageForm.setBackground(Color.WHITE);
+		panelWizard.add(pageForm, "pageForm");
+		pageForm.setLayout(null);
 		
-		JTextPane textForm = new JTextPane();
+		textForm = new JTextPane();
 		textForm.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		textForm.setText("We use this to learn more about your Internet connection. We do not collect any personal information without your consent, and all fields are optional.");
 		textForm.setBounds(10, 11, 574, 50);
-		panelForm.add(textForm);
+		pageForm.add(textForm);
 		
-		JLabel labelProvider = new JLabel("Provider:");
+		labelProvider = new JLabel("Provider:");
 		labelProvider.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		labelProvider.setDisplayedMnemonic('P');
 		labelProvider.setBounds(10, 109, 130, 20);
-		panelForm.add(labelProvider);
+		pageForm.add(labelProvider);
 		
-		JLabel labelCity = new JLabel("City:");
+		labelCity = new JLabel("City:");
 		labelCity.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		labelCity.setDisplayedMnemonic('t');
 		labelCity.setBounds(10, 161, 130, 20);
-		panelForm.add(labelCity);
+		pageForm.add(labelCity);
 		
 		textFieldProvider = new JTextField();
 		textFieldProvider.setBounds(150, 110, 300, 20);
-		panelForm.add(textFieldProvider);
+		pageForm.add(textFieldProvider);
 		textFieldProvider.setColumns(10);
 		
 		textFieldCity = new JTextField();
 		textFieldCity.setBounds(150, 162, 300, 20);
-		panelForm.add(textFieldCity);
+		pageForm.add(textFieldCity);
 		textFieldCity.setColumns(10);
 		
-		JTextPane txtpnExampleAttComcast = new JTextPane();
-		txtpnExampleAttComcast.setText("Example: AT&T, Comcast, Verizon, or the name of your company.");
-		txtpnExampleAttComcast.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-		txtpnExampleAttComcast.setBounds(150, 131, 434, 20);
-		panelForm.add(txtpnExampleAttComcast);
+		labelProviderExample = new JTextPane();
+		labelProviderExample.setText("Example: AT&T, Comcast, Verizon, or the name of your company.");
+		labelProviderExample.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+		labelProviderExample.setBounds(150, 131, 434, 20);
+		pageForm.add(labelProviderExample);
 		
-		JPanel panelRun = new JPanel();
-		panelRun.setBackground(Color.WHITE);
-		panelWizard.add(panelRun, "name_14199107629293");
-		panelRun.setLayout(null);
+		pageRun = new WizardPage();
+		pageRun.setName("pageRun");
+		pageRun.setBackground(Color.WHITE);
+		panelWizard.add(pageRun, "pageRun");
+		pageRun.setLayout(null);
 		
-		JTextPane txtpnTheWizardIs = new JTextPane();
-		txtpnTheWizardIs.setText("The wizard is ready to start the Internet measurements. This may take several minutes, depending on the speed of your Internet connection. To continue, click Start.");
-		txtpnTheWizardIs.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-		txtpnTheWizardIs.setBounds(10, 11, 574, 50);
-		panelRun.add(txtpnTheWizardIs);
+		textInfo = new JTextPane();
+		textInfo.setText("The wizard is ready to start the Internet measurements. This may take several minutes, depending on the speed of your Internet connection. To continue, click Start.");
+		textInfo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+		textInfo.setBounds(10, 11, 574, 50);
+		pageRun.add(textInfo);
 		
-		JTextPane textTime = new JTextPane();
+		textTime = new JTextPane();
 		textTime.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		textTime.setBounds(10, 230, 574, 50);
-		panelRun.add(textTime);
+		pageRun.add(textTime);
 		
-		JTextPane textProgress = new JTextPane();
+		textProgress = new JTextPane();
 		textProgress.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		textProgress.setBounds(10, 169, 574, 50);
-		panelRun.add(textProgress);
+		pageRun.add(textProgress);
 		
 		JProgressBar progressBar = new JProgressBar();
 		progressBar.setVisible(false);
 		progressBar.setBounds(10, 142, 574, 16);
-		panelRun.add(progressBar);
+		pageRun.add(progressBar);
 		
-		JPanel panelFinish = new JPanel();
-		panelFinish.setBackground(Color.WHITE);
-		panelWizard.add(panelFinish, "name_14227740574396");
-		panelFinish.setLayout(null);
+		pageFinish = new WizardPage();
+		pageFinish.setAllowCancel(false);
+		pageFinish.setName("pageFinish");
+		pageFinish.setBackground(Color.WHITE);
+		panelWizard.add(pageFinish, "pageFinish");
+		pageFinish.setLayout(null);
 		
-		JTextPane txtpnTheWizardHas = new JTextPane();
-		txtpnTheWizardHas.setText("The wizard has finished the Internet measurements.\r\n\r\nTo close, click on Finish.");
-		txtpnTheWizardHas.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-		txtpnTheWizardHas.setBounds(10, 11, 574, 100);
-		panelFinish.add(txtpnTheWizardHas);
+		textFinish = new JTextPane();
+		textFinish.setText("The wizard has finished the Internet measurements.\r\n\r\nTo close, click on Finish.");
+		textFinish.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+		textFinish.setBounds(10, 11, 574, 100);
+		pageFinish.add(textFinish);
 		
 		JLabel labelLogo = new JLabel("New label");
-		labelLogo.setIcon(new ImageIcon(FrameMain.class.getResource("/edu/upf/mercury/resources/GraphBarColor_64.png")));
+		labelLogo.setIcon(new ImageIcon(FrameMain.class.getResource("/edu/upf/mercury/client/resources/GraphBarColor_64.png")));
 		labelLogo.setBounds(10, 11, 64, 64);
 		contentPane.add(labelLogo);
 		
@@ -313,6 +366,10 @@ public class FrameMain extends JFrame {
 		labelTitle.setFont(new Font("Segoe UI", Font.PLAIN, 16));
 		labelTitle.setBounds(84, 30, 500, 23);
 		contentPane.add(labelTitle);
+		
+		// Create the wizard.
+		this.wizard = new Wizard(this.panelWizard, this.labelTitle, this.buttonBack, this.buttonNext, this.buttonCancel,
+				new WizardPage[] { this.pageLocale, this.pageForm, this.pageRun, this.pageFinish });
 	}
 	
 	/**
@@ -322,7 +379,7 @@ public class FrameMain extends JFrame {
 	 * @throws ParserConfigurationException 
 	 */
 	private static void loadCultures() throws ParserConfigurationException, SAXException, IOException {
-		InputStream stream = (InputStream) FrameMain.class.getResource("/edu/upf/mercury/resources/Cultures.xml").getContent();
+		InputStream stream = (InputStream) FrameMain.class.getResource("/edu/upf/mercury/client/resources/Cultures.xml").getContent();
 		CultureReader reader = new CultureReader(stream);
 		FrameMain.cultures = reader.readCultureCollection();
 	}
@@ -334,7 +391,7 @@ public class FrameMain extends JFrame {
 	 * @throws ParserConfigurationException 
 	 */
 	private static void loadTranslation() throws IOException, ParserConfigurationException, SAXException {
-		InputStream stream = (InputStream) FrameMain.class.getResource("/edu/upf/mercury/resources/Translation.xml").getContent();
+		InputStream stream = (InputStream) FrameMain.class.getResource("/edu/upf/mercury/client/resources/Translation.xml").getContent();
 		FrameMain.translation = new Resources(stream);
 	}
 	
@@ -434,11 +491,69 @@ public class FrameMain extends JFrame {
 		Locale.setDefault(new Locale(language.getType()));
 		
 		// Set the user interface.
+		this.pageLocale.setTitle(FrameMain.translation.get("PageLocaleTitle"));
+		this.pageForm.setTitle(FrameMain.translation.get("PageFormTitle"));
+		this.pageRun.setTitle(FrameMain.translation.get("PageRunTitle"));
+		this.pageFinish.setTitle(FrameMain.translation.get("PageFinishTitle"));
+
+		this.pageLocale.setTextBack(FrameMain.translation.get("WizardBackText", true));
+		this.pageForm.setTextBack(FrameMain.translation.get("WizardBackText", true));
+		this.pageRun.setTextBack(FrameMain.translation.get("WizardBackText", true));
+		this.pageFinish.setTextBack(FrameMain.translation.get("WizardBackText", true));
+		
+		this.pageLocale.setTextNext(FrameMain.translation.get("WizardNextText", true));
+		this.pageForm.setTextNext(FrameMain.translation.get("WizardNextText", true));
+		this.pageRun.setTextNext(FrameMain.translation.get("WizardStartText", true));
+		this.pageFinish.setTextNext(FrameMain.translation.get("WizardFinishText", true));
+		
+		this.pageLocale.setTextCancel(FrameMain.translation.get("WizardCancelText", true));
+		this.pageForm.setTextCancel(FrameMain.translation.get("WizardCancelText", true));
+		this.pageRun.setTextCancel(FrameMain.translation.get("WizardCancelText", true));
+		this.pageFinish.setTextCancel(FrameMain.translation.get("WizardCancelText", true));
+		
+		this.pageLocale.setMnemonicBack(FrameMain.translation.getMnemonic("WizardBackText"));
+		this.pageForm.setMnemonicBack(FrameMain.translation.getMnemonic("WizardBackText"));
+		this.pageRun.setMnemonicBack(FrameMain.translation.getMnemonic("WizardBackText"));
+		this.pageFinish.setMnemonicBack(FrameMain.translation.getMnemonic("WizardBackText"));
+		
+		this.pageLocale.setMnemonicNext(FrameMain.translation.getMnemonic("WizardNextText"));
+		this.pageForm.setMnemonicNext(FrameMain.translation.getMnemonic("WizardNextText"));
+		this.pageRun.setMnemonicNext(FrameMain.translation.getMnemonic("WizardNextText"));
+		this.pageFinish.setMnemonicNext(FrameMain.translation.getMnemonic("WizardNextText"));
+		
+		this.pageLocale.setMnemonicCancel(FrameMain.translation.getMnemonic("WizardCancelText"));
+		this.pageForm.setMnemonicCancel(FrameMain.translation.getMnemonic("WizardCancelText"));
+		this.pageRun.setMnemonicCancel(FrameMain.translation.getMnemonic("WizardCancelText"));
+		this.pageFinish.setMnemonicCancel(FrameMain.translation.getMnemonic("WizardCancelText"));
+		
 		this.labelLanguage.setText(FrameMain.translation.get("LabelLanguage", true));
 		this.labelLanguage.setDisplayedMnemonicIndex(FrameMain.translation.getMnemonic("LabelLanguage"));
 		
 		this.labelCountry.setText(FrameMain.translation.get("LabelCountry", true));
 		this.labelCountry.setDisplayedMnemonicIndex(FrameMain.translation.getMnemonic("LabelCountry"));
+		
+		this.textForm.setText(FrameMain.translation.get("LabelForm"));
+		
+		this.labelProvider.setText(FrameMain.translation.get("LabelProvider", true));
+		this.labelProvider.setDisplayedMnemonic(FrameMain.translation.getMnemonic("LabelProvider"));
+		
+		this.labelProviderExample.setText(FrameMain.translation.get("LabelProviderExample"));
+		
+		this.labelCity.setText(FrameMain.translation.get("LabelCity", true));
+		this.labelCity.setDisplayedMnemonic(FrameMain.translation.getMnemonic("LabelCity"));
+		
+		this.textInfo.setText(FrameMain.translation.get("LabelInfo"));
+		this.textFinish.setText(FrameMain.translation.get("LabelFinish"));
+		
+		this.timeSecondRemaining = FrameMain.translation.get("TimeSecondRemaining");
+		this.timeSecondsRemaining = FrameMain.translation.get("TimeSecondsRemaining");
+		this.timeMinuteRemaining = FrameMain.translation.get("TimeMinuteRemaining");
+		this.timeMinutesRemaining = FrameMain.translation.get("TimeMinutesRemaining");
+		this.timeMinutesSecondsRemaining = FrameMain.translation.get("TimeMinutesSecondsRemaining");
+		this.timeSecond = FrameMain.translation.get("TimeSecond");
+		this.timeSeconds = FrameMain.translation.get("TimeSeconds");
+		this.timeMinute = FrameMain.translation.get("TimeMinute");
+		this.timeMinutes = FrameMain.translation.get("TimeMinutes");
 	}
 	
 	/**
@@ -536,6 +651,78 @@ public class FrameMain extends JFrame {
 	 * An event handler called when the selected country has changed.
 	 */
 	private void onCountryChanged() {
-		
+		// Enable the next button.
+		this.pageLocale.setAllowNext(this.comboBoxCountry.getSelectedIndex() >= 0);
+
+		// Set the user country selection.
+		this.countryUser = true;		
+	}
+	
+	/**
+	 * An event handler called when the window is closing.
+	 * @param e The event.
+	 */
+	private void onClosing(WindowEvent e) {
+		synchronized (this.sync) {
+			if (!this.completed) {
+				// Call the canceling event handler.
+				if (this.onCanceling(e)) {
+					// Exit.
+					System.exit(0);
+				}
+			}
+			else {
+				// Exit.
+				System.exit(0);
+			}
+		}		
+	}
+	
+	/**
+	 * An event handler called when the wizard is canceling.
+	 * @param e The event.
+	 * @return True if the the wizard is canceled, false otherwise.
+	 */
+	private boolean onCanceling(AWTEvent e) {
+		synchronized (this.sync)
+		{
+			// If the wizard is already canceled, return true.
+			if (this.canceled) return true;
+			// If the wizard is already canceling.
+			if (this.canceling) return false;
+
+			/*
+			// If there are pending operations.
+			if (this.tracerouteRunning.Count >)
+			{
+				// Ask the user whether to cancel.
+				if (MessageBox.Show(this, WizardResources.GetString("CancelMessageText"), WizardResources.GetString("CancelMessageTitle"), MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+				{
+					// Set the canceling flag.
+					this.canceling = true;
+					// Disable the cancel and back buttons.
+					this.wizardPageRun.AllowBack = false;
+					this.wizardPageRun.AllowCancel = false;
+					// Disable the progress timer.
+					this.timer.Enabled = false;
+					// Update the progress label.
+					this.labelProgress.Text = WizardResources.GetString("LabelProgressCancel");
+					this.labelTime.Text = string.Empty;
+					// Cancel the asynchronous operations.
+					this.OnCancel();
+				}
+				// Cancel the close event.
+				e.Cancel = true;
+			}
+			else
+			{
+				// Set the canceled to true.
+				this.canceled = true;
+				// Close the form.
+				this.Close();
+			}*/
+			
+			return true;
+		}		
 	}
 }

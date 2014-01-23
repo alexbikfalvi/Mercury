@@ -1,5 +1,5 @@
 /** 
- * Copyright (C) 2013 Alex Bikfalvi
+ * Copyright (C) 2014 Alex Bikfalvi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,17 +16,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-package com.bikfalvi.java.web;
+package edu.upf.mercury.client.wizard;
 
 /**
- * An interface representing a web callback.
+ * An interface for a wizard listener.
  * @author Alex Bikfalvi
  *
  */
-public interface WebCallback {
+public interface WizardListener {
 	/**
-	 * The web request callback method.
-	 * @param result The web result.
+	 * A method called when an action is performed.
+	 * @param e The wizard event.
 	 */
-	public void callback(WebResult result);
+	public void actionPerformed(WizardEvent e);
 }

@@ -158,12 +158,12 @@ To close, click on Finish.</value>
   <data name="LabelFinish.ca">
     <value>L'assistent ha acabat els mesuraments d'Internet.
 
-Per tancar, feu clic a Finalitza.</value>
+Per tancar, feu clic a Finalitzar.</value>
   </data>
   <data name="LabelFinish.de">
     <value>Der Assistent hat die Internet-Messungen beendet.
 
-Zum Beenden klicken Sie auf Abschließen.</value>
+Zum Beenden klicken Sie auf Beenden.</value>
   </data>
   <data name="LabelFinish.es">
     <value>El asistente ha terminado las mediciones de Internet.
@@ -479,25 +479,25 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
   <data name="PageFormTitle.ro">
     <value>Spune-ne despre conexiunea la Internet</value>
   </data>
-  <data name="PageLocalesTitle">
+  <data name="PageLocaleTitle">
     <value>Select your language and country</value>
   </data>
-  <data name="PageLocalesTitle.ca">
+  <data name="PageLocaleTitle.ca">
     <value>Seleccioni el seu idioma i país</value>
   </data>
-  <data name="PageLocalesTitle.de">
+  <data name="PageLocaleTitle.de">
     <value>Wählen Sie Ihre Sprache und Land</value>
   </data>
-  <data name="PageLocalesTitle.es">
+  <data name="PageLocaleTitle.es">
     <value>Seleccione su idioma y país</value>
   </data>
-  <data name="PageLocalesTitle.fr">
+  <data name="PageLocaleTitle.fr">
     <value>Sélectionnez votre langue et pays</value>
   </data>
-  <data name="PageLocalesTitle.pt">
+  <data name="PageLocaleTitle.pt">
     <value>Selecione o idioma eo país</value>
   </data>
-  <data name="PageLocalesTitle.ro">
+  <data name="PageLocaleTitle.ro">
     <value>Selectați limba și țara dumneavoastră</value>
   </data>
   <data name="PageRunTitle">
@@ -735,22 +735,22 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>&amp;Back</value>
   </data>
   <data name="WizardBackText.ca">
-    <value>Títol assistent</value>
+    <value>&amp;Endarrere</value>
   </data>
   <data name="WizardBackText.de">
-    <value>Assistent Titel</value>
+    <value>&amp;Zurück</value>
   </data>
   <data name="WizardBackText.es">
-    <value>Título asistente</value>
+    <value>&amp;Atrás</value>
   </data>
   <data name="WizardBackText.fr">
-    <value>Titre assistant</value>
+    <value>A&amp;rrière</value>
   </data>
   <data name="WizardBackText.pt">
-    <value>Título assistente</value>
+    <value>&amp;Atrás</value>
   </data>
   <data name="WizardBackText.ro">
-    <value>Titlu expert</value>
+    <value>Î&amp;napoi</value>
   </data>
   <data name="WizardCancelText">
     <value>&amp;Cancel</value>
