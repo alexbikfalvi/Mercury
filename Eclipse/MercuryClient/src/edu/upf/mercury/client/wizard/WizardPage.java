@@ -20,7 +20,6 @@ package edu.upf.mercury.client.wizard;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
@@ -217,7 +216,23 @@ public final class WizardPage extends JPanel {
 	public void setAllowCancel(boolean allowCancel) {
 		this.allowCancel = allowCancel;
 		this.onChanged();
-	}	
+	}
+	
+	/**
+	 * Commits the current page.
+	 * @param event The wizard event.
+	 */
+	public void commit(WizardEvent event) {
+		if (null != this.commitListener) this.commitListener.actionPerformed(event);
+	}
+	
+	/**
+	 * Rolls-back the current page.
+	 * @param event The wizard event.
+	 */
+	public void rollback(WizardEvent event) {
+		if (null != this.rollbackListener) this.rollbackListener.actionPerformed(event);
+	}
 	
 	/**
 	 * Sets the page changed listener.

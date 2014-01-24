@@ -666,15 +666,13 @@ public class FrameMain extends JFrame {
 		synchronized (this.sync) {
 			if (!this.completed) {
 				// Call the canceling event handler.
-				if (this.onCanceling(e)) {
-					// Exit.
-					System.exit(0);
+				if (!this.onCanceling(e)) {
+					// If the wizard is not canceled, return.
+					return;
 				}
 			}
-			else {
-				// Exit.
-				System.exit(0);
-			}
+			// Else, close the application..
+			System.exit(0);
 		}		
 	}
 	
