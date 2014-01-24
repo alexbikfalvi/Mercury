@@ -270,25 +270,25 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Expertul anulează operațiunea curentă și se va închide în câteva secunde.</value>
   </data>
   <data name="LabelProgressCompleted">
-    <value>Completed measurements to {0} out of {1} web destinations.</value>
+    <value>Completed measurements to %d out of %d web destinations.</value>
   </data>
   <data name="LabelProgressCompleted.ca">
-    <value>Medicions completades a {0} de {1} destinacions web.</value>
+    <value>Medicions completades a %d de %d destinacions web.</value>
   </data>
   <data name="LabelProgressCompleted.de">
-    <value>Messungen zu {0} von {1} Web-Zielen abgeschlossen.</value>
+    <value>Messungen zu %d von %d Web-Zielen abgeschlossen.</value>
   </data>
   <data name="LabelProgressCompleted.es">
-    <value>Medidas completadas a {0} de {1} destinos web.</value>
+    <value>Medidas completadas a %d de %d destinos web.</value>
   </data>
   <data name="LabelProgressCompleted.fr">
-    <value>Mesures terminées à {0} de {1} destinations Web.</value>
+    <value>Mesures terminées à %d de %d destinations Web.</value>
   </data>
   <data name="LabelProgressCompleted.pt">
-    <value>Medições concluídas para {0} de {1} destinos da web.</value>
+    <value>Medições concluídas para %d de %d destinos da web.</value>
   </data>
   <data name="LabelProgressCompleted.ro">
-    <value>Măsurători realizate la {0} din {1} destinații web.</value>
+    <value>Măsurători realizate la %d din %d destinații web.</value>
   </data>
   <data name="LabelProgressDownload">
     <value>Downloading the list of web destinations...</value>
@@ -333,25 +333,25 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Încărcarea informațiilor sesiunii...</value>
   </data>
   <data name="LabelProgressTraceroute">
-    <value>Running the Internet measurements using {0} web destinations...</value>
+    <value>Running the Internet measurements using %d web destinations...</value>
   </data>
   <data name="LabelProgressTraceroute.ca">
-    <value>Execució de les mesures d'Internet utilitzant {0} destins web...</value>
+    <value>Execució de les mesures d'Internet utilitzant %d destins web...</value>
   </data>
   <data name="LabelProgressTraceroute.de">
-    <value>Ausführen der Internet-Messungen mit {0} Web-Zielen...</value>
+    <value>Ausführen der Internet-Messungen mit %d Web-Zielen...</value>
   </data>
   <data name="LabelProgressTraceroute.es">
-    <value>Ejecución de las medidas de Internet utilizando {0} destinos web...</value>
+    <value>Ejecución de las medidas de Internet utilizando %d destinos web...</value>
   </data>
   <data name="LabelProgressTraceroute.fr">
-    <value>Exécution des mesures d'Internet en utilisant {0} des destinations web...</value>
+    <value>Exécution des mesures d'Internet en utilisant %d des destinations web...</value>
   </data>
   <data name="LabelProgressTraceroute.pt">
-    <value>Correndo as medições de Internet com {0} destinos web...</value>
+    <value>Correndo as medições de Internet com %d destinos web...</value>
   </data>
   <data name="LabelProgressTraceroute.ro">
-    <value>Rularea măsurătorilor de Internet folosind {0} destinatii web...</value>
+    <value>Rularea măsurătorilor de Internet folosind %d destinatii web...</value>
   </data>
   <data name="LabelProvider">
     <value>&amp;Internet provider:</value>
@@ -396,25 +396,25 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Exemplu: RomTelecom, RDS, UPC, sau numele companiei dumneavoastră.</value>
   </data>
   <data name="MercuryMessageText">
-    <value>Cannot connect to the Mercury web server. Check your Internet connection and try again.{0}{1}Technical information: {2}</value>
+    <value>Cannot connect to the Mercury web server. Check your Internet connection and try again.%n%nTechnical information: %s</value>
   </data>
   <data name="MercuryMessageText.ca">
-    <value>No es pot connectar al servidor web Mercury. Comprovi la seva connexió a Internet i torneu a intentar. {0} {1}Informació tècnica: {2}</value>
+    <value>No es pot connectar al servidor web Mercury. Comprovi la seva connexió a Internet i torneu a intentar.%n%nInformació tècnica: %s</value>
   </data>
   <data name="MercuryMessageText.de">
-    <value>Verbindung zum Mercury Web-Server fehlgeschlagen. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut. {0} {1}Technische Informationen: {2}</value>
+    <value>Verbindung zum Mercury Web-Server fehlgeschlagen. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.%n%nTechnische Informationen: %s</value>
   </data>
   <data name="MercuryMessageText.es">
-    <value>No se puede conectar al servidor web Mercury. Compruebe su conexión a Internet y vuelva a intentarlo. {0} {1}Información técnica: {2}</value>
+    <value>No se puede conectar al servidor web Mercury. Compruebe su conexión a Internet y vuelva a intentarlo.%n%nInformación técnica: %s</value>
   </data>
   <data name="MercuryMessageText.fr">
-    <value>Impossible de se connecter au serveur Web Mercure. Vérifiez votre connexion Internet et essayez à nouveau. {0} {1}Informations techniques: {2}</value>
+    <value>Impossible de se connecter au serveur Web Mercure. Vérifiez votre connexion Internet et essayez à nouveau.%n%nInformations techniques: %s</value>
   </data>
   <data name="MercuryMessageText.pt">
-    <value>Não é possível conectar-se ao servidor web Mercury. Verifique a sua conexão com a Internet e tente novamente. {0} {1}Informações técnicas: {2}</value>
+    <value>Não é possível conectar-se ao servidor web Mercury. Verifique a sua conexão com a Internet e tente novamente.%n%nInformações técnicas: %s</value>
   </data>
   <data name="MercuryMessageText.ro">
-    <value>Nu se poate conecta la serverul de web Mercury. Verificați conexiunea la internet și încercați din nou. {0} {1}Informații tehnice: {2}</value>
+    <value>Nu se poate conecta la serverul de web Mercury. Verificați conexiunea la internet și încercați din nou.%n%nInformații tehnice: %s</value>
   </data>
   <data name="MercuryMessageTitle">
     <value>Mercury Error</value>
@@ -543,25 +543,25 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>minut</value>
   </data>
   <data name="TimeMinuteRemaining">
-    <value>{0} minute remaining</value>
+    <value>%d minute remaining</value>
   </data>
   <data name="TimeMinuteRemaining.ca">
-    <value>{0} minut restants</value>
+    <value>%d minut restants</value>
   </data>
   <data name="TimeMinuteRemaining.de">
-    <value>{0} Minute verbleibend</value>
+    <value>%d Minute verbleibend</value>
   </data>
   <data name="TimeMinuteRemaining.es">
-    <value>{0} minuto restante</value>
+    <value>%d minuto restante</value>
   </data>
   <data name="TimeMinuteRemaining.fr">
-    <value>{0} minute restante</value>
+    <value>%d minute restante</value>
   </data>
   <data name="TimeMinuteRemaining.pt">
-    <value>{0} minuto restante</value>
+    <value>%d minuto restante</value>
   </data>
   <data name="TimeMinuteRemaining.ro">
-    <value>{0} minut rămas</value>
+    <value>%d minut rămas</value>
   </data>
   <data name="TimeMinutes">
     <value>minutes</value>
@@ -585,46 +585,46 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>minute</value>
   </data>
   <data name="TimeMinutesRemaining">
-    <value>{0} minutes remaining</value>
+    <value>%d minutes remaining</value>
   </data>
   <data name="TimeMinutesRemaining.ca">
-    <value>{0} minuts restants</value>
+    <value>%d minuts restants</value>
   </data>
   <data name="TimeMinutesRemaining.de">
-    <value>{0} Minuten verbleibend</value>
+    <value>%d Minuten verbleibend</value>
   </data>
   <data name="TimeMinutesRemaining.es">
-    <value>{0} minutos restantes</value>
+    <value>%d minutos restantes</value>
   </data>
   <data name="TimeMinutesRemaining.fr">
-    <value>{0} minutes restantes</value>
+    <value>%d minutes restantes</value>
   </data>
   <data name="TimeMinutesRemaining.pt">
-    <value>{0} minutos restantes</value>
+    <value>%d minutos restantes</value>
   </data>
   <data name="TimeMinutesRemaining.ro">
-    <value>{0} minute rămase</value>
+    <value>%d minute rămase</value>
   </data>
   <data name="TimeMinutesSecondsRemaining">
-    <value>{0} {1} and {2} {3} remaining</value>
+    <value>%d %s and %d %s remaining</value>
   </data>
   <data name="TimeMinutesSecondsRemaining.ca">
-    <value>{0} {1} i {2} {3} restants</value>
+    <value>%d %s i %d %s restants</value>
   </data>
   <data name="TimeMinutesSecondsRemaining.de">
-    <value>{0} {1} und {2} {3} verbleibend</value>
+    <value>%d %s und %d %s verbleibend</value>
   </data>
   <data name="TimeMinutesSecondsRemaining.es">
-    <value>{0} {1} y {2} {3} restantes</value>
+    <value>%d %s y %d %s restantes</value>
   </data>
   <data name="TimeMinutesSecondsRemaining.fr">
-    <value>{0} {1} et {2} {3} restantes</value>
+    <value>%d %s et %d %s restantes</value>
   </data>
   <data name="TimeMinutesSecondsRemaining.pt">
-    <value>{0} {1} e {2} {3} restantes</value>
+    <value>%d %s e %d %s restantes</value>
   </data>
   <data name="TimeMinutesSecondsRemaining.ro">
-    <value>{0} {1} și {2} {3} rămase</value>
+    <value>%d %s și %d %s rămase</value>
   </data>
   <data name="TimeSecond">
     <value>second</value>
@@ -648,25 +648,25 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>secundă</value>
   </data>
   <data name="TimeSecondRemaining">
-    <value>{0} second remaining</value>
+    <value>%d second remaining</value>
   </data>
   <data name="TimeSecondRemaining.ca">
-    <value>{0} segon restants</value>
+    <value>%d segon restants</value>
   </data>
   <data name="TimeSecondRemaining.de">
-    <value>{0} Sekunde verbleibend</value>
+    <value>%d Sekunde verbleibend</value>
   </data>
   <data name="TimeSecondRemaining.es">
-    <value>{0} segundo restante</value>
+    <value>%d segundo restante</value>
   </data>
   <data name="TimeSecondRemaining.fr">
-    <value>{0} seconde restante</value>
+    <value>%d seconde restante</value>
   </data>
   <data name="TimeSecondRemaining.pt">
-    <value>{0} segundo restante</value>
+    <value>%d segundo restante</value>
   </data>
   <data name="TimeSecondRemaining.ro">
-    <value>{0} secundă rămasă</value>
+    <value>%d secundă rămasă</value>
   </data>
   <data name="TimeSeconds">
     <value>seconds</value>
@@ -690,25 +690,25 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>secunde</value>
   </data>
   <data name="TimeSecondsRemaining">
-    <value>{0} seconds remaining</value>
+    <value>%d seconds remaining</value>
   </data>
   <data name="TimeSecondsRemaining.ca">
-    <value>{0} segons restants</value>
+    <value>%d segons restants</value>
   </data>
   <data name="TimeSecondsRemaining.de">
-    <value>{0} Sekunden verbleibend</value>
+    <value>%d Sekunden verbleibend</value>
   </data>
   <data name="TimeSecondsRemaining.es">
-    <value>{0} segundos restantes</value>
+    <value>%d segundos restantes</value>
   </data>
   <data name="TimeSecondsRemaining.fr">
-    <value>{0} secondes restantes</value>
+    <value>%d secondes restantes</value>
   </data>
   <data name="TimeSecondsRemaining.pt">
-    <value>{0} segundo restantes</value>
+    <value>%d segundo restantes</value>
   </data>
   <data name="TimeSecondsRemaining.ro">
-    <value>{0} secunde rămase</value>
+    <value>%d secunde rămase</value>
   </data>
   <data name="WizardBackButtonToolTip">
     <value>Returns to a previous page</value>

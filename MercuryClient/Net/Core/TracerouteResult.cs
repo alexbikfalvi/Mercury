@@ -28,11 +28,12 @@ namespace Mercury.Net.Core
 	/// </summary>
 	public class TracerouteResult
 	{
-		private readonly List<TracerouteHopResult> hops = new List<TracerouteHopResult>();
+		private readonly List<TracerouteHop> hops = new List<TracerouteHop>();
 
 		/// <summary>
 		/// Creates a new traceroute result instance.
 		/// </summary>
+		/// <param name="destination">The traceroute destination.</param>
 		internal TracerouteResult(IPAddress destination)
 		{
 			this.Destination = destination;
@@ -47,7 +48,7 @@ namespace Mercury.Net.Core
 		/// <summary>
 		/// Gets the list of hops.
 		/// </summary>
-		public ICollection<TracerouteHopResult> Hops { get { return this.hops; } }
+		public ICollection<TracerouteHop> Hops { get { return this.hops; } }
 
 		// Internal methods.
 
@@ -55,7 +56,7 @@ namespace Mercury.Net.Core
 		/// Adds a new hop result to the traceroute result.
 		/// </summary>
 		/// <param name="hopResult">The hop result.</param>
-		internal void Add(TracerouteHopResult hopResult)
+		internal void Add(TracerouteHop hopResult)
 		{
 			this.hops.Add(hopResult);
 		}

@@ -43,8 +43,10 @@ public final class WizardPage extends JPanel {
 	private boolean allowBack = true;
 	private boolean allowNext = true;
 	private boolean allowCancel = true;
+	private boolean finishPage = false;
 	
 	private ActionListener changedListener = null;
+	private ActionListener initializedListener = null;
 	private WizardListener commitListener = null;
 	private WizardListener rollbackListener = null;
 
@@ -219,19 +221,53 @@ public final class WizardPage extends JPanel {
 	}
 	
 	/**
-	 * Commits the current page.
-	 * @param event The wizard event.
+	 * Gets whether this page is a finish page. 
+	 * @return True if the page is a finish page, false otherwise.
 	 */
-	public void commit(WizardEvent event) {
+	public boolean isFinishPage() {
+		return finishPage;
+	}
+
+	/**
+	 * Sets whether this page is a finish page.
+	 * @param finishPage True if the page is a finish page, false otherwise.
+	 */
+	public void setFinishPage(boolean finishPage) {
+		this.finishPage = finishPage;
+	}
+	
+	/**
+	 * Initializes the current page.
+	 */
+	public void initialize() {
+		// Raise the event.
+		if (null != this.initializedListener) this.initializedListener.actionPerformed(new ActionEvent(this, 0, null));
+	}
+
+	/**
+	 * Commits the current page.
+	 * @return True if a commit is allowed, false otherwise.
+	 */
+	public boolean commit() {
+		// Create a wizard event.
+		final WizardEvent event = new WizardEvent(this); 
+		// Raise the event.
 		if (null != this.commitListener) this.commitListener.actionPerformed(event);
+		// Return whether the commit is allowed.
+		return !event.isCanceled();
 	}
 	
 	/**
 	 * Rolls-back the current page.
-	 * @param event The wizard event.
+	 * @return True if a rollback is allowed, false otherwise.
 	 */
-	public void rollback(WizardEvent event) {
+	public boolean rollback() {
+		// Create a wizard event.
+		final WizardEvent event = new WizardEvent(this); 
+		// Raise the event.
 		if (null != this.rollbackListener) this.rollbackListener.actionPerformed(event);
+		// Return whether the roll-back is allowed.
+		return !event.isCanceled();
 	}
 	
 	/**
@@ -243,6 +279,14 @@ public final class WizardPage extends JPanel {
 	}
 	
 	/**
+	 * Sets the page initialized listener.
+	 * @param initializedListener The listener.
+	 */
+	public void setInitializedListener(ActionListener initializedListener) {
+		this.initializedListener = initializedListener;
+	}
+
+	/**
 	 * Sets the page commit listener.
 	 * @param commitListener The listener.
 	 */
@@ -251,10 +295,10 @@ public final class WizardPage extends JPanel {
 	}
 	
 	/**
-	 * Adds a page rollback listener.
+	 * Adds a page roll-back listener.
 	 * @param rollbackListener The listener.
 	 */
-	public void addRollbackListener(WizardListener rollbackListener) {
+	public void setRollbackListener(WizardListener rollbackListener) {
 		this.rollbackListener = rollbackListener;
 	}
 	

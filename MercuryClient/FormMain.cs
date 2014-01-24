@@ -567,10 +567,7 @@ namespace Mercury
 							try
 							{
 								// Complete the web request.
-								string data;
-								this.asyncWebRequest.End(asyncResult, out data);
-								// Parse the list of sites.
-								string[] sites = data.Split(new char[] { '\n', '\r', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+								this.asyncWebRequest.End(asyncResult);
 
 								// Set the wait handle.
 								this.waitAsync.Set();
@@ -608,7 +605,7 @@ namespace Mercury
 					// Create the traceroute JSON object.
 					JsonObject obj = new JsonObject(
 						new JsonProperty("sessionId", this.sessionId.ToString()),
-						new JsonProperty("author", Environment.UserName),
+						new JsonProperty("author", "MercuryClient"),
 						new JsonProperty("description", "MercuryClient"),
 						new JsonProperty("dateStart", this.sessionTimestamp.ToUniversalTime().ToString(@"yyyy-MM-ddTHH:mm:ss.fffZ"))
 						);
@@ -1018,11 +1015,11 @@ namespace Mercury
 				// Create the hops JSON object.
 				JsonArray hops = new JsonArray();
 
-				foreach (TracerouteHopResult hop in result.Hops)
+				foreach (TracerouteHop hop in result.Hops)
 				{
 					hops.Add(new JsonObject(
 						new JsonProperty("id", hop.TimeToLive.ToString()),
-						new JsonProperty("ip", hop.Address != null ? hop.Address.ToString() : "none"),
+						new JsonProperty("ip", hop.Address != null ? hop.Address.ToString() : "destination unreachable"),
 						new JsonProperty("asn", new JsonArray()),
 						new JsonProperty("rtt", new JsonArray(hop.AverageRoundtripTime.ToString()))
 						));
@@ -1129,16 +1126,6 @@ namespace Mercury
 				return seconds == 1 ? string.Format(this.timeSecondRemaining, seconds) : string.Format(this.timeSecondsRemaining, seconds);
 			}
 			else return string.Empty;
-		}
-
-		/// <summary>
-		/// An event handler called when the network provider has changed.
-		/// </summary>
-		/// <param name="sender">The sender object.</param>
-		/// <param name="e">The event arguments.</param>
-		private void OnProviderChanged(object sender, EventArgs e)
-		{
-
 		}
 
 		/// <summary>

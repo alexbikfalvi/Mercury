@@ -45,6 +45,9 @@ public final class Wizard {
 	
 	private final CardLayout layout;
 	
+	private ActionListener finishedListener = null;
+	private ActionListener cancelListener = null;
+	
 	public Wizard(
 			JPanel panel,
 			JLabel labelTitle,
@@ -121,6 +124,36 @@ public final class Wizard {
 	}
 	
 	/**
+	 * Sets the finished listener.
+	 * @param finishedListener The listener.
+	 */
+	public void setFinishedListener(ActionListener finishedListener) {
+		this.finishedListener = finishedListener;
+	}
+
+	/**
+	 * Sets the cancel listener.
+	 * @param cancelListener The listener.
+	 */
+	public void setCancelListener(ActionListener cancelListener) {
+		this.cancelListener = cancelListener;
+	}
+	
+	/**
+	 * Switches to the previous page.
+	 */
+	public void back() {
+		this.onBack(null);
+	}
+	
+	/**
+	 * Switches to the next page.
+	 */
+	public void next() {
+		this.onNext(null);
+	}
+
+	/**
 	 * Updates the wizard page selection for the current index.
 	 */
 	private void update() {
@@ -138,6 +171,9 @@ public final class Wizard {
 		this.buttonBack.setEnabled(this.pages[this.selected].isAllowBack());
 		this.buttonNext.setEnabled(this.pages[this.selected].isAllowNext());
 		this.buttonCancel.setEnabled(this.pages[this.selected].isAllowCancel());
+		
+		// Initialize the page.
+		this.pages[this.selected].initialize();
 	}
 	
 	/**
@@ -159,10 +195,13 @@ public final class Wizard {
 	private void onBack(ActionEvent event) {
 		// If not at the first page.
 		if (this.selected > 0) {
-			// Decrement the selected index.
-			this.selected--;
-			// Update the page.
-			this.update();
+			// Check whether a roll-back is allowed.
+			if (this.pages[this.selected].rollback()) {
+				// Decrement the selected index.
+				this.selected--;
+				// Update the page.
+				this.update();
+			}
 		}
 	}
 	
@@ -173,10 +212,20 @@ public final class Wizard {
 	private void onNext(ActionEvent event) {
 		// If not at the last page.
 		if (this.selected < this.pages.length - 1) {
-			// Increment the selected index.
-			this.selected++;
-			// Update the page.
-			this.update();
+			// Check whether a commit is allowed.
+			if (this.pages[this.selected].commit()) {
+				// Increment the selected index.
+				this.selected++;
+				// Update the page.
+				this.update();
+			}
+		}
+		else {
+			// If the page is a finish page.
+			if (this.pages[this.selected].isFinishPage()) {
+				// Raise the finished event.
+				if (null != this.finishedListener) this.finishedListener.actionPerformed(new ActionEvent(this, 0, null));
+			}
 		}
 	}
 	
@@ -185,6 +234,7 @@ public final class Wizard {
 	 * @param event The action event.
 	 */
 	private void onCancel(ActionEvent event) {
-		
+		// Raise the canceled event.
+		if (null != this.cancelListener) this.cancelListener.actionPerformed(new ActionEvent(this, 0, null));
 	}
 }

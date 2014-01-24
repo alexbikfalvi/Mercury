@@ -40,12 +40,12 @@ public class WebRequest {
 		WebState state = new WebState(url);
 		
 		// Execute the get request for the current state.
-		state.get();
+		state.execute();
 		
 		// Return the result.
 		return state;
 	}
-
+	
 	/**
 	 * Begins an asynchronous request for the specified URL.
 	 * @param url The URL.
@@ -63,7 +63,7 @@ public class WebRequest {
 			public void run() {
 				try {
 					// Execute the get request for the current state.
-					state.get();
+					state.execute();
 				}
 				catch (IOException exception) {
 					state.setException(exception);
@@ -75,6 +75,35 @@ public class WebRequest {
 		});
 		// Return the request state.
 		return state;
+	}
+	
+	/**
+	 * Begins an asynchronous request for the specified state.
+	 * @param state The web state.
+	 * @param callback The callback of the asynchronous operation.
+	 * @return The result of the asynchronous operation.
+	 * @throws IOException 
+	 */
+	public AsyncResult begin(final WebState state, final WebCallback callback) {
+		
+		// Execute the request on the thread pool.
+		ThreadPool.execute(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					// Execute the get request for the current state.
+					state.execute();
+				}
+				catch (IOException exception) {
+					state.setException(exception);
+				}
+				finally {
+					if (null != callback) callback.callback(state);
+				}
+			}
+		});
+		// Return the request state.
+		return state;		
 	}
 	
 	/**

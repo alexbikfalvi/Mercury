@@ -25,7 +25,7 @@ namespace Mercury.Net.Core
 	/// <summary>
 	/// A class representing a traceroute hop result.
 	/// </summary>
-	public class TracerouteHopResult
+	public class TracerouteHop
 	{
 		private readonly int ttl;
 		private IPAddress address;
@@ -38,7 +38,7 @@ namespace Mercury.Net.Core
 		/// Creates a new traceroute hop result instance.
 		/// </summary>
 		/// <param name="ttl">The time-to-live.</param>
-		public TracerouteHopResult(int ttl)
+		public TracerouteHop(int ttl)
 		{
 			this.ttl = ttl;
 		}

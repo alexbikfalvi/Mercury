@@ -67,7 +67,7 @@ namespace Mercury.Net.Core
 				bool success = false;
 
 				// Create a new traceroute hop result for this time-to-live.
-				TracerouteHopResult hopResult = new TracerouteHopResult(ttl);
+				TracerouteHop hopResult = new TracerouteHop(ttl);
 				result.Add(hopResult);
 
 				for (int attempt = 0; attempt < this.settings.MaximumAttempts; attempt++)

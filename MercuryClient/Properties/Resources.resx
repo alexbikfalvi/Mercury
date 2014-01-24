@@ -523,22 +523,22 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Cannot connect to the Mercury web server. Check your Internet connection and try again.{0}{1}Technical information: {2}</value>
   </data>
   <data name="MercuryMessageText.ca" xml:space="preserve">
-    <value>No es pot connectar al servidor web Mercury. Comprovi la seva connexió a Internet i torneu a intentar. {0} {1}Informació tècnica: {2}</value>
+    <value>No es pot connectar al servidor web Mercury. Comprovi la seva connexió a Internet i torneu a intentar.{0}{1}Informació tècnica: {2}</value>
   </data>
   <data name="MercuryMessageText.de" xml:space="preserve">
     <value>Verbindung zum Mercury Web-Server fehlgeschlagen. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut. {0} {1}Technische Informationen: {2}</value>
   </data>
   <data name="MercuryMessageText.es" xml:space="preserve">
-    <value>No se puede conectar al servidor web Mercury. Compruebe su conexión a Internet y vuelva a intentarlo. {0} {1}Información técnica: {2}</value>
+    <value>No se puede conectar al servidor web Mercury. Compruebe su conexión a Internet y vuelva a intentarlo.{0}{1}Información técnica: {2}</value>
   </data>
   <data name="MercuryMessageText.fr" xml:space="preserve">
-    <value>Impossible de se connecter au serveur Web Mercure. Vérifiez votre connexion Internet et essayez à nouveau. {0} {1}Informations techniques: {2}</value>
+    <value>Impossible de se connecter au serveur Web Mercure. Vérifiez votre connexion Internet et essayez à nouveau.{0}{1}Informations techniques: {2}</value>
   </data>
   <data name="MercuryMessageText.pt" xml:space="preserve">
-    <value>Não é possível conectar-se ao servidor web Mercury. Verifique a sua conexão com a Internet e tente novamente. {0} {1}Informações técnicas: {2}</value>
+    <value>Não é possível conectar-se ao servidor web Mercury. Verifique a sua conexão com a Internet e tente novamente.{0}{1}Informações técnicas: {2}</value>
   </data>
   <data name="MercuryMessageText.ro" xml:space="preserve">
-    <value>Nu se poate conecta la serverul de web Mercury. Verificați conexiunea la internet și încercați din nou. {0} {1}Informații tehnice: {2}</value>
+    <value>Nu se poate conecta la serverul de web Mercury. Verificați conexiunea la internet și încercați din nou.{0}{1}Informații tehnice: {2}</value>
   </data>
   <data name="MercuryMessageTitle" xml:space="preserve">
     <value>Mercury Error</value>

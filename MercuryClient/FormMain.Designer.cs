@@ -101,7 +101,7 @@
 			// pictureBoxCountry
 			// 
 			this.pictureBoxCountry.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.pictureBoxCountry.Location = new System.Drawing.Point(403, 119);
+			this.pictureBoxCountry.Location = new System.Drawing.Point(404, 119);
 			this.pictureBoxCountry.Name = "pictureBoxCountry";
 			this.pictureBoxCountry.Size = new System.Drawing.Size(36, 36);
 			this.pictureBoxCountry.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -126,6 +126,7 @@
 			this.comboBoxLanguage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.comboBoxLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxLanguage.DropDownWidth = 300;
 			this.comboBoxLanguage.FormattingEnabled = true;
 			this.comboBoxLanguage.Location = new System.Drawing.Point(100, 96);
 			this.comboBoxLanguage.Name = "comboBoxLanguage";
@@ -218,7 +219,6 @@
 			this.textBoxProvider.Name = "textBoxProvider";
 			this.textBoxProvider.Size = new System.Drawing.Size(300, 23);
 			this.textBoxProvider.TabIndex = 2;
-			this.textBoxProvider.TextChanged += new System.EventHandler(this.OnProviderChanged);
 			// 
 			// labelProvider
 			// 
@@ -238,7 +238,7 @@
 			this.wizardPageRun.Controls.Add(this.labelInfo);
 			this.wizardPageRun.Name = "wizardPageRun";
 			this.wizardPageRun.NextPage = this.wizardPageFinish;
-			this.wizardPageRun.Size = new System.Drawing.Size(552, 258);
+			this.wizardPageRun.Size = new System.Drawing.Size(537, 257);
 			this.wizardPageRun.TabIndex = 2;
 			this.wizardPageRun.Text = "Measuring the Internet";
 			this.wizardPageRun.TextNext = "&Start";
@@ -248,27 +248,27 @@
 			// labelProgress
 			// 
 			this.labelProgress.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.labelProgress.Location = new System.Drawing.Point(0, 158);
+			this.labelProgress.Location = new System.Drawing.Point(0, 157);
 			this.labelProgress.Name = "labelProgress";
-			this.labelProgress.Size = new System.Drawing.Size(552, 50);
+			this.labelProgress.Size = new System.Drawing.Size(537, 50);
 			this.labelProgress.TabIndex = 2;
 			// 
 			// labelTime
 			// 
 			this.labelTime.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.labelTime.Location = new System.Drawing.Point(0, 208);
+			this.labelTime.Location = new System.Drawing.Point(0, 207);
 			this.labelTime.Name = "labelTime";
-			this.labelTime.Size = new System.Drawing.Size(552, 50);
+			this.labelTime.Size = new System.Drawing.Size(537, 50);
 			this.labelTime.TabIndex = 3;
 			// 
 			// progressBar
 			// 
-			this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-			| System.Windows.Forms.AnchorStyles.Right)));
+			this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.progressBar.Location = new System.Drawing.Point(3, 103);
 			this.progressBar.MarqueeAnimationSpeed = 20;
 			this.progressBar.Name = "progressBar";
-			this.progressBar.Size = new System.Drawing.Size(531, 16);
+			this.progressBar.Size = new System.Drawing.Size(516, 16);
 			this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
 			this.progressBar.TabIndex = 1;
 			this.progressBar.Visible = false;
@@ -278,7 +278,7 @@
 			this.labelInfo.Dock = System.Windows.Forms.DockStyle.Top;
 			this.labelInfo.Location = new System.Drawing.Point(0, 0);
 			this.labelInfo.Name = "labelInfo";
-			this.labelInfo.Size = new System.Drawing.Size(552, 100);
+			this.labelInfo.Size = new System.Drawing.Size(537, 100);
 			this.labelInfo.TabIndex = 0;
 			// 
 			// wizardPageFinish
@@ -289,7 +289,7 @@
 			this.wizardPageFinish.IsFinishPage = true;
 			this.wizardPageFinish.Name = "wizardPageFinish";
 			this.wizardPageFinish.ShowCancel = false;
-			this.wizardPageFinish.Size = new System.Drawing.Size(537, 256);
+			this.wizardPageFinish.Size = new System.Drawing.Size(537, 257);
 			this.wizardPageFinish.TabIndex = 3;
 			this.wizardPageFinish.Text = "Finished";
 			this.wizardPageFinish.Rollback += new System.EventHandler<Mercury.Windows.Controls.AeroWizard.WizardPageConfirmEventArgs>(this.OnFinishRollback);

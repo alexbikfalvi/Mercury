@@ -40,6 +40,7 @@ public class WebResult implements AsyncResult {
 	
 	private int responseCode;
 
+	private String responseEncoding = null;
 	private byte[] responseData = null;
 	private InputStream responseStream = null;
 	private IOException exception = null;
@@ -79,11 +80,31 @@ public class WebResult implements AsyncResult {
 	}
 	
 	/**
+	 * Gets the result response encoding.
+	 * @return
+	 */
+	public String getResponseEncoding() {
+		return responseEncoding;
+	}
+
+	/**
 	 * Gets the result response data.
 	 * @return The response data.
 	 */
 	public byte[] getResponseData() {
 		return this.responseData;
+	}
+	
+	/**
+	 * Gets the result response data as a string.
+	 * @return The response data string.
+	 */
+	public String getResponseDataAsString() {
+		try {
+			return this.responseData != null ? this.responseEncoding != null ? IOUtils.toString(this.responseData, this.responseEncoding) : IOUtils.toString(this.responseData, "UTF-8"): "";
+		} catch (IOException e) {
+			return "";
+		}
 	}
 	
 	/**
@@ -115,10 +136,12 @@ public class WebResult implements AsyncResult {
 	 * Sets the response.
 	 * @param code The response code.
 	 * @param stream The response input stream.
+	 * @param encoding The response encoding.
 	 * @throws IOException 
 	 */
-	protected void setResponse(int code, InputStream stream) throws IOException {
+	protected void setResponse(int code, InputStream stream, String encoding) throws IOException {
 		this.responseCode = code;
+		this.responseEncoding = encoding;
 		this.responseData = IOUtils.toByteArray(stream);
 		this.responseStream = new ByteArrayInputStream(this.responseData);
 	}
