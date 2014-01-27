@@ -101,7 +101,7 @@
 			// pictureBoxCountry
 			// 
 			this.pictureBoxCountry.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.pictureBoxCountry.Location = new System.Drawing.Point(404, 119);
+			this.pictureBoxCountry.Location = new System.Drawing.Point(401, 119);
 			this.pictureBoxCountry.Name = "pictureBoxCountry";
 			this.pictureBoxCountry.Size = new System.Drawing.Size(36, 36);
 			this.pictureBoxCountry.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -165,7 +165,7 @@
 			this.wizardPageForm.HelpText = "For what is this information?";
 			this.wizardPageForm.Name = "wizardPageForm";
 			this.wizardPageForm.NextPage = this.wizardPageRun;
-			this.wizardPageForm.Size = new System.Drawing.Size(537, 257);
+			this.wizardPageForm.Size = new System.Drawing.Size(552, 258);
 			this.wizardPageForm.TabIndex = 1;
 			this.wizardPageForm.Text = "Tell us about your network connection";
 			this.wizardPageForm.HelpClicked += new System.EventHandler(this.OnHelp);
@@ -197,7 +197,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.textBoxCity.Location = new System.Drawing.Point(140, 139);
 			this.textBoxCity.Name = "textBoxCity";
-			this.textBoxCity.Size = new System.Drawing.Size(300, 23);
+			this.textBoxCity.Size = new System.Drawing.Size(315, 23);
 			this.textBoxCity.TabIndex = 5;
 			this.textBoxCity.TextChanged += new System.EventHandler(this.OnCityChanged);
 			// 
@@ -206,7 +206,7 @@
 			this.labelForm.Dock = System.Windows.Forms.DockStyle.Top;
 			this.labelForm.Location = new System.Drawing.Point(0, 0);
 			this.labelForm.Name = "labelForm";
-			this.labelForm.Size = new System.Drawing.Size(537, 50);
+			this.labelForm.Size = new System.Drawing.Size(552, 50);
 			this.labelForm.TabIndex = 0;
 			this.labelForm.Text = "We use this to learn more about your Internet connection. We do not collect any p" +
     "ersonal information without your consent, and all fields are optional.";
@@ -217,7 +217,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.textBoxProvider.Location = new System.Drawing.Point(140, 95);
 			this.textBoxProvider.Name = "textBoxProvider";
-			this.textBoxProvider.Size = new System.Drawing.Size(300, 23);
+			this.textBoxProvider.Size = new System.Drawing.Size(315, 23);
 			this.textBoxProvider.TabIndex = 2;
 			// 
 			// labelProvider
@@ -238,7 +238,7 @@
 			this.wizardPageRun.Controls.Add(this.labelInfo);
 			this.wizardPageRun.Name = "wizardPageRun";
 			this.wizardPageRun.NextPage = this.wizardPageFinish;
-			this.wizardPageRun.Size = new System.Drawing.Size(537, 257);
+			this.wizardPageRun.Size = new System.Drawing.Size(552, 258);
 			this.wizardPageRun.TabIndex = 2;
 			this.wizardPageRun.Text = "Measuring the Internet";
 			this.wizardPageRun.TextNext = "&Start";
@@ -248,17 +248,17 @@
 			// labelProgress
 			// 
 			this.labelProgress.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.labelProgress.Location = new System.Drawing.Point(0, 157);
+			this.labelProgress.Location = new System.Drawing.Point(0, 158);
 			this.labelProgress.Name = "labelProgress";
-			this.labelProgress.Size = new System.Drawing.Size(537, 50);
+			this.labelProgress.Size = new System.Drawing.Size(552, 50);
 			this.labelProgress.TabIndex = 2;
 			// 
 			// labelTime
 			// 
 			this.labelTime.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.labelTime.Location = new System.Drawing.Point(0, 207);
+			this.labelTime.Location = new System.Drawing.Point(0, 208);
 			this.labelTime.Name = "labelTime";
-			this.labelTime.Size = new System.Drawing.Size(537, 50);
+			this.labelTime.Size = new System.Drawing.Size(552, 50);
 			this.labelTime.TabIndex = 3;
 			// 
 			// progressBar
@@ -268,7 +268,7 @@
 			this.progressBar.Location = new System.Drawing.Point(3, 103);
 			this.progressBar.MarqueeAnimationSpeed = 20;
 			this.progressBar.Name = "progressBar";
-			this.progressBar.Size = new System.Drawing.Size(516, 16);
+			this.progressBar.Size = new System.Drawing.Size(531, 16);
 			this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
 			this.progressBar.TabIndex = 1;
 			this.progressBar.Visible = false;
@@ -278,7 +278,7 @@
 			this.labelInfo.Dock = System.Windows.Forms.DockStyle.Top;
 			this.labelInfo.Location = new System.Drawing.Point(0, 0);
 			this.labelInfo.Name = "labelInfo";
-			this.labelInfo.Size = new System.Drawing.Size(537, 100);
+			this.labelInfo.Size = new System.Drawing.Size(552, 100);
 			this.labelInfo.TabIndex = 0;
 			// 
 			// wizardPageFinish
@@ -289,7 +289,7 @@
 			this.wizardPageFinish.IsFinishPage = true;
 			this.wizardPageFinish.Name = "wizardPageFinish";
 			this.wizardPageFinish.ShowCancel = false;
-			this.wizardPageFinish.Size = new System.Drawing.Size(537, 257);
+			this.wizardPageFinish.Size = new System.Drawing.Size(537, 256);
 			this.wizardPageFinish.TabIndex = 3;
 			this.wizardPageFinish.Text = "Finished";
 			this.wizardPageFinish.Rollback += new System.EventHandler<Mercury.Windows.Controls.AeroWizard.WizardPageConfirmEventArgs>(this.OnFinishRollback);

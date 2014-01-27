@@ -388,6 +388,9 @@ public class FrameMain extends JFrame {
 		pageForm.setLayout(null);
 		
 		textForm = new JTextPane();
+		textForm.setSelectionColor(Color.WHITE);
+		textForm.setSelectedTextColor(Color.BLACK);
+		textForm.setEditable(false);
 		textForm.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		textForm.setText("We use this to learn more about your Internet connection. We do not collect any personal information without your consent, and all fields are optional.");
 		textForm.setBounds(10, 11, 574, 50);
@@ -416,6 +419,9 @@ public class FrameMain extends JFrame {
 		textFieldCity.setColumns(10);
 		
 		labelProviderExample = new JTextPane();
+		labelProviderExample.setSelectionColor(Color.WHITE);
+		labelProviderExample.setSelectedTextColor(Color.BLACK);
+		labelProviderExample.setEditable(false);
 		labelProviderExample.setText("Example: AT&T, Comcast, Verizon, or the name of your company.");
 		labelProviderExample.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		labelProviderExample.setBounds(150, 131, 434, 20);
@@ -428,17 +434,26 @@ public class FrameMain extends JFrame {
 		pageRun.setLayout(null);
 		
 		textInfo = new JTextPane();
+		textInfo.setSelectionColor(Color.WHITE);
+		textInfo.setSelectedTextColor(Color.BLACK);
+		textInfo.setEditable(false);
 		textInfo.setText("The wizard is ready to start the Internet measurements. This may take several minutes, depending on the speed of your Internet connection. To continue, click Start.");
 		textInfo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		textInfo.setBounds(10, 11, 574, 50);
 		pageRun.add(textInfo);
 		
 		textTime = new JTextPane();
+		textTime.setSelectionColor(Color.WHITE);
+		textTime.setSelectedTextColor(Color.BLACK);
+		textTime.setEditable(false);
 		textTime.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		textTime.setBounds(10, 230, 574, 50);
 		pageRun.add(textTime);
 		
 		textProgress = new JTextPane();
+		textProgress.setSelectionColor(Color.WHITE);
+		textProgress.setSelectedTextColor(Color.BLACK);
+		textProgress.setEditable(false);
 		textProgress.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		textProgress.setBounds(10, 169, 574, 50);
 		pageRun.add(textProgress);
@@ -449,6 +464,7 @@ public class FrameMain extends JFrame {
 		pageRun.add(progressBar);
 		
 		pageFinish = new WizardPage();
+		pageFinish.setFinishPage(true);
 		pageFinish.setAllowCancel(false);
 		pageFinish.setName("pageFinish");
 		pageFinish.setBackground(Color.WHITE);
@@ -456,6 +472,9 @@ public class FrameMain extends JFrame {
 		pageFinish.setLayout(null);
 		
 		textFinish = new JTextPane();
+		textFinish.setSelectionColor(Color.WHITE);
+		textFinish.setSelectedTextColor(Color.BLACK);
+		textFinish.setEditable(false);
 		textFinish.setText("The wizard has finished the Internet measurements.\r\n\r\nTo close, click on Finish.");
 		textFinish.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		textFinish.setBounds(10, 11, 574, 100);
@@ -1417,13 +1436,10 @@ public class FrameMain extends JFrame {
 
 		
 		try {
-			File file = new File(result.getDestination().getHostAddress() + "-" + new Date().getTime() + ".json");
- 
-			// if file doesnt exists, then create it
+			File file = new File(result.getDestination().getHostAddress() + "-" + new Date().getTime() + ".json"); 
 			if (!file.exists()) {
 				file.createNewFile();
 			}
- 
 			FileWriter fw = new FileWriter(file.getAbsoluteFile());
 			BufferedWriter bw = new BufferedWriter(fw);
 			bw.write(obj.toString());
@@ -1487,6 +1503,7 @@ public class FrameMain extends JFrame {
 	 */
 	private void onFinishRollback(WizardEvent e)
 	{
+		// Set the completed to false.
 		this.completed = false;
 	}
 	
@@ -1560,5 +1577,4 @@ public class FrameMain extends JFrame {
 		}
 		else return "";
 	}
-	
 }

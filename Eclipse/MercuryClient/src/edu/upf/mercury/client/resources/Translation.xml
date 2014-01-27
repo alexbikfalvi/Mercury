@@ -189,13 +189,13 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>We use this to learn more about your Internet connection. We do not collect any personal information without your consent, and all fields are optional.</value>
   </data>
   <data name="LabelForm.ca">
-    <value>Fem servir això per aprendre més sobre la seva connexió a Internet. Nosaltres no recollim cap informació personal sense el seu consentiment, i tots els camps són opcionals.</value>
+    <value>Fem servir això per aprendre més sobre la seva connexió d'Internet. Nosaltres no recollim cap informació personal sense el seu consentiment, i tots els camps són opcionals.</value>
   </data>
   <data name="LabelForm.de">
     <value>Wir nutzen diese Information, um mehr über Ihre Internetverbindung zu erfahren. Wir sammeln keine persönlichen Informationen ohne Ihre Zustimmung, und alle Felder sind optional.</value>
   </data>
   <data name="LabelForm.es">
-    <value>Usamos esto para aprender más acerca de su conexión a Internet. Nosotros no recogemos ninguna información personal sin su consentimiento, y todos los campos son opcionales.</value>
+    <value>Usamos esto para aprender más sobre su conexión de Internet. Nosotros no recogemos ninguna información personal sin su consentimiento, y todos los campos son opcionales.</value>
   </data>
   <data name="LabelForm.fr">
     <value>Nous l'utilisons pour en savoir plus sur votre connexion Internet. Nous ne collectons aucune information personnelle sans votre consentement, et tous les champs sont facultatifs.</value>
@@ -216,7 +216,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Der Assistent ist bereit, die Internet-Messungen zu starten. Dies kann einige Minuten dauern, abhängig von der Geschwindigkeit Ihrer Internetverbindung. Um fortzufahren, klicken Sie auf Start.</value>
   </data>
   <data name="LabelInfo.es">
-    <value>El asistente está listo para iniciar las mediciones de Internet. Esto puede tardar varios minutos, dependiendo de la velocidad de su conexión a Internet. Para continuar, haga clic en Iniciar.</value>
+    <value>El asistente está listo para iniciar las medidas de Internet. Esto puede tardar varios minutos, dependiendo de la velocidad de su conexión a Internet. Para continuar, haga clic en Iniciar.</value>
   </data>
   <data name="LabelInfo.fr">
     <value>L'assistant est prêt à commencer les mesures d'Internet. Cela peut prendre plusieurs minutes, selon la vitesse de votre connexion Internet. Pour continuer, cliquez sur Début.</value>
