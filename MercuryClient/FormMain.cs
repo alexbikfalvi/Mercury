@@ -484,7 +484,7 @@ namespace Mercury
 		/// <param name="e">The event arguments.</param>
 		private void OnHelp(object sender, EventArgs e)
 		{
-			Process.Start("http://inetanalytics.nets.upf.edu/mercury/faq");
+			Process.Start("http://alex.bikfalvi.com/projects/inetanalytics/mercury/faqs.html");
 		}
 
 		/// <summary>

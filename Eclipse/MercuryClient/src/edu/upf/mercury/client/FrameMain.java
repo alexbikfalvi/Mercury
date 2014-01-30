@@ -163,6 +163,8 @@ public class FrameMain extends JFrame {
 	private static final long serialVersionUID = 1597877587805876042L;
 	private final Object sync = new Object();
 	
+	private static boolean saveToFile = false;
+	
 	private static final String[] locales = { "ca", "de", "en", "es", "fr", "pt", "ro" };
 	private static CultureCollection cultures;
 	private static Resources translation;
@@ -172,7 +174,7 @@ public class FrameMain extends JFrame {
 	
 	private static final String uriGetUrls = "http://inetanalytics.nets.upf.edu/getUrls?countryCode=%s";
 	private static final String uriUploadSession = "http://mercury.upf.edu/mercury/api/traceroute/addTracerouteSession";
-	//private static final String uriUploadTrace = "http://mercury.upf.edu/mercury/api/traceroute/uploadTrace";
+	private static final String uriUploadTrace = "http://mercury.upf.edu/mercury/api/traceroute/uploadTrace";
 	
 	private final Wizard wizard;
 	
@@ -252,6 +254,14 @@ public class FrameMain extends JFrame {
 	 * @throws ParserConfigurationException 
 	 */
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
+		
+		// Check the arguments.
+		if (args.length == 1) {
+			if (args[0] == "--file") {
+				FrameMain.saveToFile = true;
+			}
+		}
+		
 		// Load the cultures.
 		FrameMain.loadCultures();
 		
@@ -1434,66 +1444,39 @@ public class FrameMain extends JFrame {
 			new JsonProperty("dstName", info.getSite()),
 			new JsonProperty("hops", hops));
 
+		// Save to file.
+		if (FrameMain.saveToFile) {
+	 		try {
+	 			File file = new File(result.getDestination().getHostAddress() + "-" + new Date().getTime() + ".json"); 
+	 				if (!file.exists()) {
+	 					file.createNewFile();
+	 				}
+	 				FileWriter fw = new FileWriter(file.getAbsoluteFile());
+	 				BufferedWriter bw = new BufferedWriter(fw);
+	 				bw.write(obj.toString());
+	 				bw.close();
+	 		} catch (IOException e) {
+	 		}		
+		}	
 		
 		try {
-			File file = new File(result.getDestination().getHostAddress() + "-" + new Date().getTime() + ".json"); 
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-			FileWriter fw = new FileWriter(file.getAbsoluteFile());
-			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write(obj.toString());
-			bw.close();
-		} catch (IOException e) {
-		}		
-		
-//		try {
-//			// Create a web request.
-//			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(FormMain.uriUploadTrace);
-//
-//			// Set the request headers.
-//			request.Method = "POST";
-//			request.Accept = "text/html,application/xhtml+xml,application/xml";
-//			request.ContentType = "application/json;charset=UTF-8";
-//
-//			// Create the hops JSON object.
-//			JsonArray hops = new JsonArray();
-//
-//			foreach (TracerouteHop hop in result.Hops)
-//			{
-//				hops.Add(new JsonObject(
-//					new JsonProperty("id", hop.TimeToLive.ToString()),
-//					new JsonProperty("ip", hop.Address != null ? hop.Address.ToString() : "none"),
-//					new JsonProperty("asn", new JsonArray()),
-//					new JsonProperty("rtt", new JsonArray(hop.AverageRoundtripTime.ToString()))
-//					));
-//			}
-//
-//			// Create the traceroute JSON object.
-//			JsonObject obj = new JsonObject(
-//				new JsonProperty("sessionId", this.sessionId.ToString()),
-//				new JsonProperty("srcIp", this.location != null ? this.location.Address : "none"),
-//				new JsonProperty("dstIp", result.Destination.ToString()),
-//				new JsonProperty("srcName", Dns.GetHostName()),
-//				new JsonProperty("dstName", info.Site),
-//				new JsonProperty("hops", hops));
-//
-//			using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
-//			{
-//				writer.Write(obj.ToString());
-//			}
-//
-//			// Execute the request.
-//			using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
-//			{
-//				return response.StatusCode == HttpStatusCode.OK;
-//			}
-//		}
-//		catch
-//		{
-//			return false;
-//		}
-		return true;
+			// Create the web state for the upload session URL.
+			WebState state = new WebState(FrameMain.uriUploadTrace);
+			
+			state.getConnection().setRequestMethod("POST");
+			state.getConnection().setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml");
+			state.getConnection().setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+			state.setData(obj.toString(), Charset.forName("UTF-8"));				
+			
+			// Execute the request.
+			WebResult webResult = this.webRequest.execute(state);
+			
+			// Return if the request was successful.
+			return webResult.getResponseCode() == 200;
+		}
+		catch (Exception e) {
+			return false;
+		}	
 	}
 	
 	

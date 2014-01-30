@@ -47,6 +47,19 @@ public class WebRequest {
 	}
 	
 	/**
+	 * Executes a web request for the specified web state. 
+	 * @param state The web state.
+	 * @return The web result.
+	 * @throws IOException
+	 */
+	public WebResult execute(WebState state) throws IOException {
+		// Execute the get request for the current state.
+		state.execute();
+		// Return the state.
+		return state;
+	}
+	
+	/**
 	 * Begins an asynchronous request for the specified URL.
 	 * @param url The URL.
 	 * @param callback The callback of the asynchronous operation.
