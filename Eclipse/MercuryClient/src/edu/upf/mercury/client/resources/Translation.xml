@@ -4,19 +4,19 @@
     <value>Cancelling the wizard will prevent uploading any measurement result. Do you want to continue?</value>
   </data>
   <data name="CancelMessageText.ca">
-    <value>Cancel·lació de l'assistent evitarà pujar qualsevol resultat del mesurament. Vols continuar?</value>
+    <value>Cancel·lant l'assistent evitarà pujar qualsevol mesura. Vols continuar?</value>
   </data>
   <data name="CancelMessageText.de">
     <value>Ein Abbruch des Assistenten verhindert das Hochladen von Ergebnissen. Wollen Sie fortfahren?</value>
   </data>
   <data name="CancelMessageText.es">
-    <value>Cancelación del asistente evitará subir cualquier resultado de las medidas. ¿Quieres continuar?</value>
+    <value>Cancelando el asistente evitará subir cualquier medida. ¿Quieres continuar?</value>
   </data>
   <data name="CancelMessageText.fr">
     <value>Annulation de l'assistant d'empêcher le téléchargement de tout résultat de mesure. Voulez-vous continuer?</value>
   </data>
   <data name="CancelMessageText.pt">
-    <value>Cancelando o assistente irá evitar carregar qualquer resultado de medição. Você quer continuar?</value>
+    <value>Ao cancelar o assistente, nenhum resultado da medição será enviado ao servidor. Você deseja continuar?</value>
   </data>
   <data name="CancelMessageText.ro">
     <value>Anularea expertului va preveni încărcarea oricărui rezultat de măsurare. Vreți să continuați?</value>
@@ -46,7 +46,7 @@
     <value>Your computer does not have a network connection. Connect your computer to the Internet and then try again.</value>
   </data>
   <data name="ConnectionMessageText.ca">
-    <value>El seu equip no té una connexió de xarxa. Connecteu l'ordinador a Internet i torneu a intentar.</value>
+    <value>El seu equip no té una connexió de xarxa. Connecti l'ordinador a Internet i torni-ho a intentar.</value>
   </data>
   <data name="ConnectionMessageText.de">
     <value>Ihr Computer verfügt über keine Netzwerkverbindung. Verbinden Sie Ihren Computer mit dem Internet und versuchen Sie es erneut.</value>
@@ -100,7 +100,7 @@
     <value>Pour ce qui est de cette information?</value>
   </data>
   <data name="Help.pt">
-    <value>Pois o que é essa informação?</value>
+    <value>Por que pedimos esta informação?</value>
   </data>
   <data name="Help.ro">
     <value>Pentru ce este această informație?</value>
@@ -156,7 +156,7 @@
 To close, click on Finish.</value>
   </data>
   <data name="LabelFinish.ca">
-    <value>L'assistent ha acabat els mesuraments d'Internet.
+    <value>L'assistent ha acabat de fer les mesures d'Internet.
 
 Per tancar, feu clic a Finalitzar.</value>
   </data>
@@ -166,7 +166,7 @@ Per tancar, feu clic a Finalitzar.</value>
 Zum Beenden klicken Sie auf Beenden.</value>
   </data>
   <data name="LabelFinish.es">
-    <value>El asistente ha terminado las mediciones de Internet.
+    <value>El asistente ha terminado de hacer las mediciones de Internet.
 
 Para cerrar, haga clic en Finalizar.</value>
   </data>
@@ -189,13 +189,13 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>We use this to learn more about your Internet connection. We do not collect any personal information without your consent, and all fields are optional.</value>
   </data>
   <data name="LabelForm.ca">
-    <value>Fem servir això per aprendre més sobre la seva connexió d'Internet. Nosaltres no recollim cap informació personal sense el seu consentiment, i tots els camps són opcionals.</value>
+    <value>Fem servir això per conèixer més sobre la seva connexió a Internet. Nosaltres no recollim cap informació personal sense el seu consentiment, i tots els camps són opcionals.</value>
   </data>
   <data name="LabelForm.de">
     <value>Wir nutzen diese Information, um mehr über Ihre Internetverbindung zu erfahren. Wir sammeln keine persönlichen Informationen ohne Ihre Zustimmung, und alle Felder sind optional.</value>
   </data>
   <data name="LabelForm.es">
-    <value>Usamos esto para aprender más sobre su conexión de Internet. Nosotros no recogemos ninguna información personal sin su consentimiento, y todos los campos son opcionales.</value>
+    <value>Usamos esto para conocer más sobre su conexión a Internet. Nosotros no recogemos ninguna información personal sin su consentimiento, y todos los campos son opcionales.</value>
   </data>
   <data name="LabelForm.fr">
     <value>Nous l'utilisons pour en savoir plus sur votre connexion Internet. Nous ne collectons aucune information personnelle sans votre consentement, et tous les champs sont facultatifs.</value>
@@ -210,7 +210,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>The wizard is ready to start the Internet measurements. This may take several minutes, depending on the speed of your Internet connection. To continue, click Start.</value>
   </data>
   <data name="LabelInfo.ca">
-    <value>L'assistent està llest per iniciar els mesuraments d'Internet. Això pot trigar diversos minuts, depenent de la velocitat de la seva connexió a Internet. Per continuar, feu clic a Iniciar.</value>
+    <value>L'assistent està llest per iniciar les mesures d'Internet. Això pot trigar uns quants minuts, depenent de la velocitat de la seva connexió a Internet. Per continuar, feu clic a Iniciar.</value>
   </data>
   <data name="LabelInfo.de">
     <value>Der Assistent ist bereit, die Internet-Messungen zu starten. Dies kann einige Minuten dauern, abhängig von der Geschwindigkeit Ihrer Internetverbindung. Um fortzufahren, klicken Sie auf Start.</value>
@@ -222,7 +222,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>L'assistant est prêt à commencer les mesures d'Internet. Cela peut prendre plusieurs minutes, selon la vitesse de votre connexion Internet. Pour continuer, cliquez sur Début.</value>
   </data>
   <data name="LabelInfo.pt">
-    <value>O assistente está pronto para iniciar as medições de Internet. Isso pode levar vários minutos, dependendo da velocidade de sua conexão de Internet. Para continuar, clique em Começo.</value>
+    <value>O assistente está pronto para iniciar as medições de Internet. Isso pode levar alguns minutos, dependendo da velocidade de sua conexão com a Internet. Para continuar, clique em Iniciar.</value>
   </data>
   <data name="LabelInfo.ro">
     <value>Expertul este pregătit pentru a începe măsurătorile de Internet. Acest lucru poate dura câteva minute, în funcție de viteza conexiunii la Internet. Pentru a continua, faceți clic pe Start.</value>
@@ -264,7 +264,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>L'assistant annule l'opération en cours et se terminera dans quelques secondes.</value>
   </data>
   <data name="LabelProgressCancel.pt">
-    <value>O assistente está a cancelar a operação atual e vai fechar em poucos segundos.</value>
+    <value>O assistente está cancelando a operação atual e fechará em alguns segundos.</value>
   </data>
   <data name="LabelProgressCancel.ro">
     <value>Expertul anulează operațiunea curentă și se va închide în câteva secunde.</value>
@@ -273,13 +273,13 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Completed measurements to %d out of %d web destinations.</value>
   </data>
   <data name="LabelProgressCompleted.ca">
-    <value>Medicions completades a %d de %d destinacions web.</value>
+    <value>Mesures completades %d de %d destinacions web.</value>
   </data>
   <data name="LabelProgressCompleted.de">
     <value>Messungen zu %d von %d Web-Zielen abgeschlossen.</value>
   </data>
   <data name="LabelProgressCompleted.es">
-    <value>Medidas completadas a %d de %d destinos web.</value>
+    <value>Medidas completadas %d de %d destinos web.</value>
   </data>
   <data name="LabelProgressCompleted.fr">
     <value>Mesures terminées à %d de %d destinations Web.</value>
@@ -348,10 +348,10 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Exécution des mesures d'Internet en utilisant %d des destinations web...</value>
   </data>
   <data name="LabelProgressTraceroute.pt">
-    <value>Correndo as medições de Internet com %d destinos web...</value>
+    <value>Realizando as medições de Internet com %d destinos web...</value>
   </data>
   <data name="LabelProgressTraceroute.ro">
-    <value>Rularea măsurătorilor de Internet folosind %d destinatii web...</value>
+    <value>Executarea măsurătorilor de Internet folosind %d destinații web...</value>
   </data>
   <data name="LabelProvider">
     <value>&amp;Internet provider:</value>
@@ -369,7 +369,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Fournisseur d'&amp;Internet:</value>
   </data>
   <data name="LabelProvider.pt">
-    <value>Fornecedor de &amp;Internet:</value>
+    <value>Provedor de &amp;Internet:</value>
   </data>
   <data name="LabelProvider.ro">
     <value>Furnizor de &amp;Internet:</value>
@@ -390,7 +390,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Exemple: Orange, Free, SFR, ou le nom de votre entreprise.</value>
   </data>
   <data name="LabelProviderExample.pt">
-    <value>Exemplo: Optimus, Vodafone, Embratel, ou o nome de sua empresa.</value>
+    <value>Exemplo: VIVO, Net Vírtua, Embratel, ou o nome de sua empresa.</value>
   </data>
   <data name="LabelProviderExample.ro">
     <value>Exemplu: RomTelecom, RDS, UPC, sau numele companiei dumneavoastră.</value>
@@ -411,7 +411,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Impossible de se connecter au serveur Web Mercure. Vérifiez votre connexion Internet et essayez à nouveau.%n%nInformations techniques: %s</value>
   </data>
   <data name="MercuryMessageText.pt">
-    <value>Não é possível conectar-se ao servidor web Mercury. Verifique a sua conexão com a Internet e tente novamente.%n%nInformações técnicas: %s</value>
+    <value>Não é possível conectar-se ao servidor Mercury. Verifique a sua conexão com a Internet e tente novamente.%n%nInformações técnicas: %s</value>
   </data>
   <data name="MercuryMessageText.ro">
     <value>Nu se poate conecta la serverul de web Mercury. Verificați conexiunea la internet și încercați din nou.%n%nInformații tehnice: %s</value>
@@ -432,7 +432,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Erreur de Mercury</value>
   </data>
   <data name="MercuryMessageTitle.pt">
-    <value>Erro Mercury</value>
+    <value>Erro no servidor Mercury</value>
   </data>
   <data name="MercuryMessageTitle.ro">
     <value>Eroare de Mercury</value>
@@ -495,7 +495,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Sélectionnez votre langue et pays</value>
   </data>
   <data name="PageLocaleTitle.pt">
-    <value>Selecione o idioma eo país</value>
+    <value>Selecione o idioma e o país</value>
   </data>
   <data name="PageLocaleTitle.ro">
     <value>Selectați limba și țara dumneavoastră</value>
@@ -705,7 +705,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>%d secondes restantes</value>
   </data>
   <data name="TimeSecondsRemaining.pt">
-    <value>%d segundo restantes</value>
+    <value>%d segundos restantes</value>
   </data>
   <data name="TimeSecondsRemaining.ro">
     <value>%d secunde rămase</value>
@@ -726,7 +726,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>Retourne à une page précédente</value>
   </data>
   <data name="WizardBackButtonToolTip.pt">
-    <value>Retorna para a página anterior</value>
+    <value>Retorna à página anterior</value>
   </data>
   <data name="WizardBackButtonToolTip.ro">
     <value>Întoarce la o pagină anterioară</value>
@@ -747,7 +747,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>A&amp;rrière</value>
   </data>
   <data name="WizardBackText.pt">
-    <value>&amp;Atrás</value>
+    <value>&amp;Voltar</value>
   </data>
   <data name="WizardBackText.ro">
     <value>Î&amp;napoi</value>
@@ -837,7 +837,7 @@ Pentru a închide, faceți clic pe &amp;Termină.</value>
     <value>&amp;Début</value>
   </data>
   <data name="WizardStartText.pt">
-    <value>&amp;Começo</value>
+    <value>&amp;Iniciar</value>
   </data>
   <data name="WizardStartText.ro">
     <value>&amp;Start</value>

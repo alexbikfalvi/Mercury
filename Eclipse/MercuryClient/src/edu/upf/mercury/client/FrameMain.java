@@ -254,10 +254,9 @@ public class FrameMain extends JFrame {
 	 * @throws ParserConfigurationException 
 	 */
 	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
-		
 		// Check the arguments.
 		if (args.length == 1) {
-			if (args[0] == "--file") {
+			if (args[0].equals("--file")) {
 				FrameMain.saveToFile = true;
 			}
 		}
@@ -274,10 +273,18 @@ public class FrameMain extends JFrame {
 				// Set the look and feel.
 				try {
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				} catch (Exception e) {
 				}
-				catch (Exception e) {
-					
+				
+				// If the file switch has been set, alert the user.
+				if (FrameMain.saveToFile) {
+					JOptionPane.showMessageDialog(
+						null,
+						"The file switch has been set. Mercury Client will save the traceroute JSON output to files in the current folder.",
+						"Mercury Client Options",
+						JOptionPane.INFORMATION_MESSAGE);
 				}
+				
 				// Create the main frame.
 				FrameMain frame = new FrameMain();
 				// Show the main frame.
