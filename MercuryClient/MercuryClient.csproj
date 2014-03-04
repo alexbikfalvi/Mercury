@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -24,7 +25,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -92,6 +92,7 @@
     <Compile Include="Net\Core\TracerouteHop.cs" />
     <Compile Include="Net\Core\TracerouteResult.cs" />
     <Compile Include="Net\Core\TracerouteSettings.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Threading\CancellationToken.cs" />
     <Compile Include="Web\AsyncWebBuffer.cs" />
     <Compile Include="Web\AsyncWebRequest.cs" />
@@ -120,7 +121,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\AeroWizard\StepWizardControl.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Windows\Controls\AeroWizard\ThemedImageButton.cs">
       <SubType>Component</SubType>
@@ -136,7 +137,7 @@
     </Compile>
     <Compile Include="Windows\VisualStyles\VisualStyleElementEx.cs" />
     <Compile Include="Windows\Controls\AeroWizard\WizardControl.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Windows\Controls\AeroWizard\Design\WizardControlDesigner.cs" />
     <Compile Include="Windows\Controls\AeroWizard\WizardPage.cs">
