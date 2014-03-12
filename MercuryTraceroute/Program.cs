@@ -52,8 +52,13 @@ namespace Mercury
 				this.ParseArgument(args, ref index);
 			}
 
+			// Show the syntax.
+			Program.WriteLine(ConsoleColor.Gray, Resources.Syntax);
+			// Show the interfaces.
+			Program.ListInterfaces();
+
 			// If the destination is not set, throw an exception.
-			if (null == destination) throw new ArgumentException(Resources.Syntax);
+			if (null == destination) throw new ArgumentException("Invalid syntax");
 		}
 
 		// Public methods.
@@ -100,7 +105,7 @@ namespace Mercury
 		{
 			// Show the destination.
 			Program.WriteLine(ConsoleColor.Gray, "Destination:");
-			Program.WriteLine(ConsoleColor.Cyan, "\t{0}", this.destination);
+			Program.WriteLine(ConsoleColor.Cyan, "  {0}", this.destination);
 
 			// Resolve the destination IP address.
 			IPAddress[] addresses = Dns.GetHostAddresses(this.destination);
@@ -109,34 +114,7 @@ namespace Mercury
 			Program.WriteLine(ConsoleColor.Gray, "Addresses:");
 			foreach (IPAddress address in addresses)
 			{
-				Program.WriteLine(ConsoleColor.Cyan, "\t{0}", address);
-			}
-
-			// Show the local IP addresses.
-			Program.WriteLine(ConsoleColor.Gray, "Interfaces:");
-			foreach (NetworkInterface iface in NetworkInterface.GetAllNetworkInterfaces())
-			{
-				// Get the IP properties of the interface.
-				IPInterfaceProperties properties = iface.GetIPProperties();
-
-				// 
-				foreach(UnicastIPAddressInformation info in properties.UnicastAddresses)
-				{
-					switch (info.Address.AddressFamily)
-					{
-						case AddressFamily.InterNetwork:
-							Program.Write(ConsoleColor.Green, "\tIPv4", ConsoleColor.Cyan, "\t{0} / {1}", info.Address, info.IPv4Mask);
-							Program.Write(ConsoleColor.White, "");
-							break;
-						case AddressFamily.InterNetworkV6:
-							Program.Write(ConsoleColor.Green, "\tIPv6", ConsoleColor.Cyan, "\t{0} {1}", info.Address,
-								info.Address.IsIPv6LinkLocal ? "Link-local" : string.Empty,
-								info.Address.IsIPv6Multicast ? "Multicast" : string.Empty,
-								info.Address.IsIPv6SiteLocal ? "Site-local" :string.Empty);
-							break;
-					}
-				}
-
+				Program.WriteLine(ConsoleColor.Cyan, "  {0}", address);
 			}
 
 			// Run the traceroute.
@@ -201,6 +179,44 @@ namespace Mercury
 		}
 
 		/// <summary>
+		/// Shows the information on the local IP interfaces.
+		/// </summary>
+		private static void ListInterfaces()
+		{
+			// Show the local IP addresses.
+			Program.WriteLine(ConsoleColor.Gray, "Interfaces:");
+			foreach (NetworkInterface iface in NetworkInterface.GetAllNetworkInterfaces())
+			{
+				Program.WriteLine(ConsoleColor.White, "  {0}", iface.Name);
+				Program.WriteLine(ConsoleColor.Gray, "    Type: ", ConsoleColor.Cyan, iface.NetworkInterfaceType.ToString());
+				Program.WriteLine(ConsoleColor.Gray, "    Status: ", ConsoleColor.Cyan, iface.OperationalStatus.ToString());
+				Program.WriteLine(ConsoleColor.Gray, "    Speed: ", ConsoleColor.Cyan, iface.Speed.ToString());
+
+				// Get the IP properties of the interface.
+				IPInterfaceProperties properties = iface.GetIPProperties();
+
+				// 
+				foreach (UnicastIPAddressInformation info in properties.UnicastAddresses)
+				{
+					switch (info.Address.AddressFamily)
+					{
+						case AddressFamily.InterNetwork:
+							Program.Write(ConsoleColor.Yellow, "      IPv4", ConsoleColor.Cyan, "  {0}", info.Address);
+							Program.WriteLine(ConsoleColor.White, " / ", ConsoleColor.Cyan, "{0}", info.IPv4Mask);
+							break;
+						case AddressFamily.InterNetworkV6:
+							Program.Write(ConsoleColor.Yellow, "      IPv6", ConsoleColor.Cyan, "  {0}", info.Address);
+							Program.WriteLine(ConsoleColor.Yellow, "  {0}  {1}  {2}",
+								info.Address.IsIPv6LinkLocal ? "Link-local" : string.Empty,
+								info.Address.IsIPv6Multicast ? "Multicast" : string.Empty,
+								info.Address.IsIPv6SiteLocal ? "Site-local" : string.Empty);
+							break;
+					}
+				}
+			}
+		}
+
+		/// <summary>
 		/// Writes a text to the console.
 		/// </summary>
 		/// <param name="color">The text foreground color.</param>
@@ -225,10 +241,28 @@ namespace Mercury
 		}
 
 		/// <summary>
+		/// Writes a text to the console.
+		/// </summary>
+		/// <param name="color1">The first foreground color.</param>
+		/// <param name="text">The first text.</param>
+		/// <param name="color2">The second foreground color.</param>
+		/// <param name="format">The second text format.</param>
+		/// <param name="arguments">The text arguments.</param>
+		private static void Write(ConsoleColor color1, string text, ConsoleColor color2, string format, params object[] arguments)
+		{
+			Console.ForegroundColor = color1;
+			Console.Write(text);
+			Console.ForegroundColor = color2;
+			Console.Write(format, arguments);
+		}
+
+		/// <summary>
 		/// Writes a line to the console.
 		/// </summary>
-		/// <param name="color">The text foreground color.</param>
-		/// <param name="format">The text format.</param>
+		/// <param name="color1">The first foreground color.</param>
+		/// <param name="text">The first text.</param>
+		/// <param name="color2">The second foreground color.</param>
+		/// <param name="format">The second text format.</param>
 		/// <param name="arguments">The text arguments.</param>
 		private static void WriteLine(ConsoleColor color1, string text, ConsoleColor color2, string format, params object[] arguments)
 		{

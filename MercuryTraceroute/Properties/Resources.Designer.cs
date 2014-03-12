@@ -72,7 +72,8 @@ namespace Mercury.Properties {
         ///-I           Use ICMP (default).
         ///-i &lt;value&gt;   The local IP address.
         ///-m &lt;number&gt;  The maximum TTL if the destination is not found.
-        ///-U           Use UDP..
+        ///-U           Use UDP.
+        ///.
         /// </summary>
         internal static string Syntax {
             get {
