@@ -187,6 +187,9 @@ namespace Mercury
 			Program.WriteLine(ConsoleColor.Gray, "Interfaces:");
 			foreach (NetworkInterface iface in NetworkInterface.GetAllNetworkInterfaces())
 			{
+				// Do not show down interfaces.
+				if (iface.OperationalStatus != OperationalStatus.Up) continue;
+
 				Program.WriteLine(ConsoleColor.White, "  {0}", iface.Name);
 				Program.WriteLine(ConsoleColor.Gray, "    Type: ", ConsoleColor.Cyan, iface.NetworkInterfaceType.ToString());
 				Program.WriteLine(ConsoleColor.Gray, "    Status: ", ConsoleColor.Cyan, iface.OperationalStatus.ToString());

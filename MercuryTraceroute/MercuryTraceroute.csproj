@@ -44,6 +44,8 @@
     <Compile Include="Net\Core\MultipathTraceroute.cs" />
     <Compile Include="Net\Core\MultipathTracerouteResult.cs" />
     <Compile Include="Net\Core\MultipathTracerouteSettings.cs" />
+    <Compile Include="Net\Information\IPAddressInformation.cs" />
+    <Compile Include="Net\Information\IPUnicastAddressInformation.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

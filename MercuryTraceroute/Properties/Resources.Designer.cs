@@ -63,14 +63,13 @@ namespace Mercury.Properties {
         /// <summary>
         ///   Looks up a localized string similar to The syntax is:
         ///
-        ///mercurytraceroute [options] destination
+        ///mercurytraceroute [options] interface destination
         ///
         ///Options:
         ///-A           Solve the autonomous system numbers.
         ///-c &lt;number&gt;  The number of attempts per flow, to detect per-packet load balancing.
         ///-f &lt;number&gt;  The number of flows to detect multiple paths.
         ///-I           Use ICMP (default).
-        ///-i &lt;value&gt;   The local IP address.
         ///-m &lt;number&gt;  The maximum TTL if the destination is not found.
         ///-U           Use UDP.
         ///.
