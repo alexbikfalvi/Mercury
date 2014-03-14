@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercuryClient", "MercuryCli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercuryTraceroute", "MercuryTraceroute\MercuryTraceroute.csproj", "{C413660D-88F9-46FF-90BE-F2064F996DF6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InetApi", "..\InetAnalytics\InetApi\InetApi.csproj", "{6E2D7303-FFAB-4732-86F5-8BB0F7CD8276}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C413660D-88F9-46FF-90BE-F2064F996DF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C413660D-88F9-46FF-90BE-F2064F996DF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C413660D-88F9-46FF-90BE-F2064F996DF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E2D7303-FFAB-4732-86F5-8BB0F7CD8276}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E2D7303-FFAB-4732-86F5-8BB0F7CD8276}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E2D7303-FFAB-4732-86F5-8BB0F7CD8276}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E2D7303-FFAB-4732-86F5-8BB0F7CD8276}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -41,11 +41,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Net\Core\MultipathTraceroute.cs" />
-    <Compile Include="Net\Core\MultipathTracerouteResult.cs" />
-    <Compile Include="Net\Core\MultipathTracerouteSettings.cs" />
-    <Compile Include="Net\Information\IPAddressInformation.cs" />
-    <Compile Include="Net\Information\IPUnicastAddressInformation.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -63,6 +58,12 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="app.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\InetAnalytics\InetApi\InetApi.csproj">
+      <Project>{6e2d7303-ffab-4732-86f5-8bb0f7cd8276}</Project>
+      <Name>InetApi</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

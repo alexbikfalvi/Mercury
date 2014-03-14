@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright (C) 2013 Alex Bikfalvi
+ * Copyright (C) 2014 Alex Bikfalvi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,12 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Net.NetworkInformation;
+using Mercury.Net.Information;
 using Mercury.Properties;
 
-using System.Net;
 using System.Net.Sockets;
 using Mercury.Net.Core;
 
@@ -31,7 +33,10 @@ namespace Mercury
 	/// </summary>
 	public sealed class Program : IDisposable
 	{
+		private static readonly List<IPUnicastAddressInformation> localAddresses = new List<IPUnicastAddressInformation>();
+
 		private string destination = null;
+		private IPUnicastAddressInformation localAddress = null;
 		private MultipathTracerouteSettings settings;
 
 		/// <summary>
@@ -43,22 +48,21 @@ namespace Mercury
 			// Write the program information.
 			Program.WriteLine(ConsoleColor.White, Resources.Title);
 
+			// Update the list of local IP addresses.
+			Program.UpdateLocalAddresses();
+
 			// Create the traceroute settings.
 			this.settings = new MultipathTracerouteSettings();
 
 			// Parse the arguments.
-			for (int index = 0; index < args.Length; index++)
+			for (int argumentIndex = 0, parameterIndex = 0; argumentIndex < args.Length; argumentIndex++)
 			{
-				this.ParseArgument(args, ref index);
+				this.ParseArgument(args, ref argumentIndex, ref parameterIndex);
 			}
 
-			// Show the syntax.
-			Program.WriteLine(ConsoleColor.Gray, Resources.Syntax);
-			// Show the interfaces.
-			Program.ListInterfaces();
-
-			// If the destination is not set, throw an exception.
-			if (null == destination) throw new ArgumentException("Invalid syntax");
+			// If not all parameters are set, throw an exception.
+			if (null == this.localAddress) throw new ArgumentException("The local address is missing.");
+			if (null == this.destination) throw new ArgumentException("The destination is missing.");
 		}
 
 		// Public methods.
@@ -80,6 +84,11 @@ namespace Mercury
 			}
 			catch (Exception exception)
 			{
+				// Show the syntax.
+				Program.WriteLine(ConsoleColor.Gray, Resources.Syntax);
+				// Show the list of local IP addresses.
+				Program.ShowLocalAddresses();
+				// Show the error.
 				Program.WriteLine(ConsoleColor.Red, "ERROR  ", ConsoleColor.Gray, exception.Message);
 			}
 
@@ -104,21 +113,23 @@ namespace Mercury
 		private void Run()
 		{
 			// Show the destination.
-			Program.WriteLine(ConsoleColor.Gray, "Destination:");
-			Program.WriteLine(ConsoleColor.Cyan, "  {0}", this.destination);
+			Program.WriteLine(ConsoleColor.Gray, "Destination: ", ConsoleColor.Cyan, "{0}", this.destination);
+			// Show the local address.
+			Program.WriteLine(ConsoleColor.Gray, "Source address: ", ConsoleColor.Cyan, "{0}", this.localAddress.Address);
 
-			// Resolve the destination IP address.
-			IPAddress[] addresses = Dns.GetHostAddresses(this.destination);
+			// Resolve the remote IP address.
+			IPAddress[] remoteAddresses = Dns.GetHostAddresses(this.destination);
 
-			// Show the destination IP addresses.
-			Program.WriteLine(ConsoleColor.Gray, "Addresses:");
-			foreach (IPAddress address in addresses)
+			// Show the remote IP addresses.
+			Program.Write(ConsoleColor.Gray, "Remote addresses:");
+			foreach (IPAddress address in remoteAddresses)
 			{
-				Program.WriteLine(ConsoleColor.Cyan, "  {0}", address);
+				Program.Write(ConsoleColor.Cyan, "  {0}", address);
 			}
+			Console.WriteLine();
 
 			// Run the traceroute.
-			foreach (IPAddress address in addresses)
+			foreach (IPAddress address in remoteAddresses)
 			{
 				try
 				{
@@ -165,58 +176,99 @@ namespace Mercury
 		/// Parses the argument from the list at the specified index.
 		/// </summary>
 		/// <param name="args">The list of arguments.</param>
-		/// <param name="index">The argument index.</param>
-		private void ParseArgument(string[] args, ref int index)
+		/// <param name="argumentIndex">The argument index.</param>
+		/// <param name="parameterIndex">The parameter index.</param>
+		private void ParseArgument(string[] args, ref int argumentIndex, ref int parameterIndex)
 		{
 			// Parse the argument.
-			switch (args[index].Trim())
+			switch (args[argumentIndex].Trim())
 			{
-				case "-A": break;
 				default:
-					this.destination = args[index];
+					switch(parameterIndex++)
+					{
+						case 0: this.localAddress = Program.localAddresses[int.Parse(args[argumentIndex])]; break;
+						case 1: this.destination = args[argumentIndex]; break;
+						default: throw new ArgumentException(string.Format("Unknown argument: {0}", args[argumentIndex]));
+					}
 					break;
 			}
 		}
 
 		/// <summary>
-		/// Shows the information on the local IP interfaces.
+		/// Updates the information on the local IP addresses.
 		/// </summary>
-		private static void ListInterfaces()
+		private static void UpdateLocalAddresses()
 		{
-			// Show the local IP addresses.
-			Program.WriteLine(ConsoleColor.Gray, "Interfaces:");
+			// Clear the current addresses list.
+			Program.localAddresses.Clear();
+
+			// For each network interface.
 			foreach (NetworkInterface iface in NetworkInterface.GetAllNetworkInterfaces())
 			{
-				// Do not show down interfaces.
+				// Skip the interfaces that are not up.
 				if (iface.OperationalStatus != OperationalStatus.Up) continue;
-
-				Program.WriteLine(ConsoleColor.White, "  {0}", iface.Name);
-				Program.WriteLine(ConsoleColor.Gray, "    Type: ", ConsoleColor.Cyan, iface.NetworkInterfaceType.ToString());
-				Program.WriteLine(ConsoleColor.Gray, "    Status: ", ConsoleColor.Cyan, iface.OperationalStatus.ToString());
-				Program.WriteLine(ConsoleColor.Gray, "    Speed: ", ConsoleColor.Cyan, iface.Speed.ToString());
 
 				// Get the IP properties of the interface.
 				IPInterfaceProperties properties = iface.GetIPProperties();
 
-				// 
+				// If the interface does not have a DNS server address.
+				if (properties.DnsAddresses.Count == 0) continue;
+
+				// For all unicast IP addresses of this interface.
 				foreach (UnicastIPAddressInformation info in properties.UnicastAddresses)
 				{
-					switch (info.Address.AddressFamily)
+					// If the IP address is IPv4 or IPv6.
+					if ((info.Address.AddressFamily == AddressFamily.InterNetwork) || (info.Address.AddressFamily == AddressFamily.InterNetworkV6))
 					{
-						case AddressFamily.InterNetwork:
-							Program.Write(ConsoleColor.Yellow, "      IPv4", ConsoleColor.Cyan, "  {0}", info.Address);
-							Program.WriteLine(ConsoleColor.White, " / ", ConsoleColor.Cyan, "{0}", info.IPv4Mask);
-							break;
-						case AddressFamily.InterNetworkV6:
-							Program.Write(ConsoleColor.Yellow, "      IPv6", ConsoleColor.Cyan, "  {0}", info.Address);
-							Program.WriteLine(ConsoleColor.Yellow, "  {0}  {1}  {2}",
-								info.Address.IsIPv6LinkLocal ? "Link-local" : string.Empty,
-								info.Address.IsIPv6Multicast ? "Multicast" : string.Empty,
-								info.Address.IsIPv6SiteLocal ? "Site-local" : string.Empty);
-							break;
+						// Add a new unicast address information instance to the local addresses list.
+						Program.localAddresses.Add(new IPUnicastAddressInformation(iface, info));
 					}
 				}
 			}
+		}
+
+		/// <summary>
+		/// Shows the information on the local IP addresses.
+		/// </summary>
+		private static void ShowLocalAddresses()
+		{
+			// Show the local IP addresses.
+			Program.WriteLine(ConsoleColor.Gray, "Local addresses:");
+
+			// For all the local IP addresses.
+			int addressIndex = 0;
+			Program.WriteLine(ConsoleColor.Gray, "{0,4} | {1,-40} | {2,-6} | {3,-30} | {4,-15} | {5,-10} | {6,-5} | {7, -20}", "#", "Address", "Family", "Interface", "Type", "Speed", "Flags", "DNS");
+			foreach (IPUnicastAddressInformation info in Program.localAddresses)
+			{
+				Program.Write(ConsoleColor.Cyan, "{0,4}", addressIndex++);
+				Program.Write(ConsoleColor.Gray, " | ", ConsoleColor.Yellow, "{0,-40}", info.Address);
+				Program.Write(ConsoleColor.Gray, " | ", ConsoleColor.Cyan, "{0,-6}", (info.Address.AddressFamily == AddressFamily.InterNetwork) ? "IPv4" : "IPv6");
+				Program.Write(ConsoleColor.Gray, " | ", ConsoleColor.Cyan, "{0,-30}", info.Interface.Name);
+				Program.Write(ConsoleColor.Gray, " | ", ConsoleColor.Cyan, "{0,-15}", info.Interface.NetworkInterfaceType.ToString());
+				Program.Write(ConsoleColor.Gray, " | ", ConsoleColor.Cyan, "{0,-10}", info.Interface.Speed);
+				Program.Write(ConsoleColor.Gray, " | ", ConsoleColor.Cyan, "{0,-5}", 
+					string.Format("{0}{1}{2}",
+					info.Address.IsIPv6LinkLocal ? "L" : string.Empty,
+					info.Address.IsIPv6Multicast ? "M" : string.Empty,
+					info.Address.IsIPv6SiteLocal ? "S" : string.Empty)
+					);
+
+				// Show the DNS addresses.
+				IPAddressCollection dnsAddresses = info.Interface.GetIPProperties().DnsAddresses;
+				Program.WriteLine(ConsoleColor.Gray, " | ", ConsoleColor.Cyan, "{0,-20}", dnsAddresses[0]);
+				for (int dnsIndex = 1; dnsIndex < dnsAddresses.Count; dnsIndex++)
+				{
+					Program.Write(ConsoleColor.Gray, "{0,4} | {0,-40} | {0,-6} | {0,-30} | {0,-15} | {0,-10} | {0,-5} | ", string.Empty);
+					Program.WriteLine(ConsoleColor.Cyan, "{0,-20}", dnsAddresses[dnsIndex]);
+				}
+			}
+			Console.WriteLine();
+			Program.Write(ConsoleColor.Gray, "  Flags: ");
+			Program.Write(ConsoleColor.Cyan, "L", ConsoleColor.Gray, " Link-local  ");
+			Program.Write(ConsoleColor.Cyan, "M", ConsoleColor.Gray, " Multicast  ");
+			Program.Write(ConsoleColor.Cyan, "S", ConsoleColor.Gray, " Site-local  ");
+			Console.WriteLine();
+			Console.WriteLine();
 		}
 
 		/// <summary>
