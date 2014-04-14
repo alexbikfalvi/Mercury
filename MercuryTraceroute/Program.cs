@@ -20,11 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
-using Mercury.Net.Information;
-using Mercury.Properties;
-
 using System.Net.Sockets;
-using Mercury.Net.Core;
+using InetApi.Net.Core;
+using Mercury.Properties;
 
 namespace Mercury
 {
@@ -33,10 +31,7 @@ namespace Mercury
 	/// </summary>
 	public sealed class Program : IDisposable
 	{
-		private static readonly List<IPUnicastAddressInformation> localAddresses = new List<IPUnicastAddressInformation>();
-
 		private string destination = null;
-		private IPUnicastAddressInformation localAddress = null;
 		private MultipathTracerouteSettings settings;
 
 		/// <summary>
@@ -48,9 +43,6 @@ namespace Mercury
 			// Write the program information.
 			Program.WriteLine(ConsoleColor.White, Resources.Title);
 
-			// Update the list of local IP addresses.
-			Program.UpdateLocalAddresses();
-
 			// Create the traceroute settings.
 			this.settings = new MultipathTracerouteSettings();
 
@@ -61,11 +53,10 @@ namespace Mercury
 			}
 
 			// If not all parameters are set, throw an exception.
-			if (null == this.localAddress) throw new ArgumentException("The local address is missing.");
 			if (null == this.destination) throw new ArgumentException("The destination is missing.");
 		}
 
-		// Public methods.
+		#region Public methods
 
 		/// <summary>
 		/// The main method.
@@ -86,8 +77,6 @@ namespace Mercury
 			{
 				// Show the syntax.
 				Program.WriteLine(ConsoleColor.Gray, Resources.Syntax);
-				// Show the list of local IP addresses.
-				Program.ShowLocalAddresses();
 				// Show the error.
 				Program.WriteLine(ConsoleColor.Red, "ERROR  ", ConsoleColor.Gray, exception.Message);
 			}
@@ -105,7 +94,9 @@ namespace Mercury
 			GC.SuppressFinalize(this);
 		}
 
-		// Private methods.
+		#endregion
+
+		#region Private methods
 
 		/// <summary>
 		/// Runs the current traceroute.
@@ -115,7 +106,7 @@ namespace Mercury
 			// Show the destination.
 			Program.WriteLine(ConsoleColor.Gray, "Destination: ", ConsoleColor.Cyan, "{0}", this.destination);
 			// Show the local address.
-			Program.WriteLine(ConsoleColor.Gray, "Source address: ", ConsoleColor.Cyan, "{0}", this.localAddress.Address);
+			//Program.WriteLine(ConsoleColor.Gray, "Source address: ", ConsoleColor.Cyan, "{0}", this.localAddress.Address);
 
 			// Resolve the remote IP address.
 			IPAddress[] remoteAddresses = Dns.GetHostAddresses(this.destination);
@@ -186,89 +177,11 @@ namespace Mercury
 				default:
 					switch(parameterIndex++)
 					{
-						case 0: this.localAddress = Program.localAddresses[int.Parse(args[argumentIndex])]; break;
 						case 1: this.destination = args[argumentIndex]; break;
 						default: throw new ArgumentException(string.Format("Unknown argument: {0}", args[argumentIndex]));
 					}
 					break;
 			}
-		}
-
-		/// <summary>
-		/// Updates the information on the local IP addresses.
-		/// </summary>
-		private static void UpdateLocalAddresses()
-		{
-			// Clear the current addresses list.
-			Program.localAddresses.Clear();
-
-			// For each network interface.
-			foreach (NetworkInterface iface in NetworkInterface.GetAllNetworkInterfaces())
-			{
-				// Skip the interfaces that are not up.
-				if (iface.OperationalStatus != OperationalStatus.Up) continue;
-
-				// Get the IP properties of the interface.
-				IPInterfaceProperties properties = iface.GetIPProperties();
-
-				// If the interface does not have a DNS server address.
-				if (properties.DnsAddresses.Count == 0) continue;
-
-				// For all unicast IP addresses of this interface.
-				foreach (UnicastIPAddressInformation info in properties.UnicastAddresses)
-				{
-					// If the IP address is IPv4 or IPv6.
-					if ((info.Address.AddressFamily == AddressFamily.InterNetwork) || (info.Address.AddressFamily == AddressFamily.InterNetworkV6))
-					{
-						// Add a new unicast address information instance to the local addresses list.
-						Program.localAddresses.Add(new IPUnicastAddressInformation(iface, info));
-					}
-				}
-			}
-		}
-
-		/// <summary>
-		/// Shows the information on the local IP addresses.
-		/// </summary>
-		private static void ShowLocalAddresses()
-		{
-			// Show the local IP addresses.
-			Program.WriteLine(ConsoleColor.Gray, "Local addresses:");
-
-			// For all the local IP addresses.
-			int addressIndex = 0;
-			Program.WriteLine(ConsoleColor.Gray, "{0,4} | {1,-40} | {2,-6} | {3,-30} | {4,-15} | {5,-10} | {6,-5} | {7, -20}", "#", "Address", "Family", "Interface", "Type", "Speed", "Flags", "DNS");
-			foreach (IPUnicastAddressInformation info in Program.localAddresses)
-			{
-				Program.Write(ConsoleColor.Cyan, "{0,4}", addressIndex++);
-				Program.Write(ConsoleColor.Gray, " | ", ConsoleColor.Yellow, "{0,-40}", info.Address);
-				Program.Write(ConsoleColor.Gray, " | ", ConsoleColor.Cyan, "{0,-6}", (info.Address.AddressFamily == AddressFamily.InterNetwork) ? "IPv4" : "IPv6");
-				Program.Write(ConsoleColor.Gray, " | ", ConsoleColor.Cyan, "{0,-30}", info.Interface.Name);
-				Program.Write(ConsoleColor.Gray, " | ", ConsoleColor.Cyan, "{0,-15}", info.Interface.NetworkInterfaceType.ToString());
-				Program.Write(ConsoleColor.Gray, " | ", ConsoleColor.Cyan, "{0,-10}", info.Interface.Speed);
-				Program.Write(ConsoleColor.Gray, " | ", ConsoleColor.Cyan, "{0,-5}", 
-					string.Format("{0}{1}{2}",
-					info.Address.IsIPv6LinkLocal ? "L" : string.Empty,
-					info.Address.IsIPv6Multicast ? "M" : string.Empty,
-					info.Address.IsIPv6SiteLocal ? "S" : string.Empty)
-					);
-
-				// Show the DNS addresses.
-				IPAddressCollection dnsAddresses = info.Interface.GetIPProperties().DnsAddresses;
-				Program.WriteLine(ConsoleColor.Gray, " | ", ConsoleColor.Cyan, "{0,-20}", dnsAddresses[0]);
-				for (int dnsIndex = 1; dnsIndex < dnsAddresses.Count; dnsIndex++)
-				{
-					Program.Write(ConsoleColor.Gray, "{0,4} | {0,-40} | {0,-6} | {0,-30} | {0,-15} | {0,-10} | {0,-5} | ", string.Empty);
-					Program.WriteLine(ConsoleColor.Cyan, "{0,-20}", dnsAddresses[dnsIndex]);
-				}
-			}
-			Console.WriteLine();
-			Program.Write(ConsoleColor.Gray, "  Flags: ");
-			Program.Write(ConsoleColor.Cyan, "L", ConsoleColor.Gray, " Link-local  ");
-			Program.Write(ConsoleColor.Cyan, "M", ConsoleColor.Gray, " Multicast  ");
-			Program.Write(ConsoleColor.Cyan, "S", ConsoleColor.Gray, " Site-local  ");
-			Console.WriteLine();
-			Console.WriteLine();
 		}
 
 		/// <summary>
@@ -326,5 +239,7 @@ namespace Mercury
 			Console.ForegroundColor = color2;
 			Console.WriteLine(format, arguments);
 		}
+
+		#endregion
 	}
 }
