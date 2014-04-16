@@ -263,7 +263,7 @@ namespace Mercury
 				try
 				{
 					// Run an ICMP traceroute.
-					this.traceroute.RunIcmpV4(localAddress, remoteAddress, cancel.Token, null);
+					this.traceroute.RunIpv4(localAddress, remoteAddress, cancel.Token, null);
 				}
 				catch (Exception exception)
 				{
