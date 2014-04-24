@@ -49,8 +49,7 @@ namespace Mercury
 		private MultipathTracerouteSettings settings;
 
 		private bool flagIpv6 = false;
-		private bool flagResolveAs = false;
-
+		private int verbosity = 2;
 
 		/// <summary>
 		/// Creates a new program instance.
@@ -246,8 +245,10 @@ namespace Mercury
 			Console.WriteLine();
 			Program.WriteLine(ConsoleColor.Gray, "Attempts per flow......................", ConsoleColor.Cyan, this.settings.AttemptsPerFlow.ToString());
 			Program.WriteLine(ConsoleColor.Gray, "Flow count.............................", ConsoleColor.Cyan, this.settings.FlowCount.ToString());
+			Program.WriteLine(ConsoleColor.Gray, "Minimum hops...........................", ConsoleColor.Cyan, this.settings.MinimumHops.ToString());
 			Program.WriteLine(ConsoleColor.Gray, "Maximum hops...........................", ConsoleColor.Cyan, this.settings.MaximumHops.ToString());
 			Program.WriteLine(ConsoleColor.Gray, "Maximum unknown hops...................", ConsoleColor.Cyan, this.settings.MaximumUnknownHops.ToString());
+			Program.WriteLine(ConsoleColor.Gray, "Attempt delay (ms).....................", ConsoleColor.Cyan, this.settings.AttemptDelay.ToString());
 			Program.WriteLine(ConsoleColor.Gray, "Hop timeout (ms).......................", ConsoleColor.Cyan, this.settings.HopTimeout.ToString());
 			Program.WriteLine(ConsoleColor.Gray, "Data length (bytes)....................", ConsoleColor.Cyan, this.settings.DataLength.ToString());
 
@@ -277,117 +278,123 @@ namespace Mercury
 					// Run an ICMP traceroute.
 					this.traceroute.RunIpv4(localAddress, remoteAddress, cancel.Token, (MultipathTracerouteResult result, MultipathTracerouteState state) =>
 						{
-							/*
-							switch (state.Type)
+							// Level 3 verbosity.
+							if (this.verbosity >= 3)
 							{
-								case MultipathTracerouteState.StateType.PacketCapture:
-									Program.WriteLine(ConsoleColor.Yellow, "PACKET-CAPTURE ", ConsoleColor.Gray, (state.Parameters[0] as ProtoPacketIp).ToString());
-									{
-										ProtoPacket payload = (state.Parameters[0] as ProtoPacketIp).Payload;
-										if (null != payload)
+								switch (state.Type)
+								{
+									case MultipathTracerouteState.StateType.PacketCapture:
+										Program.WriteLine(ConsoleColor.Yellow, "PACKET-CAPTURE ", ConsoleColor.Gray, (state.Parameters[0] as ProtoPacketIp).ToString());
 										{
-											Program.WriteLine(ConsoleColor.Gray, "               Payload: {0}", payload.ToString());
-											if (payload is ProtoPacketIcmpTimeExceeded)
+											ProtoPacket payload = (state.Parameters[0] as ProtoPacketIp).Payload;
+											if (null != payload)
 											{
-												Program.WriteLine(ConsoleColor.Gray, "                        {0}", (payload as ProtoPacketIcmpTimeExceeded).IpHeader.ToString());
-												Program.WriteLine(ConsoleColor.Gray, "                        IPv4 PAYLOAD Data: {0}", (payload as ProtoPacketIcmpTimeExceeded).IpPayload.ToExtendedString());
+												Program.WriteLine(ConsoleColor.Gray, "               Payload: {0}", payload.ToString());
+												if (payload is ProtoPacketIcmpTimeExceeded)
+												{
+													Program.WriteLine(ConsoleColor.Gray, "                        {0}", (payload as ProtoPacketIcmpTimeExceeded).IpHeader.ToString());
+													Program.WriteLine(ConsoleColor.Gray, "                        IPv4 PAYLOAD Data: {0}", (payload as ProtoPacketIcmpTimeExceeded).IpPayload.ToExtendedString());
+												}
 											}
 										}
-									}
-									break;
-								case MultipathTracerouteState.StateType.PacketError:
-									Program.WriteLine(ConsoleColor.Red, "PACKET-ERROR ", ConsoleColor.Gray, (state.Parameters[0] as Exception).Message);
-									break;
-								case MultipathTracerouteState.StateType.BeginIcmp:
-									Program.WriteLine(ConsoleColor.Cyan, "BEGIN-ICMP");
-									break;
-								case MultipathTracerouteState.StateType.EndIcmp:
-									Program.WriteLine(ConsoleColor.Cyan, "END-ICMP");
-									break;
-								case MultipathTracerouteState.StateType.BeginUdp:
-									Program.WriteLine(ConsoleColor.Cyan, "BEGIN-UDP");
-									break;
-								case MultipathTracerouteState.StateType.EndUdp:
-									Program.WriteLine(ConsoleColor.Cyan, "END-UDP");
-									break;
-								case MultipathTracerouteState.StateType.BeginFlow:
-									{
-										byte flow = (byte)state.Parameters[0];
-										Program.WriteLine(ConsoleColor.Cyan, "BEGIN-FLOW ", ConsoleColor.Gray, "Index: {0} ID: {1}", flow, result.Flows[flow].Id);
-										Program.WriteLine(ConsoleColor.Gray, "           ICMP identifier: 0x{0:X4} ICMP checksum: 0x{1:X4}", result.Flows[flow].IcmpId, result.Flows[flow].IcmpChecksum);
-									}
-									break;
-								case MultipathTracerouteState.StateType.EndFlow:
-									{
-										byte flow = (byte)state.Parameters[0];
-										Program.WriteLine(ConsoleColor.Cyan, "END-FLOW ", ConsoleColor.Gray, "Index: {0}", flow);
-									}
-									break;
-								case MultipathTracerouteState.StateType.BeginTtl:
-									Program.WriteLine(ConsoleColor.Cyan, "BEGIN-TTL ", ConsoleColor.Gray, "TTL: {0}", (byte)state.Parameters[0]);
-									break;
-								case MultipathTracerouteState.StateType.EndTtl:
-									Program.WriteLine(ConsoleColor.Cyan, "END-TTL ", ConsoleColor.Gray, "TTL: {0}", (byte)state.Parameters[0]);
-									break;
-								case MultipathTracerouteState.StateType.RequestExpired:
-									{
-										MultipathTracerouteResult.RequestState requestState = (MultipathTracerouteResult.RequestState)state.Parameters[0];
-										Program.WriteLine(ConsoleColor.Magenta, "REQUEST-EXPIRED ", ConsoleColor.Gray, "Type: {0} Timestamp: {1} Timeout: {2} Flow: {3} Attempt: {4} TTL: {5}",
-											requestState.Flow, requestState.Timestamp, requestState.Timeout, requestState.Flow, requestState.Attempt, requestState.TimeToLive);
-									}
-									break;
+										break;
+									case MultipathTracerouteState.StateType.PacketError:
+										Program.WriteLine(ConsoleColor.Red, "PACKET-ERROR ", ConsoleColor.Gray, (state.Parameters[0] as Exception).Message);
+										break;
+									case MultipathTracerouteState.StateType.BeginIcmp:
+										Program.WriteLine(ConsoleColor.Cyan, "BEGIN-ICMP");
+										break;
+									case MultipathTracerouteState.StateType.EndIcmp:
+										Program.WriteLine(ConsoleColor.Cyan, "END-ICMP");
+										break;
+									case MultipathTracerouteState.StateType.BeginUdp:
+										Program.WriteLine(ConsoleColor.Cyan, "BEGIN-UDP");
+										break;
+									case MultipathTracerouteState.StateType.EndUdp:
+										Program.WriteLine(ConsoleColor.Cyan, "END-UDP");
+										break;
+									case MultipathTracerouteState.StateType.BeginFlow:
+										{
+											byte flow = (byte)state.Parameters[0];
+											Program.WriteLine(ConsoleColor.Cyan, "BEGIN-FLOW ", ConsoleColor.Gray, "Index: {0} ID: {1}", flow, result.Flows[flow].Id);
+											Program.WriteLine(ConsoleColor.Gray, "           ICMP identifier: 0x{0:X4} ICMP checksum: 0x{1:X4}", result.Flows[flow].IcmpId, result.Flows[flow].IcmpChecksum);
+										}
+										break;
+									case MultipathTracerouteState.StateType.EndFlow:
+										{
+											byte flow = (byte)state.Parameters[0];
+											Program.WriteLine(ConsoleColor.Cyan, "END-FLOW ", ConsoleColor.Gray, "Index: {0}", flow);
+										}
+										break;
+									case MultipathTracerouteState.StateType.BeginTtl:
+										Program.WriteLine(ConsoleColor.Cyan, "BEGIN-TTL ", ConsoleColor.Gray, "TTL: {0}", (byte)state.Parameters[0]);
+										break;
+									case MultipathTracerouteState.StateType.EndTtl:
+										Program.WriteLine(ConsoleColor.Cyan, "END-TTL ", ConsoleColor.Gray, "TTL: {0}", (byte)state.Parameters[0]);
+										break;
+									case MultipathTracerouteState.StateType.RequestExpired:
+										{
+											MultipathTracerouteResult.RequestState requestState = (MultipathTracerouteResult.RequestState)state.Parameters[0];
+											Program.WriteLine(ConsoleColor.Magenta, "REQUEST-EXPIRED ", ConsoleColor.Gray, "Type: {0} Timestamp: {1} Timeout: {2} Flow: {3} Attempt: {4} TTL: {5}",
+												requestState.Flow, requestState.Timestamp, requestState.Timeout, requestState.Flow, requestState.Attempt, requestState.TimeToLive);
+										}
+										break;
+								}
 							}
-							 */
 
-							if (state.Type == MultipathTracerouteState.StateType.EndIcmp)
+							if (this.verbosity >= 2)
 							{
-								// Display the ICMP result.
-								Program.WriteLine(ConsoleColor.Cyan, "ICMP Traceroute Data");
-								Program.WriteLine(ConsoleColor.Cyan, "====================");
-								Console.WriteLine();
-
-								for (byte flow = 0; flow < result.Flows.Length; flow++)
+								if (state.Type == MultipathTracerouteState.StateType.EndIcmp)
 								{
-									Console.WriteLine();
-									Program.WriteLine(ConsoleColor.Gray, "Flow identifier..................", ConsoleColor.Cyan, result.Flows[flow].Id.ToString());
-									Program.WriteLine(ConsoleColor.Gray, "Flow short identifier............", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].ShortId);
-									Program.WriteLine(ConsoleColor.Gray, "Flow ICMP identifier.............", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].IcmpId);
-									Program.WriteLine(ConsoleColor.Gray, "Flow ICMP checksum...............", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].IcmpChecksum);
-									Console.WriteLine();
-
-									// Display the results header.
-									Program.Write(ConsoleColor.White, " TTL ");
-									for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+									// Display the ICMP result.
+									for (byte flow = 0; flow < result.Flows.Length; flow++)
 									{
-										Program.Write(ConsoleColor.White, "| Attempt {0}", attempt.ToString().PadRight(11));
-									}
-									Console.WriteLine();
+										Console.WriteLine();
+										Program.WriteLine(ConsoleColor.Gray, "Flow index.............................", ConsoleColor.Cyan, flow);
+										Program.WriteLine(ConsoleColor.Gray, "Flow identifier........................", ConsoleColor.Cyan, result.Flows[flow].Id.ToString());
+										Program.WriteLine(ConsoleColor.Gray, "Flow short identifier..................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].ShortId);
+										Program.WriteLine(ConsoleColor.Gray, "Flow ICMP identifier...................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].IcmpId);
+										Program.WriteLine(ConsoleColor.Gray, "Flow ICMP checksum.....................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].IcmpChecksum);
+										Console.WriteLine();
 
-													// Display the remaining hops.
-									bool completed = false;
-									for (byte ttl = 0; (ttl < this.settings.MaximumHops - this.settings.MinimumHops + 1) && (!completed); ttl++)
-									{
-										completed = true;
-										Program.Write(ConsoleColor.Gray, (this.settings.MinimumHops + ttl).ToString().PadLeft(5));
+										// Display the results header.
+										Program.Write(ConsoleColor.White, " TTL ");
 										for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
 										{
-											switch (result.IcmpData[flow, ttl, attempt].State)
-											{
-												case MultipathTracerouteData.DataState.NotSet:
-													completed = false;
-													Program.Write(ConsoleColor.Magenta, "| Not set".PadRight(22));
-													break;
-												case MultipathTracerouteData.DataState.RequestSent:
-													completed = false;
-													Program.Write(ConsoleColor.Red, "| Timeout".PadRight(22));
-													break;
-												case MultipathTracerouteData.DataState.ResponseReceived:
-													completed = completed && (result.IcmpData[flow, ttl, attempt].Address.Equals(remoteAddress));
-													Program.Write(ConsoleColor.Green, "| {0}", result.IcmpData[flow, ttl, attempt].Address.ToString().PadRight(20));
-													break;
-											}
+											Program.Write(ConsoleColor.White, "| Attempt {0}", attempt.ToString().PadRight(14));
 										}
 										Console.WriteLine();
+
+										// Display the remaining hops.
+										bool completed = false;
+										for (byte ttl = 0; (ttl < this.settings.MaximumHops - this.settings.MinimumHops + 1) && (!completed); ttl++)
+										{
+											completed = true;
+											Program.Write(ConsoleColor.Gray, (this.settings.MinimumHops + ttl).ToString().PadLeft(5));
+											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											{
+												switch (result.IcmpData[flow, ttl, attempt].State)
+												{
+													case MultipathTracerouteData.DataState.NotSet:
+														completed = false;
+														Program.Write(ConsoleColor.White, "| ", ConsoleColor.Yellow, "Not set".PadRight(22));
+														break;
+													case MultipathTracerouteData.DataState.RequestSent:
+														completed = false;
+														Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Timeout".PadRight(22));
+														break;
+													case MultipathTracerouteData.DataState.ResponseReceived:
+														completed = completed && (result.IcmpData[flow, ttl, attempt].Address.Equals(remoteAddress));
+														{
+															int rtt = (int)(result.IcmpData[flow, ttl, attempt].ResponseTimestamp - result.IcmpData[flow, ttl, attempt].RequestTimestamp).TotalMilliseconds;
+															Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, result.IcmpData[flow, ttl, attempt].Address.ToString().PadRight(16));
+															Program.Write(ConsoleColor.Gray, "({0})".FormatWith(rtt).PadRight(6));
+														}
+														break;
+												}
+											}
+											Console.WriteLine();
+										}
 									}
 								}
 							}
@@ -401,7 +408,7 @@ namespace Mercury
 			}
 
 			// Reset the console color.
-			Console.ResetColor();
+			Program.WriteLine(ConsoleColor.Gray, "Completed.");
 		}
 
 		/// <summary>
@@ -426,9 +433,9 @@ namespace Mercury
 			switch (args[argumentIndex].Trim())
 			{
 				case "-6": this.flagIpv6 = true; break;
-				case "-a": this.flagResolveAs = true; break;
 				case "-c": this.settings.AttemptsPerFlow = (byte)int.Parse(args[++argumentIndex]); break;
 				case "-d": this.dnsServer = IPAddress.Parse(args[++argumentIndex]); break;
+				case "-e": this.settings.AttemptDelay = int.Parse(args[++argumentIndex]); break;
 				case "-f": this.settings.FlowCount = (byte)int.Parse(args[++argumentIndex]); break;
 				case "-h": this.settings.MaximumUnknownHops = (byte)int.Parse(args[++argumentIndex]); break;
 				case "-i": this.iface = int.Parse(args[++argumentIndex]); break;
@@ -436,6 +443,7 @@ namespace Mercury
 				case "-o": this.settings.HopTimeout = int.Parse(args[++argumentIndex]); break;
 				case "-s": this.settings.DataLength = int.Parse(args[++argumentIndex]); break;
 				case "-t": this.dnsClient.QueryTimeout = int.Parse(args[++argumentIndex]); break;
+				case "-v": this.verbosity = int.Parse(args[++argumentIndex]); break;
 				case "-x": this.settings.MaximumHops = (byte)int.Parse(args[++argumentIndex]); break;
 				default: throw new ArgumentException("Option {0} unknown.".FormatWith(args[argumentIndex]));
 			}
