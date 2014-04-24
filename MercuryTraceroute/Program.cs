@@ -26,6 +26,7 @@ using System.Threading;
 using DotNetApi;
 using InetApi.Net.Core;
 using InetApi.Net.Core.Dns;
+using InetApi.Net.Core.Protocols;
 using InetCommon.Net;
 using Mercury.Properties;
 
@@ -49,7 +50,6 @@ namespace Mercury
 
 		private bool flagIpv6 = false;
 		private bool flagResolveAs = false;
-		private bool flagUseUdp = true;
 
 
 		/// <summary>
@@ -141,7 +141,7 @@ namespace Mercury
 			// Show the local interfaces.
 			Program.WriteLine(ConsoleColor.Gray, "Network interfaces");
 			Program.WriteLine(ConsoleColor.Gray, "{0}|{1}|{2}|{3}|{4}",
-				"#".PadRight(3), "Name".PadRight(30), "IPv4 Address".PadRight(16), "IPv6 Address".PadRight(40), "DNS Server");
+				"#".PadRight(3), "Name".PadRight(40), "IPv4 Address".PadRight(16), "IPv6 Address".PadRight(40), "DNS Server");
 			for (int index = 0; index < this.interfaces.Length; index++)
 			{
 				IPAddress addressIPv4 = NetworkConfiguration.GetLocalUnicastAddress(this.interfaces[index], AddressFamily.InterNetwork);
@@ -150,7 +150,7 @@ namespace Mercury
 
 				Program.WriteLine(ConsoleColor.Cyan, "{0}|{1}|{2}|{3}|{4}",
 					index.ToString().PadRight(3),
-					this.interfaces[index].Name.PadRight(30),
+					this.interfaces[index].Name.PadRight(40),
 					addressIPv4 != null ? addressIPv4.ToString().PadRight(16) : string.Empty.PadRight(16),
 					addressIPv6 != null ? addressIPv6.ToString().PadRight(40) : string.Empty.PadRight(40),
 					addressDns != null ? addressDns.ToString() : string.Empty);
@@ -180,7 +180,7 @@ namespace Mercury
 			Program.WriteLine(ConsoleColor.Gray, "Local address..........................", ConsoleColor.Cyan, localAddress.ToString());
 
 			// Get the DNS server.
-			IPAddress dnsAddress = this.dnsServer != null ? this.dnsServer : this.iface != null ? NetworkConfiguration.GetDnsServer(this.interfaces[this.iface.Value]) : NetworkConfiguration.GetDnsServer();
+			IPAddress dnsAddress = this.dnsServer != null ? this.dnsServer : this.iface != null ? NetworkConfiguration.GetDnsServer(this.interfaces[this.iface.Value]) : NetworkConfiguration.GetDnsServer(this.interfaces);
 			
 			// Show the DNS server.
 			Program.WriteLine(ConsoleColor.Gray, "DNS server.............................", ConsoleColor.Cyan, dnsAddress.ToString());
@@ -191,29 +191,41 @@ namespace Mercury
 			List<IPAddress> remoteAddresses = new List<IPAddress>();
 			try
 			{
-				DnsMessage dnsResponse = this.dnsClient.Resolve(this.destination, localAddress, dnsAddress, this.flagIpv6 ? RecordType.Aaaa : RecordType.A, RecordClass.INet);
-				if (this.flagIpv6)
+				IPAddress address;
+				// Try parse the destination name to a remote address.
+				if (IPAddress.TryParse(this.destination, out address))
 				{
-					foreach (DnsRecordBase record in dnsResponse.AnswerRecords.Where(rec => rec is AaaaRecord))
-					{
-						// Get the IP address.
-						IPAddress address = (record as AaaaRecord).Address;
-						// Show the remote IP address.
-						Program.WriteLine(ConsoleColor.Gray, "Remote address.........................", ConsoleColor.Cyan, address.ToString());
-						// Add the address.
-						remoteAddresses.Add(address);
-					}
+					// Show the remote IP address.
+					Program.WriteLine(ConsoleColor.Gray, "Remote address.........................", ConsoleColor.Cyan, address.ToString());
+					// Add the address.
+					remoteAddresses.Add(address);
 				}
 				else
 				{
-					foreach (DnsRecordBase record in dnsResponse.AnswerRecords.Where(rec => rec is ARecord))
+					DnsMessage dnsResponse = this.dnsClient.Resolve(this.destination, localAddress, dnsAddress, this.flagIpv6 ? RecordType.Aaaa : RecordType.A, RecordClass.INet);
+					if (this.flagIpv6)
 					{
-						// Get the IP address.
-						IPAddress address = (record as ARecord).Address;
-						// Show the remote IP address.
-						Program.WriteLine(ConsoleColor.Gray, "Remote address.........................", ConsoleColor.Cyan, address.ToString());
-						// Add the address.
-						remoteAddresses.Add(address);
+						foreach (DnsRecordBase record in dnsResponse.AnswerRecords.Where(rec => rec is AaaaRecord))
+						{
+							// Get the IP address.
+							address = (record as AaaaRecord).Address;
+							// Show the remote IP address.
+							Program.WriteLine(ConsoleColor.Gray, "Remote address.........................", ConsoleColor.Cyan, address.ToString());
+							// Add the address.
+							remoteAddresses.Add(address);
+						}
+					}
+					else
+					{
+						foreach (DnsRecordBase record in dnsResponse.AnswerRecords.Where(rec => rec is ARecord))
+						{
+							// Get the IP address.
+							address = (record as ARecord).Address;
+							// Show the remote IP address.
+							Program.WriteLine(ConsoleColor.Gray, "Remote address.........................", ConsoleColor.Cyan, address.ToString());
+							// Add the address.
+							remoteAddresses.Add(address);
+						}
 					}
 				}
 			}
@@ -263,7 +275,53 @@ namespace Mercury
 				try
 				{
 					// Run an ICMP traceroute.
-					this.traceroute.RunIpv4(localAddress, remoteAddress, cancel.Token, null);
+					this.traceroute.RunIpv4(localAddress, remoteAddress, cancel.Token, (MultipathTracerouteResult result, MultipathTracerouteState state) =>
+						{
+							switch (state.Type)
+							{
+								case MultipathTracerouteState.StateType.PacketCapture:
+									Program.WriteLine(ConsoleColor.Yellow, "PACKET-CAPTURE ", ConsoleColor.Gray, (state.Parameters[0] as ProtoPacketIp).ToString());
+									if (null != (state.Parameters[0] as ProtoPacketIp).Payload)
+									{
+										Program.WriteLine(ConsoleColor.Gray, "               Payload: {0}", (state.Parameters[0] as ProtoPacketIp).Payload.ToString());
+									}
+									break;
+								case MultipathTracerouteState.StateType.PacketError:
+									Program.WriteLine(ConsoleColor.Red, "PACKET-ERROR ", ConsoleColor.Gray, (state.Parameters[0] as Exception).Message);
+									break;
+								case MultipathTracerouteState.StateType.BeginIcmp:
+									Program.WriteLine(ConsoleColor.Cyan, "BEGIN-ICMP");
+									break;
+								case MultipathTracerouteState.StateType.EndIcmp:
+									Program.WriteLine(ConsoleColor.Cyan, "END-ICMP");
+									break;
+								case MultipathTracerouteState.StateType.BeginUdp:
+									Program.WriteLine(ConsoleColor.Cyan, "BEGIN-UDP");
+									break;
+								case MultipathTracerouteState.StateType.EndUdp:
+									Program.WriteLine(ConsoleColor.Cyan, "END-UDP");
+									break;
+								case MultipathTracerouteState.StateType.BeginFlow:
+									{
+										int index = (int)state.Parameters[0];
+										Program.WriteLine(ConsoleColor.Cyan, "BEGIN-FLOW ", ConsoleColor.Gray, "Index: {0} ID: {1}", index, result.Flows[index].Id);
+										Program.WriteLine(ConsoleColor.Gray, "           ICMP identifier: 0x{0:X4} ICMP checksum: 0x{1:X4}", result.Flows[index].IcmpId, result.Flows[index].IcmpChecksum);
+									}
+									break;
+								case MultipathTracerouteState.StateType.EndFlow:
+									{
+										int index = (int)state.Parameters[0];
+										Program.WriteLine(ConsoleColor.Cyan, "END-FLOW ", ConsoleColor.Gray, "Index: {0}", index);
+									}
+									break;
+								case MultipathTracerouteState.StateType.BeginTtl:
+									Program.WriteLine(ConsoleColor.Cyan, "BEGIN-TTL", ConsoleColor.Gray, "TTL: {0}", (byte)state.Parameters[0]);
+									break;
+								case MultipathTracerouteState.StateType.EndTtl:
+									Program.WriteLine(ConsoleColor.Cyan, "END-TTL", ConsoleColor.Gray, "TTL: {0}", (byte)state.Parameters[0]);
+									break;
+							}
+						});
 				}
 				catch (Exception exception)
 				{
@@ -316,16 +374,16 @@ namespace Mercury
 			{
 				case "-6": this.flagIpv6 = true; break;
 				case "-a": this.flagResolveAs = true; break;
-				case "-c": this.settings.AttemptsPerFlow = int.Parse(args[++argumentIndex]); break;
+				case "-c": this.settings.AttemptsPerFlow = (byte)int.Parse(args[++argumentIndex]); break;
 				case "-d": this.dnsServer = IPAddress.Parse(args[++argumentIndex]); break;
-				case "-f": this.settings.FlowCount = int.Parse(args[++argumentIndex]); break;
-				case "-h": this.settings.MaximumHops = int.Parse(args[++argumentIndex]); break;
+				case "-f": this.settings.FlowCount = (byte)int.Parse(args[++argumentIndex]); break;
+				case "-h": this.settings.MaximumUnknownHops = (byte)int.Parse(args[++argumentIndex]); break;
 				case "-i": this.iface = int.Parse(args[++argumentIndex]); break;
-				case "-m": this.settings.MaximumUnknownHops = int.Parse(args[++argumentIndex]); break;
+				case "-m": this.settings.MinimumHops = (byte)int.Parse(args[++argumentIndex]); break;
 				case "-o": this.settings.HopTimeout = int.Parse(args[++argumentIndex]); break;
 				case "-s": this.settings.DataLength = int.Parse(args[++argumentIndex]); break;
 				case "-t": this.dnsClient.QueryTimeout = int.Parse(args[++argumentIndex]); break;
-				case "-u": this.flagUseUdp = true; break;
+				case "-x": this.settings.MaximumHops = (byte)int.Parse(args[++argumentIndex]); break;
 				default: throw new ArgumentException("Option {0} unknown.".FormatWith(args[argumentIndex]));
 			}
 		}

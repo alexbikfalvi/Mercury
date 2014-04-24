@@ -68,12 +68,11 @@ namespace Mercury.Properties {
         ///Options:
         ///  -6           Use IP version 6.
         ///  -a           Resolve the autonomous system numbers.
-        ///  -c &lt;number&gt;  The number of attempts per flow, to detect per-packet load balancing.
+        ///  -c &lt;number&gt;  The number of attempts per flow, to detect per-packet load balancing (default is 5).
         ///  -d &lt;address&gt; Resolve the destination using the specified DNS server.
-        ///  -f &lt;number&gt;  The number of flows to detect multiple paths.
-        ///  -h &lt;number&gt;  The maximum number of unknown hops.
-        ///  -i &lt;number&gt;  The local interface index.
-        ///  -m &lt;number&gt;  The maximum TTL if the [rest of string was truncated]&quot;;.
+        ///  -f &lt;number&gt;  The number of flows to detect multiple paths (default is 5).
+        ///  -h &lt;number&gt;  The maximum number of unknown hops (default is 10).
+        ///  -i &lt;number&gt;  The local interface [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Syntax {
             get {
