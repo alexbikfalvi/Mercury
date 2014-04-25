@@ -54,7 +54,7 @@ namespace Mercury
 		/// <summary>
 		/// Creates a new program instance.
 		/// </summary>
-		/// <param name="args"></param>
+		/// <param name="args">The arguments.</param>
 		public Program(string[] args)
 		{
 			// Write the program information.
@@ -344,58 +344,88 @@ namespace Mercury
 
 							if (this.verbosity >= 2)
 							{
-								if (state.Type == MultipathTracerouteState.StateType.EndIcmp)
+								switch (state.Type)
 								{
-									// Display the ICMP result.
-									for (byte flow = 0; flow < result.Flows.Length; flow++)
-									{
-										Console.WriteLine();
-										Program.WriteLine(ConsoleColor.Gray, "Flow index.............................", ConsoleColor.Cyan, flow);
-										Program.WriteLine(ConsoleColor.Gray, "Flow identifier........................", ConsoleColor.Cyan, result.Flows[flow].Id.ToString());
-										Program.WriteLine(ConsoleColor.Gray, "Flow short identifier..................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].ShortId);
-										Program.WriteLine(ConsoleColor.Gray, "Flow ICMP identifier...................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].IcmpId);
-										Program.WriteLine(ConsoleColor.Gray, "Flow ICMP checksum.....................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].IcmpChecksum);
-										Console.WriteLine();
-
-										// Display the results header.
-										Program.Write(ConsoleColor.White, " TTL ");
-										for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+									case MultipathTracerouteState.StateType.EndIcmp:
+										// Display the ICMP result.
+										for (byte flow = 0; flow < result.Flows.Length; flow++)
 										{
-											Program.Write(ConsoleColor.White, "| Attempt {0}", attempt.ToString().PadRight(14));
-										}
-										Console.WriteLine();
+											Console.WriteLine();
+											Program.WriteLine(ConsoleColor.Gray, "Protocol...............................", ConsoleColor.Yellow, "ICMP");
+											Console.WriteLine();
+											Program.WriteLine(ConsoleColor.Gray, "Flow index.............................", ConsoleColor.Cyan, flow.ToString());
+											Program.WriteLine(ConsoleColor.Gray, "Flow identifier........................", ConsoleColor.Cyan, result.Flows[flow].Id.ToString());
+											Program.WriteLine(ConsoleColor.Gray, "Flow short identifier..................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].ShortId);
+											Program.WriteLine(ConsoleColor.Gray, "Flow ICMP identifier...................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].IcmpId);
+											Program.WriteLine(ConsoleColor.Gray, "Flow ICMP checksum.....................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].IcmpChecksum);
+											Console.WriteLine();
 
-										// Display the remaining hops.
-										bool completed = false;
-										for (byte ttl = 0; (ttl < this.settings.MaximumHops - this.settings.MinimumHops + 1) && (!completed); ttl++)
-										{
-											completed = true;
-											Program.Write(ConsoleColor.Gray, (this.settings.MinimumHops + ttl).ToString().PadLeft(5));
+											// Display the results header.
+											Program.Write(ConsoleColor.White, " TTL ");
 											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
 											{
-												switch (result.IcmpData[flow, ttl, attempt].State)
+												Program.Write(ConsoleColor.White, "| Attempt {0}(RTT) ", attempt.ToString().PadRight(8));
+											}
+											Console.WriteLine();
+
+											// Compute the maximum time-to-live.
+											byte maximumTtl = byte.MinValue;
+											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											{
+												maximumTtl = maximumTtl < result.IcmpStatistics[flow, attempt].MaximumTimeToLive ? result.IcmpStatistics[flow, attempt].MaximumTimeToLive : maximumTtl;
+											}
+
+											// Display the hops data.
+											for (byte ttl = 0; ttl < this.settings.MinimumHops + maximumTtl - 1; ttl++)
+											{
+												Program.Write(ConsoleColor.Gray, (this.settings.MinimumHops + ttl).ToString().PadLeft(5));
+												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
 												{
-													case MultipathTracerouteData.DataState.NotSet:
-														completed = false;
-														Program.Write(ConsoleColor.White, "| ", ConsoleColor.Yellow, "Not set".PadRight(22));
+													switch (result.IcmpData[flow, ttl, attempt].State)
+													{
+														case MultipathTracerouteData.DataState.NotSet:
+															Program.Write(ConsoleColor.White, "| ", ConsoleColor.Yellow, "Not set".PadRight(22));
+															break;
+														case MultipathTracerouteData.DataState.RequestSent:
+															Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Timeout".PadRight(22));
+															break;
+														case MultipathTracerouteData.DataState.ResponseReceived:
+															{
+																int rtt = (int)(result.IcmpData[flow, ttl, attempt].ResponseTimestamp - result.IcmpData[flow, ttl, attempt].RequestTimestamp).TotalMilliseconds;
+																Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, result.IcmpData[flow, ttl, attempt].Address.ToString().PadRight(16));
+																Program.Write(ConsoleColor.Gray, "({0})".FormatWith(rtt).PadRight(6));
+															}
+															break;
+													}
+												}
+												Console.WriteLine();
+											}
+
+											// Display the results footer.
+											Program.Write(ConsoleColor.White, "=====");
+											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											{
+												Program.Write(ConsoleColor.White, "|=======================", attempt.ToString().PadRight(8));
+											}
+											Console.WriteLine();
+
+											// Display the results statistics.
+											Program.Write(ConsoleColor.White, "     ");
+											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											{
+												switch(result.IcmpStatistics[flow, attempt].State)
+												{
+													case MultipathTracerouteStatistics.StatisticsState.Completed:
+														Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, "Completed".PadRight(22));
 														break;
-													case MultipathTracerouteData.DataState.RequestSent:
-														completed = false;
-														Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Timeout".PadRight(22));
-														break;
-													case MultipathTracerouteData.DataState.ResponseReceived:
-														completed = completed && (result.IcmpData[flow, ttl, attempt].Address.Equals(remoteAddress));
-														{
-															int rtt = (int)(result.IcmpData[flow, ttl, attempt].ResponseTimestamp - result.IcmpData[flow, ttl, attempt].RequestTimestamp).TotalMilliseconds;
-															Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, result.IcmpData[flow, ttl, attempt].Address.ToString().PadRight(16));
-															Program.Write(ConsoleColor.Gray, "({0})".FormatWith(rtt).PadRight(6));
-														}
+													case MultipathTracerouteStatistics.StatisticsState.Unreachable:
+														Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Unreachable".PadRight(22));
 														break;
 												}
 											}
 											Console.WriteLine();
 										}
-									}
+										break;
 								}
 							}
 						});
@@ -406,9 +436,6 @@ namespace Mercury
 					return;
 				}
 			}
-
-			// Reset the console color.
-			Program.WriteLine(ConsoleColor.Gray, "Completed.");
 		}
 
 		/// <summary>
@@ -432,19 +459,20 @@ namespace Mercury
 			// Parse the argument.
 			switch (args[argumentIndex].Trim())
 			{
-				case "-6": this.flagIpv6 = true; break;
 				case "-c": this.settings.AttemptsPerFlow = (byte)int.Parse(args[++argumentIndex]); break;
 				case "-d": this.dnsServer = IPAddress.Parse(args[++argumentIndex]); break;
 				case "-e": this.settings.AttemptDelay = int.Parse(args[++argumentIndex]); break;
 				case "-f": this.settings.FlowCount = (byte)int.Parse(args[++argumentIndex]); break;
 				case "-h": this.settings.MaximumUnknownHops = (byte)int.Parse(args[++argumentIndex]); break;
 				case "-i": this.iface = int.Parse(args[++argumentIndex]); break;
-				case "-m": this.settings.MinimumHops = (byte)int.Parse(args[++argumentIndex]); break;
 				case "-o": this.settings.HopTimeout = int.Parse(args[++argumentIndex]); break;
+				case "-p-min": this.settings.MinimumPort = ushort.Parse(args[++argumentIndex]); break;
+				case "-p-max": this.settings.MinimumPort = ushort.Parse(args[++argumentIndex]); break;
 				case "-s": this.settings.DataLength = int.Parse(args[++argumentIndex]); break;
 				case "-t": this.dnsClient.QueryTimeout = int.Parse(args[++argumentIndex]); break;
+				case "-t-min": this.settings.MinimumHops = (byte)int.Parse(args[++argumentIndex]); break;
+				case "-t-max": this.settings.MaximumHops = (byte)int.Parse(args[++argumentIndex]); break;
 				case "-v": this.verbosity = int.Parse(args[++argumentIndex]); break;
-				case "-x": this.settings.MaximumHops = (byte)int.Parse(args[++argumentIndex]); break;
 				default: throw new ArgumentException("Option {0} unknown.".FormatWith(args[argumentIndex]));
 			}
 		}
@@ -459,6 +487,7 @@ namespace Mercury
 		{
 			Console.ForegroundColor = color;
 			Console.Write(format, arguments);
+			Console.ResetColor();
 		}
 
 		/// <summary>
@@ -471,6 +500,7 @@ namespace Mercury
 		{
 			Console.ForegroundColor = color;
 			Console.WriteLine(format, arguments);
+			Console.ResetColor();
 		}
 
 		/// <summary>
@@ -487,6 +517,7 @@ namespace Mercury
 			Console.Write(text);
 			Console.ForegroundColor = color2;
 			Console.Write(format, arguments);
+			Console.ResetColor();
 		}
 
 		/// <summary>
@@ -503,6 +534,7 @@ namespace Mercury
 			Console.Write(text);
 			Console.ForegroundColor = color2;
 			Console.WriteLine(format, arguments);
+			Console.ResetColor();
 		}
 
 		#endregion
