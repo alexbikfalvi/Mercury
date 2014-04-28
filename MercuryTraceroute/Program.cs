@@ -295,23 +295,22 @@ namespace Mercury
 													Program.WriteLine(ConsoleColor.Gray, "                        {0}", (payload as ProtoPacketIcmpTimeExceeded).IpHeader.ToString());
 													Program.WriteLine(ConsoleColor.Gray, "                        IPv4 PAYLOAD Data: {0}", (payload as ProtoPacketIcmpTimeExceeded).IpPayload.ToExtendedString());
 												}
+												if (payload is ProtoPacketIcmpDestinationUnreachable)
+												{
+													Program.WriteLine(ConsoleColor.Gray, "                        {0}", (payload as ProtoPacketIcmpDestinationUnreachable).IpHeader.ToString());
+													Program.WriteLine(ConsoleColor.Gray, "                        IPv4 PAYLOAD Data: {0}", (payload as ProtoPacketIcmpDestinationUnreachable).IpPayload.ToExtendedString());
+												}
 											}
 										}
 										break;
 									case MultipathTracerouteState.StateType.PacketError:
 										Program.WriteLine(ConsoleColor.Red, "PACKET-ERROR ", ConsoleColor.Gray, (state.Parameters[0] as Exception).Message);
 										break;
-									case MultipathTracerouteState.StateType.BeginIcmp:
-										Program.WriteLine(ConsoleColor.Cyan, "BEGIN-ICMP");
+									case MultipathTracerouteState.StateType.BeginAlgorithm:
+										Program.WriteLine(ConsoleColor.Cyan, "BEGIN-ALGORITHM ", ConsoleColor.Gray, "Algorithm: {0}", (MultipathTraceroute.MultipathAlgorithm)state.Parameters[0]);
 										break;
-									case MultipathTracerouteState.StateType.EndIcmp:
-										Program.WriteLine(ConsoleColor.Cyan, "END-ICMP");
-										break;
-									case MultipathTracerouteState.StateType.BeginUdp:
-										Program.WriteLine(ConsoleColor.Cyan, "BEGIN-UDP");
-										break;
-									case MultipathTracerouteState.StateType.EndUdp:
-										Program.WriteLine(ConsoleColor.Cyan, "END-UDP");
+									case MultipathTracerouteState.StateType.EndAlgorithm:
+										Program.WriteLine(ConsoleColor.Cyan, "END-ALGORITHM ", ConsoleColor.Gray, "Algorithm: {0}", (MultipathTraceroute.MultipathAlgorithm)state.Parameters[0]);
 										break;
 									case MultipathTracerouteState.StateType.BeginFlow:
 										{
@@ -344,88 +343,278 @@ namespace Mercury
 
 							if (this.verbosity >= 2)
 							{
-								switch (state.Type)
+								if (state.Type == MultipathTracerouteState.StateType.EndAlgorithm)
 								{
-									case MultipathTracerouteState.StateType.EndIcmp:
-										// Display the ICMP result.
-										for (byte flow = 0; flow < result.Flows.Length; flow++)
-										{
-											Console.WriteLine();
-											Program.WriteLine(ConsoleColor.Gray, "Protocol...............................", ConsoleColor.Yellow, "ICMP");
-											Console.WriteLine();
-											Program.WriteLine(ConsoleColor.Gray, "Flow index.............................", ConsoleColor.Cyan, flow.ToString());
-											Program.WriteLine(ConsoleColor.Gray, "Flow identifier........................", ConsoleColor.Cyan, result.Flows[flow].Id.ToString());
-											Program.WriteLine(ConsoleColor.Gray, "Flow short identifier..................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].ShortId);
-											Program.WriteLine(ConsoleColor.Gray, "Flow ICMP identifier...................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].IcmpId);
-											Program.WriteLine(ConsoleColor.Gray, "Flow ICMP checksum.....................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].IcmpChecksum);
-											Console.WriteLine();
-
-											// Display the results header.
-											Program.Write(ConsoleColor.White, " TTL ");
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+									switch ((MultipathTraceroute.MultipathAlgorithm)state.Parameters[0])
+									{
+										case MultipathTraceroute.MultipathAlgorithm.Icmp:
+											// Display the ICMP result.
+											for (byte flow = 0; flow < result.Flows.Length; flow++)
 											{
-												Program.Write(ConsoleColor.White, "| Attempt {0}(RTT) ", attempt.ToString().PadRight(8));
-											}
-											Console.WriteLine();
+												Console.WriteLine();
+												Program.WriteLine(ConsoleColor.Gray, "Protocol...............................", ConsoleColor.Yellow, "ICMP");
+												Console.WriteLine();
+												Program.WriteLine(ConsoleColor.Gray, "Flow index.............................", ConsoleColor.Cyan, flow.ToString());
+												Program.WriteLine(ConsoleColor.Gray, "Flow identifier........................", ConsoleColor.Cyan, result.Flows[flow].Id.ToString());
+												Program.WriteLine(ConsoleColor.Gray, "Flow short identifier..................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].ShortId);
+												Program.WriteLine(ConsoleColor.Gray, "Flow ICMP identifier...................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].IcmpId);
+												Program.WriteLine(ConsoleColor.Gray, "Flow ICMP checksum.....................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].IcmpChecksum);
+												Console.WriteLine();
 
-											// Compute the maximum time-to-live.
-											byte maximumTtl = byte.MinValue;
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
-											{
-												maximumTtl = maximumTtl < result.IcmpStatistics[flow, attempt].MaximumTimeToLive ? result.IcmpStatistics[flow, attempt].MaximumTimeToLive : maximumTtl;
-											}
-
-											// Display the hops data.
-											for (byte ttl = 0; ttl < this.settings.MinimumHops + maximumTtl - 1; ttl++)
-											{
-												Program.Write(ConsoleColor.Gray, (this.settings.MinimumHops + ttl).ToString().PadLeft(5));
+												// Display the results header.
+												Program.Write(ConsoleColor.White, " TTL ");
 												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
 												{
-													switch (result.IcmpData[flow, ttl, attempt].State)
+													Program.Write(ConsoleColor.White, "| Attempt {0}(RTT) ", attempt.ToString().PadRight(8));
+												}
+												Console.WriteLine();
+
+												// Compute the maximum time-to-live.
+												byte maximumTtl = byte.MinValue;
+												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												{
+													maximumTtl = maximumTtl < result.IcmpStatistics[flow, attempt].MaximumTimeToLive ? result.IcmpStatistics[flow, attempt].MaximumTimeToLive : maximumTtl;
+												}
+
+												// Display the hops data.
+												for (byte ttl = 0; ttl < this.settings.MinimumHops + maximumTtl - 1; ttl++)
+												{
+													Program.Write(ConsoleColor.Gray, (this.settings.MinimumHops + ttl).ToString().PadLeft(5));
+													for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
 													{
-														case MultipathTracerouteData.DataState.NotSet:
-															Program.Write(ConsoleColor.White, "| ", ConsoleColor.Yellow, "Not set".PadRight(22));
+														switch (result.IcmpData[flow, ttl, attempt].State)
+														{
+															case MultipathTracerouteData.DataState.NotSet:
+																Program.Write(ConsoleColor.White, "| ", ConsoleColor.Yellow, "Not set".PadRight(22));
+																break;
+															case MultipathTracerouteData.DataState.RequestSent:
+																Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Timeout".PadRight(22));
+																break;
+															case MultipathTracerouteData.DataState.ResponseReceived:
+																{
+																	int rtt = (int)(result.IcmpData[flow, ttl, attempt].ResponseTimestamp - result.IcmpData[flow, ttl, attempt].RequestTimestamp).TotalMilliseconds;
+																	Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, result.IcmpData[flow, ttl, attempt].Address.ToString().PadRight(16));
+																	Program.Write(ConsoleColor.Gray, "({0})".FormatWith(rtt).PadRight(6));
+																}
+																break;
+														}
+													}
+													Console.WriteLine();
+												}
+
+												// Display the results footer.
+												Program.Write(ConsoleColor.White, "=====");
+												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												{
+													Program.Write(ConsoleColor.White, "|=======================", attempt.ToString().PadRight(8));
+												}
+												Console.WriteLine();
+
+												// Display the results statistics.
+												Program.Write(ConsoleColor.White, "     ");
+												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												{
+													switch (result.IcmpStatistics[flow, attempt].State)
+													{
+														case MultipathTracerouteStatistics.StatisticsState.Completed:
+															Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, "Completed".PadRight(22));
 															break;
-														case MultipathTracerouteData.DataState.RequestSent:
-															Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Timeout".PadRight(22));
-															break;
-														case MultipathTracerouteData.DataState.ResponseReceived:
-															{
-																int rtt = (int)(result.IcmpData[flow, ttl, attempt].ResponseTimestamp - result.IcmpData[flow, ttl, attempt].RequestTimestamp).TotalMilliseconds;
-																Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, result.IcmpData[flow, ttl, attempt].Address.ToString().PadRight(16));
-																Program.Write(ConsoleColor.Gray, "({0})".FormatWith(rtt).PadRight(6));
-															}
+														case MultipathTracerouteStatistics.StatisticsState.Unreachable:
+															Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Unreachable".PadRight(22));
 															break;
 													}
 												}
 												Console.WriteLine();
 											}
-
-											// Display the results footer.
-											Program.Write(ConsoleColor.White, "=====");
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											break;
+										case MultipathTraceroute.MultipathAlgorithm.Udp:
+											// Display the ICMP result.
+											for (byte flow = 0; flow < result.Flows.Length; flow++)
 											{
-												Program.Write(ConsoleColor.White, "|=======================", attempt.ToString().PadRight(8));
-											}
-											Console.WriteLine();
+												Console.WriteLine();
+												Program.WriteLine(ConsoleColor.Gray, "Protocol...............................", ConsoleColor.Yellow, "UDP");
+												Console.WriteLine();
+												Program.WriteLine(ConsoleColor.Gray, "Flow index.............................", ConsoleColor.Cyan, flow.ToString());
+												Program.WriteLine(ConsoleColor.Gray, "Flow identifier........................", ConsoleColor.Cyan, result.Flows[flow].Id.ToString());
+												Program.WriteLine(ConsoleColor.Gray, "Flow short identifier..................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].ShortId);
+												Program.WriteLine(ConsoleColor.Gray, "Flow UDP source port...................", ConsoleColor.Cyan, "{0}", result.Flows[flow].UdpSourcePort);
+												Program.WriteLine(ConsoleColor.Gray, "Flow UDP destination port..............", ConsoleColor.Cyan, "{0}", result.Flows[flow].UdpDestinationPort);
+												Program.WriteLine(ConsoleColor.Gray, "Flow UDP identifier....................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].UdpId);
+												Console.WriteLine();
 
-											// Display the results statistics.
-											Program.Write(ConsoleColor.White, "     ");
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
-											{
-												switch(result.IcmpStatistics[flow, attempt].State)
+												// Display the results header.
+												Program.Write(ConsoleColor.White, " TTL ");
+												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
 												{
-													case MultipathTracerouteStatistics.StatisticsState.Completed:
-														Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, "Completed".PadRight(22));
-														break;
-													case MultipathTracerouteStatistics.StatisticsState.Unreachable:
-														Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Unreachable".PadRight(22));
-														break;
+													Program.Write(ConsoleColor.White, "| Attempt {0}(RTT) ", attempt.ToString().PadRight(8));
 												}
+												Console.WriteLine();
+
+												// Compute the maximum time-to-live.
+												byte maximumTtl = byte.MinValue;
+												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												{
+													maximumTtl = maximumTtl < result.UdpStatistics[flow, attempt].MaximumTimeToLive ? result.UdpStatistics[flow, attempt].MaximumTimeToLive : maximumTtl;
+												}
+
+												// Display the hops data.
+												for (byte ttl = 0; ttl < this.settings.MinimumHops + maximumTtl - 1; ttl++)
+												{
+													Program.Write(ConsoleColor.Gray, (this.settings.MinimumHops + ttl).ToString().PadLeft(5));
+													for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+													{
+														switch (result.UdpData[flow, ttl, attempt].State)
+														{
+															case MultipathTracerouteData.DataState.NotSet:
+																Program.Write(ConsoleColor.White, "| ", ConsoleColor.Yellow, "Not set".PadRight(22));
+																break;
+															case MultipathTracerouteData.DataState.RequestSent:
+																Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Timeout".PadRight(22));
+																break;
+															case MultipathTracerouteData.DataState.ResponseReceived:
+																{
+																	int rtt = (int)(result.UdpData[flow, ttl, attempt].ResponseTimestamp - result.UdpData[flow, ttl, attempt].RequestTimestamp).TotalMilliseconds;
+																	Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, result.UdpData[flow, ttl, attempt].Address.ToString().PadRight(16));
+																	Program.Write(ConsoleColor.Gray, "({0})".FormatWith(rtt).PadRight(6));
+																}
+																break;
+														}
+													}
+													Console.WriteLine();
+												}
+
+												// Display the results footer.
+												Program.Write(ConsoleColor.White, "=====");
+												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												{
+													Program.Write(ConsoleColor.White, "|=======================", attempt.ToString().PadRight(8));
+												}
+												Console.WriteLine();
+
+												// Display the results statistics.
+												Program.Write(ConsoleColor.White, "     ");
+												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												{
+													switch (result.IcmpStatistics[flow, attempt].State)
+													{
+														case MultipathTracerouteStatistics.StatisticsState.Completed:
+															Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, "Completed".PadRight(22));
+															break;
+														case MultipathTracerouteStatistics.StatisticsState.Unreachable:
+															Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Unreachable".PadRight(22));
+															break;
+													}
+												}
+												Console.WriteLine();
 											}
-											Console.WriteLine();
-										}
-										break;
+											break;
+										case MultipathTraceroute.MultipathAlgorithm.UdpTest:
+											// Display the ICMP result.
+											for (byte flow = 0; flow < result.Flows.Length; flow++)
+											{
+												Console.WriteLine();
+												Program.WriteLine(ConsoleColor.Gray, "Protocol...............................", ConsoleColor.Yellow, "UDP (TEST)");
+												Console.WriteLine();
+												Program.WriteLine(ConsoleColor.Gray, "Flow index.............................", ConsoleColor.Cyan, flow.ToString());
+												Program.WriteLine(ConsoleColor.Gray, "Flow identifier........................", ConsoleColor.Cyan, result.Flows[flow].Id.ToString());
+												Program.WriteLine(ConsoleColor.Gray, "Flow short identifier..................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].ShortId);
+												Program.WriteLine(ConsoleColor.Gray, "Flow UDP source port...................", ConsoleColor.Cyan, "{0}", result.Flows[flow].UdpSourcePort);
+												Program.WriteLine(ConsoleColor.Gray, "Flow UDP destination port..............", ConsoleColor.Cyan, "{0}", result.Flows[flow].UdpDestinationPort);
+												Program.WriteLine(ConsoleColor.Gray, "Flow UDP identifier....................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].UdpId);
+												Console.WriteLine();
+
+												// Display the results header.
+												Program.Write(ConsoleColor.White, " TTL ");
+												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												{
+													Program.Write(ConsoleColor.White, "| Attempt {0}      ", attempt.ToString().PadRight(8));
+												}
+												Console.WriteLine();
+
+												// Compute the maximum time-to-live.
+												byte maximumTtl = byte.MinValue;
+												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												{
+													maximumTtl = maximumTtl < result.UdpStatistics[flow, attempt].MaximumTimeToLive ? result.UdpStatistics[flow, attempt].MaximumTimeToLive : maximumTtl;
+												}
+
+												// Display the hops data.
+												for (byte ttl = 0; ttl < this.settings.MinimumHops + maximumTtl - 1; ttl++)
+												{
+													Program.Write(ConsoleColor.Gray, (this.settings.MinimumHops + ttl).ToString().PadLeft(5));
+													for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+													{
+														switch (result.UdpData[flow, ttl, attempt].State)
+														{
+															case MultipathTracerouteData.DataState.NotSet:
+																Program.Write(ConsoleColor.White, "| ", ConsoleColor.Yellow, "Not set".PadRight(22));
+																break;
+															case MultipathTracerouteData.DataState.RequestSent:
+																Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Timeout".PadRight(22));
+																break;
+															case MultipathTracerouteData.DataState.ResponseReceived:
+																{
+																	int rtt = (int)(result.UdpData[flow, ttl, attempt].ResponseTimestamp - result.UdpData[flow, ttl, attempt].RequestTimestamp).TotalMilliseconds;
+
+																	if (result.UdpData[flow, ttl, attempt].Response.Payload is ProtoPacketIcmpTimeExceeded)
+																	{
+																		ProtoPacketIcmpTimeExceeded icmpTimeExceeded = result.UdpData[flow, ttl, attempt].Response.Payload as ProtoPacketIcmpTimeExceeded;
+																		ushort identification = icmpTimeExceeded.IpHeader.Identification;
+																		ushort checksum = (ushort)((icmpTimeExceeded.IpPayload[6] << 8) | icmpTimeExceeded.IpPayload[7]);
+
+																		Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, "0x{0} {1} 0x{2}      ",
+																			identification.ToString("X4").PadRight(4),
+																			identification == checksum ? "==" : "!=",
+																			checksum.ToString("X4").PadRight(4));
+																	}
+																	else if (result.UdpData[flow, ttl, attempt].Response.Payload is ProtoPacketIcmpDestinationUnreachable)
+																	{
+																		ProtoPacketIcmpDestinationUnreachable icmpTimeExceeded = result.UdpData[flow, ttl, attempt].Response.Payload as ProtoPacketIcmpDestinationUnreachable;
+																		ushort identification = icmpTimeExceeded.IpHeader.Identification;
+																		ushort checksum = (ushort)((icmpTimeExceeded.IpPayload[6] << 8) | icmpTimeExceeded.IpPayload[7]);
+
+																		Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, "0x{0} {1} 0x{2}      ",
+																			identification.ToString("X4").PadRight(4),
+																			identification == checksum ? "==" : "!=",
+																			checksum.ToString("X4").PadRight(4));
+																	}
+																	else
+																	{
+																		Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Unknown".PadRight(22));
+																	}
+																}
+																break;
+														}
+													}
+													Console.WriteLine();
+												}
+
+												// Display the results footer.
+												Program.Write(ConsoleColor.White, "=====");
+												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												{
+													Program.Write(ConsoleColor.White, "|=======================", attempt.ToString().PadRight(8));
+												}
+												Console.WriteLine();
+
+												// Display the results statistics.
+												Program.Write(ConsoleColor.White, "     ");
+												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												{
+													switch (result.IcmpStatistics[flow, attempt].State)
+													{
+														case MultipathTracerouteStatistics.StatisticsState.Completed:
+															Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, "Completed".PadRight(22));
+															break;
+														case MultipathTracerouteStatistics.StatisticsState.Unreachable:
+															Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Unreachable".PadRight(22));
+															break;
+													}
+												}
+												Console.WriteLine();
+											}
+											break;
+									}
 								}
 							}
 						});
@@ -459,21 +648,44 @@ namespace Mercury
 			// Parse the argument.
 			switch (args[argumentIndex].Trim())
 			{
-				case "-c": this.settings.AttemptsPerFlow = (byte)int.Parse(args[++argumentIndex]); break;
+				case "-a": this.settings.Algorithm = this.ParseAlgorithm(args, ref argumentIndex); break;
+				case "-c": this.settings.AttemptsPerFlow = byte.Parse(args[++argumentIndex]); break;
 				case "-d": this.dnsServer = IPAddress.Parse(args[++argumentIndex]); break;
 				case "-e": this.settings.AttemptDelay = int.Parse(args[++argumentIndex]); break;
-				case "-f": this.settings.FlowCount = (byte)int.Parse(args[++argumentIndex]); break;
-				case "-h": this.settings.MaximumUnknownHops = (byte)int.Parse(args[++argumentIndex]); break;
+				case "-f": this.settings.FlowCount = byte.Parse(args[++argumentIndex]); break;
+				case "-h": this.settings.MaximumUnknownHops = byte.Parse(args[++argumentIndex]); break;
 				case "-i": this.iface = int.Parse(args[++argumentIndex]); break;
 				case "-o": this.settings.HopTimeout = int.Parse(args[++argumentIndex]); break;
 				case "-p-min": this.settings.MinimumPort = ushort.Parse(args[++argumentIndex]); break;
 				case "-p-max": this.settings.MinimumPort = ushort.Parse(args[++argumentIndex]); break;
 				case "-s": this.settings.DataLength = int.Parse(args[++argumentIndex]); break;
 				case "-t": this.dnsClient.QueryTimeout = int.Parse(args[++argumentIndex]); break;
-				case "-t-min": this.settings.MinimumHops = (byte)int.Parse(args[++argumentIndex]); break;
-				case "-t-max": this.settings.MaximumHops = (byte)int.Parse(args[++argumentIndex]); break;
+				case "-t-min": this.settings.MinimumHops = byte.Parse(args[++argumentIndex]); break;
+				case "-t-max": this.settings.MaximumHops = byte.Parse(args[++argumentIndex]); break;
 				case "-v": this.verbosity = int.Parse(args[++argumentIndex]); break;
 				default: throw new ArgumentException("Option {0} unknown.".FormatWith(args[argumentIndex]));
+			}
+		}
+
+		/// <summary>
+		/// Parses the algorithm.
+		/// </summary>
+		/// <param name="args">The list of arguments.</param>
+		/// <param name="argumentIndex">The argument index.</param>
+		/// <returns>The algorithm.</returns>
+		private MultipathTraceroute.MultipathAlgorithm ParseAlgorithm(string[] args, ref int argumentIndex)
+		{
+			switch (int.Parse(args[++argumentIndex]))
+			{
+				case 0: return MultipathTraceroute.MultipathAlgorithm.Icmp | MultipathTraceroute.MultipathAlgorithm.UdpIdentification;
+				case 1: return MultipathTraceroute.MultipathAlgorithm.Icmp | MultipathTraceroute.MultipathAlgorithm.UdpChecksum;
+				case 2: return MultipathTraceroute.MultipathAlgorithm.Icmp | MultipathTraceroute.MultipathAlgorithm.UdpIdentification | MultipathTraceroute.MultipathAlgorithm.UdpChecksum;
+				case 3: return MultipathTraceroute.MultipathAlgorithm.Icmp;
+				case 4: return MultipathTraceroute.MultipathAlgorithm.UdpIdentification;
+				case 5: return MultipathTraceroute.MultipathAlgorithm.UdpChecksum;
+				case 6: return MultipathTraceroute.MultipathAlgorithm.UdpIdentification | MultipathTraceroute.MultipathAlgorithm.UdpChecksum;
+				case 7: return MultipathTraceroute.MultipathAlgorithm.UdpTest;
+				default: throw new ArgumentException("Algorithm unknown.");
 			}
 		}
 
