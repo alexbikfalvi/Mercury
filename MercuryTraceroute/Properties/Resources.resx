@@ -131,8 +131,8 @@ Options:
   -h &lt;number&gt;      The maximum number of unknown hops (default is 10).
   -i &lt;number&gt;      The local interface index.
   -o &lt;number&gt;      The traceroute hop timeout in milliseconds (default is 2000).
-  -p-min &lt;number&gt;  The minimum port number (default is 8192).
-  -p-max &lt;number&gt;  The maximum port number (default is 65520).
+  -p-min &lt;number&gt;  The minimum port number (default is 33434).
+  -p-max &lt;number&gt;  The maximum port number (default is 33523).
   -s &lt;number&gt;      The size of the data payload in bytes (default is 32).
   -t &lt;number&gt;      The DNS server timeout in milliseconds (default is 5000).
   -t-min &lt;number&gt;  The minimum TTL (default is 1).
