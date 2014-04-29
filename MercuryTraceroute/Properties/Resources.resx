@@ -123,7 +123,7 @@
 mercurytraceroute [options] destination
 
 Options:
-  -a &lt;number&gt;      The algorithm.
+  -a &lt;number&gt;      The algorithm (default is 0).
   -c &lt;number&gt;      The number of attempts per flow, to detect per-packet load balancing (default is 5).
   -d &lt;address&gt;     Resolve the destination using the specified DNS server.
   -e &lt;number&gt;      The delay between attempts in milliseconds (default is 1000).
@@ -138,6 +138,7 @@ Options:
   -t-min &lt;number&gt;  The minimum TTL (default is 1).
   -t-max &lt;number&gt;  The maximum TTL (default is 32).
   -v &lt;number&gt;      The verbosity level (default is 1).
+  -w &lt;url&gt;         The verbosity level (default is 1).
 
 Algorithms:
   0                ICMP and UDP with constant identification (default)
