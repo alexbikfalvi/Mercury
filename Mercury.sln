@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InetCommon", "..\InetAnalyt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapApi", "..\DotNetApi\MapApi\MapApi.csproj", "{C5C1839C-4971-4781-B8FA-FF743E257A7E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercuryApi", "MercuryApi\MercuryApi.csproj", "{984A6894-D3FA-4348-ACA5-F1FEB86C9CBD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Newtonsoft.Json.Net40", "..\Newtonsoft.JsonNet\Newtonsoft.Json\Newtonsoft.Json.Net40.csproj", "{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,14 @@ Global
 		{C5C1839C-4971-4781-B8FA-FF743E257A7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5C1839C-4971-4781-B8FA-FF743E257A7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5C1839C-4971-4781-B8FA-FF743E257A7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{984A6894-D3FA-4348-ACA5-F1FEB86C9CBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{984A6894-D3FA-4348-ACA5-F1FEB86C9CBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{984A6894-D3FA-4348-ACA5-F1FEB86C9CBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{984A6894-D3FA-4348-ACA5-F1FEB86C9CBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

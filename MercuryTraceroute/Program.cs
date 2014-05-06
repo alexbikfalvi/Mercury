@@ -29,6 +29,7 @@ using InetApi.Net.Core.Dns;
 using InetApi.Net.Core.Protocols;
 using InetCommon.Net;
 using Mercury.Properties;
+using Mercury.Topology;
 
 namespace Mercury
 {
@@ -45,8 +46,11 @@ namespace Mercury
 		private string destination = null;
 		private int? iface = null;
 
-		private MultipathTraceroute traceroute;
-		private MultipathTracerouteSettings settings;
+		private MultipathTraceroute tracerouteIp;
+		private MultipathTracerouteSettings settingsIp;
+
+		private ASTraceroute tracerouteAs;
+		private ASTracerouteSettings settingsAs;
 
 		private bool flagIpv6 = false;
 		private int verbosity = 2;
@@ -63,11 +67,17 @@ namespace Mercury
 			// Get the current interfaces.
 			this.interfaces = NetworkConfiguration.GetNetworkInterfacesWithUnicastAddresses();
 
-			// Create the traceroute settings.
-			this.settings = new MultipathTracerouteSettings();
+			// Create the IP-level traceroute settings.
+			this.settingsIp = new MultipathTracerouteSettings();
 
-			// Create the traceroute.
-			this.traceroute = new MultipathTraceroute(this.settings);
+			// Create the IP-level traceroute.
+			this.tracerouteIp = new MultipathTraceroute(this.settingsIp);
+
+			// Create the AS-level traceroute settings.
+			this.settingsAs = new ASTracerouteSettings();
+
+			// Create the AS-level traceroute.
+			this.tracerouteAs = new ASTraceroute(this.settingsAs);
 
 			// Parse the arguments.
 			for (int argumentIndex = 0; argumentIndex < args.Length; argumentIndex++)
@@ -243,14 +253,14 @@ namespace Mercury
 
 			// Show the traceroute settings.
 			Console.WriteLine();
-			Program.WriteLine(ConsoleColor.Gray, "Attempts per flow......................", ConsoleColor.Cyan, this.settings.AttemptsPerFlow.ToString());
-			Program.WriteLine(ConsoleColor.Gray, "Flow count.............................", ConsoleColor.Cyan, this.settings.FlowCount.ToString());
-			Program.WriteLine(ConsoleColor.Gray, "Minimum hops...........................", ConsoleColor.Cyan, this.settings.MinimumHops.ToString());
-			Program.WriteLine(ConsoleColor.Gray, "Maximum hops...........................", ConsoleColor.Cyan, this.settings.MaximumHops.ToString());
-			Program.WriteLine(ConsoleColor.Gray, "Maximum unknown hops...................", ConsoleColor.Cyan, this.settings.MaximumUnknownHops.ToString());
-			Program.WriteLine(ConsoleColor.Gray, "Attempt delay (ms).....................", ConsoleColor.Cyan, this.settings.AttemptDelay.ToString());
-			Program.WriteLine(ConsoleColor.Gray, "Hop timeout (ms).......................", ConsoleColor.Cyan, this.settings.HopTimeout.ToString());
-			Program.WriteLine(ConsoleColor.Gray, "Data length (bytes)....................", ConsoleColor.Cyan, this.settings.DataLength.ToString());
+			Program.WriteLine(ConsoleColor.Gray, "Attempts per flow......................", ConsoleColor.Cyan, this.settingsIp.AttemptsPerFlow.ToString());
+			Program.WriteLine(ConsoleColor.Gray, "Flow count.............................", ConsoleColor.Cyan, this.settingsIp.FlowCount.ToString());
+			Program.WriteLine(ConsoleColor.Gray, "Minimum hops...........................", ConsoleColor.Cyan, this.settingsIp.MinimumHops.ToString());
+			Program.WriteLine(ConsoleColor.Gray, "Maximum hops...........................", ConsoleColor.Cyan, this.settingsIp.MaximumHops.ToString());
+			Program.WriteLine(ConsoleColor.Gray, "Maximum unknown hops...................", ConsoleColor.Cyan, this.settingsIp.MaximumUnknownHops.ToString());
+			Program.WriteLine(ConsoleColor.Gray, "Attempt delay (ms).....................", ConsoleColor.Cyan, this.settingsIp.AttemptDelay.ToString());
+			Program.WriteLine(ConsoleColor.Gray, "Hop timeout (ms).......................", ConsoleColor.Cyan, this.settingsIp.HopTimeout.ToString());
+			Program.WriteLine(ConsoleColor.Gray, "Data length (bytes)....................", ConsoleColor.Cyan, this.settingsIp.DataLength.ToString());
 
 			// Run the traceroute for each remote address.
 			foreach (IPAddress remoteAddress in remoteAddresses)
@@ -276,7 +286,7 @@ namespace Mercury
 				try
 				{
 					// Run an ICMP traceroute.
-					this.traceroute.RunIpv4(localAddress, remoteAddress, cancel.Token, (MultipathTracerouteResult result, MultipathTracerouteState state) =>
+					this.tracerouteIp.RunIpv4(localAddress, remoteAddress, cancel.Token, (MultipathTracerouteResult result, MultipathTracerouteState state) =>
 						{
 							// Level 3 verbosity.
 							if (this.verbosity >= 3)
@@ -361,7 +371,7 @@ namespace Mercury
 
 											// Display the results header.
 											Program.Write(ConsoleColor.White, " TTL ");
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 											{
 												Program.Write(ConsoleColor.White, "| Attempt {0}(RTT) ", attempt.ToString().PadRight(8));
 											}
@@ -369,16 +379,16 @@ namespace Mercury
 
 											// Compute the maximum time-to-live.
 											byte maximumTtl = byte.MinValue;
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 											{
 												maximumTtl = maximumTtl < result.IcmpStatistics[flow, attempt].MaximumTimeToLive ? result.IcmpStatistics[flow, attempt].MaximumTimeToLive : maximumTtl;
 											}
 
 											// Display the hops data.
-											for (byte ttl = 0; ttl < this.settings.MinimumHops + maximumTtl - 1; ttl++)
+											for (byte ttl = 0; ttl < this.settingsIp.MinimumHops + maximumTtl - 1; ttl++)
 											{
-												Program.Write(ConsoleColor.Gray, (this.settings.MinimumHops + ttl).ToString().PadLeft(5));
-												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												Program.Write(ConsoleColor.Gray, (this.settingsIp.MinimumHops + ttl).ToString().PadLeft(5));
+												for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 												{
 													switch (result.IcmpData[flow, ttl, attempt].State)
 													{
@@ -402,7 +412,7 @@ namespace Mercury
 
 											// Display the results footer.
 											Program.Write(ConsoleColor.White, "=====");
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 											{
 												Program.Write(ConsoleColor.White, "|=======================", attempt.ToString().PadRight(8));
 											}
@@ -410,7 +420,7 @@ namespace Mercury
 
 											// Display the results statistics.
 											Program.Write(ConsoleColor.White, "     ");
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 											{
 												switch (result.IcmpStatistics[flow, attempt].State)
 												{
@@ -445,7 +455,7 @@ namespace Mercury
 
 											// Display the results header.
 											Program.Write(ConsoleColor.White, " TTL ");
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 											{
 												Program.Write(ConsoleColor.White, "| Attempt {0}(RTT) ", attempt.ToString().PadRight(8));
 											}
@@ -453,16 +463,16 @@ namespace Mercury
 
 											// Compute the maximum time-to-live.
 											byte maximumTtl = byte.MinValue;
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 											{
 												maximumTtl = maximumTtl < result.UdpStatistics[flow, attempt].MaximumTimeToLive ? result.UdpStatistics[flow, attempt].MaximumTimeToLive : maximumTtl;
 											}
 
 											// Display the hops data.
-											for (byte ttl = 0; ttl < maximumTtl - this.settings.MinimumHops + 1; ttl++)
+											for (byte ttl = 0; ttl < maximumTtl - this.settingsIp.MinimumHops + 1; ttl++)
 											{
-												Program.Write(ConsoleColor.Gray, (this.settings.MinimumHops + ttl).ToString().PadLeft(5));
-												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												Program.Write(ConsoleColor.Gray, (this.settingsIp.MinimumHops + ttl).ToString().PadLeft(5));
+												for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 												{
 													switch (result.UdpData[flow, ttl, attempt].State)
 													{
@@ -486,7 +496,7 @@ namespace Mercury
 
 											// Display the results footer.
 											Program.Write(ConsoleColor.White, "=====");
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 											{
 												Program.Write(ConsoleColor.White, "|=======================", attempt.ToString().PadRight(8));
 											}
@@ -494,7 +504,7 @@ namespace Mercury
 
 											// Display the results statistics.
 											Program.Write(ConsoleColor.White, "     ");
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 											{
 												switch (result.UdpStatistics[flow, attempt].State)
 												{
@@ -529,7 +539,7 @@ namespace Mercury
 
 											// Display the results header.
 											Program.Write(ConsoleColor.White, " TTL ");
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 											{
 												Program.Write(ConsoleColor.White, "| Attempt {0}      ", attempt.ToString().PadRight(8));
 											}
@@ -537,16 +547,16 @@ namespace Mercury
 
 											// Compute the maximum time-to-live.
 											byte maximumTtl = byte.MinValue;
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 											{
 												maximumTtl = maximumTtl < result.UdpStatistics[flow, attempt].MaximumTimeToLive ? result.UdpStatistics[flow, attempt].MaximumTimeToLive : maximumTtl;
 											}
 
 											// Display the hops data.
-											for (byte ttl = 0; ttl < maximumTtl - this.settings.MinimumHops + 1; ttl++)
+											for (byte ttl = 0; ttl < maximumTtl - this.settingsIp.MinimumHops + 1; ttl++)
 											{
-												Program.Write(ConsoleColor.Gray, (this.settings.MinimumHops + ttl).ToString().PadLeft(5));
-												for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+												Program.Write(ConsoleColor.Gray, (this.settingsIp.MinimumHops + ttl).ToString().PadLeft(5));
+												for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 												{
 													switch (result.UdpData[flow, ttl, attempt].State)
 													{
@@ -595,7 +605,7 @@ namespace Mercury
 
 											// Display the results footer.
 											Program.Write(ConsoleColor.White, "=====");
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 											{
 												Program.Write(ConsoleColor.White, "|=======================", attempt.ToString().PadRight(8));
 											}
@@ -603,7 +613,7 @@ namespace Mercury
 
 											// Display the results statistics.
 											Program.Write(ConsoleColor.White, "     ");
-											for (byte attempt = 0; attempt < this.settings.AttemptsPerFlow; attempt++)
+											for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 											{
 												switch (result.IcmpStatistics[flow, attempt].State)
 												{
@@ -651,20 +661,20 @@ namespace Mercury
 			// Parse the argument.
 			switch (args[argumentIndex].Trim())
 			{
-				case "-a": this.settings.Algorithm = this.ParseAlgorithm(args, ref argumentIndex); break;
-				case "-c": this.settings.AttemptsPerFlow = byte.Parse(args[++argumentIndex]); break;
+				case "-a": this.settingsIp.Algorithm = this.ParseAlgorithm(args, ref argumentIndex); break;
+				case "-c": this.settingsIp.AttemptsPerFlow = byte.Parse(args[++argumentIndex]); break;
 				case "-d": this.dnsServer = IPAddress.Parse(args[++argumentIndex]); break;
-				case "-e": this.settings.AttemptDelay = int.Parse(args[++argumentIndex]); break;
-				case "-f": this.settings.FlowCount = byte.Parse(args[++argumentIndex]); break;
-				case "-h": this.settings.MaximumUnknownHops = byte.Parse(args[++argumentIndex]); break;
+				case "-e": this.settingsIp.AttemptDelay = int.Parse(args[++argumentIndex]); break;
+				case "-f": this.settingsIp.FlowCount = byte.Parse(args[++argumentIndex]); break;
+				case "-h": this.settingsIp.MaximumUnknownHops = byte.Parse(args[++argumentIndex]); break;
 				case "-i": this.iface = int.Parse(args[++argumentIndex]); break;
-				case "-o": this.settings.HopTimeout = int.Parse(args[++argumentIndex]); break;
-				case "-p-min": this.settings.MinimumPort = ushort.Parse(args[++argumentIndex]); break;
-				case "-p-max": this.settings.MaximumPort = ushort.Parse(args[++argumentIndex]); break;
-				case "-s": this.settings.DataLength = int.Parse(args[++argumentIndex]); break;
+				case "-o": this.settingsIp.HopTimeout = int.Parse(args[++argumentIndex]); break;
+				case "-p-min": this.settingsIp.MinimumPort = ushort.Parse(args[++argumentIndex]); break;
+				case "-p-max": this.settingsIp.MaximumPort = ushort.Parse(args[++argumentIndex]); break;
+				case "-s": this.settingsIp.DataLength = int.Parse(args[++argumentIndex]); break;
 				case "-t": this.dnsClient.QueryTimeout = int.Parse(args[++argumentIndex]); break;
-				case "-t-min": this.settings.MinimumHops = byte.Parse(args[++argumentIndex]); break;
-				case "-t-max": this.settings.MaximumHops = byte.Parse(args[++argumentIndex]); break;
+				case "-t-min": this.settingsIp.MinimumHops = byte.Parse(args[++argumentIndex]); break;
+				case "-t-max": this.settingsIp.MaximumHops = byte.Parse(args[++argumentIndex]); break;
 				case "-v": this.verbosity = int.Parse(args[++argumentIndex]); break;
 				default: throw new ArgumentException("Option {0} unknown.".FormatWith(args[argumentIndex]));
 			}
