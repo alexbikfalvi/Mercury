@@ -32,6 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,15 +47,12 @@
     <Compile Include="Topology\ASTracerouteCache.cs" />
     <Compile Include="Topology\ASTracerouteResult.cs" />
     <Compile Include="Topology\ASTracerouteSettings.cs" />
+    <Compile Include="Topology\ASTracerouteState.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\InetAnalytics\InetApi\InetApi.csproj">
       <Project>{6e2d7303-ffab-4732-86f5-8bb0f7cd8276}</Project>
       <Name>InetApi</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Newtonsoft.JsonNet\Newtonsoft.Json\Newtonsoft.Json.Net40.csproj">
-      <Project>{a9ae40ff-1a21-414a-9fe7-3be13644cc6d}</Project>
-      <Name>Newtonsoft.Json.Net40</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

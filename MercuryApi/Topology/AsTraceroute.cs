@@ -17,10 +17,18 @@
  */
 
 using System;
+using System.Threading;
 using InetApi.Net.Core;
+using Mercury.Api;
 
 namespace Mercury.Topology
 {
+	/// <summary>
+	/// A delegate used for AS traceroute callback methods.
+	/// </summary>
+	/// <param name="result">The AS traceroute result.</param>
+	public delegate void ASTracerouteCallback(ASTracerouteResult result, ASTracerouteState state);
+
 	/// <summary>
 	/// A class for an autonomous system traceroute.
 	/// </summary>
@@ -42,10 +50,14 @@ namespace Mercury.Topology
 		/// Runs an AS-level traceroute starting from the specified IP-level multipath traceroute.
 		/// </summary>
 		/// <param name="traceroute">The IP-level multipath traceroute.</param>
+		/// <param name="cancel">The cancellation token.</param>
+		/// <param name="callback">The callback methods.</param>
 		/// <returns>The AS-level traceroute.</returns>
-		public ASTracerouteResult Run(MultipathTracerouteResult traceroute)
+		public ASTracerouteResult Run(MultipathTracerouteResult traceroute, CancellationToken cancel, ASTracerouteCallback callback)
 		{
+			LocalInformation localInformation = MercuryService.GetLocalInformation();
 
+			return null;
 		}
 	}
 }

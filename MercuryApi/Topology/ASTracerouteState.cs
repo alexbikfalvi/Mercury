@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright (C) 2014 Alex Bikfalvi, Manuel Palacin
+ * Copyright (C) 2014 Alex Bikfalvi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,45 +17,52 @@
  */
 
 using System;
-using System.IO;
-using System.Net;
-using System.Runtime.Serialization;
 
-namespace Mercury.Api
+namespace InetApi.Net.Core
 {
 	/// <summary>
-	/// A class representing the local information.
+	/// A structure representing the state of an AS traceroute.
 	/// </summary>
-	[DataContract]
-	public class LocalInformation
+	public sealed class ASTracerouteState
 	{
-		[DataMember]
-		internal string ipAddress;
-		[DataMember]
-		internal string asNumber;
-		[DataMember]
-		internal string asName;
-		[DataMember]
-		internal string timestamp;
+		/// <summary>
+		/// An enumeration representing the state type.
+		/// </summary>
+		public enum StateType
+		{
+			Unknown = -1
+		}
+
+		/// <summary>
+		/// Internal constructor.
+		/// </summary>
+		internal ASTracerouteState()
+		{
+			this.Type = StateType.Unknown;
+			this.Parameters = null;
+		}
+
+		/// <summary>
+		/// Creates a new AS traceroute state.
+		/// </summary>
+		/// <param name="type">The state type.</param>
+		/// <param name="parameters">The state parameyets.</param>
+		public ASTracerouteState(StateType type, params object[] parameters)
+		{
+			this.Type = type;
+			this.Parameters = parameters;
+		}
 
 		#region Public properties
 
 		/// <summary>
-		/// Gets the IP address.
+		/// Gets the state type.
 		/// </summary>
-		public IPAddress Address { get { return IPAddress.Parse(this.ipAddress); } }
+		public StateType Type { get; internal set; }
 		/// <summary>
-		/// Gets the AS number.
+		/// Gets the list of parameters.
 		/// </summary>
-		public uint ASNumber { get { return uint.Parse(this.asNumber); } }
-		/// <summary>
-		/// Gets the AS name.
-		/// </summary>
-		public string ASName { get { return this.asName; } }
-		/// <summary>
-		/// Gets the timestamp.
-		/// </summary>
-		public DateTime Timestamp { get { return DateTime.Parse(this.timestamp); } }
+		public object[] Parameters { get; internal set; }
 
 		#endregion
 	}

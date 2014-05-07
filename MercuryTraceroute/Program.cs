@@ -285,8 +285,9 @@ namespace Mercury
 			{
 				try
 				{
-					// Run an ICMP traceroute.
-					this.tracerouteIp.RunIpv4(localAddress, remoteAddress, cancel.Token, (MultipathTracerouteResult result, MultipathTracerouteState state) =>
+					// Run an IP-level traceroute.
+					/*
+					MultipathTracerouteResult resultIp = this.tracerouteIp.RunIpv4(localAddress, remoteAddress, cancel.Token, (MultipathTracerouteResult result, MultipathTracerouteState state) =>
 						{
 							// Level 3 verbosity.
 							if (this.verbosity >= 3)
@@ -630,6 +631,12 @@ namespace Mercury
 										break;
 								}
 							}
+						});
+					 */
+
+					// Run the AS-level traceroute.
+					ASTracerouteResult resultAs = this.tracerouteAs.Run(null, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
+						{
 						});
 				}
 				catch (Exception exception)

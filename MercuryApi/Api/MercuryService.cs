@@ -19,10 +19,9 @@
 using System;
 using System.IO;
 using System.Net;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Runtime.Serialization.Json;
 
-namespace MercuryApi.Api
+namespace Mercury.Api
 {
 	/// <summary>
 	/// A class representing the Mercury service.
@@ -39,14 +38,20 @@ namespace MercuryApi.Api
 		/// <returns>The local information.</returns>
 		public static LocalInformation GetLocalInformation()
 		{
-			return LocalInformation.Parse(MercuryService.Get(new Uri(MercuryService.urlLocalInformation)));
+			return MercuryService.Get<LocalInformation>(new Uri(MercuryService.urlLocalInformation));
 		}
 
 		#endregion
 
 		#region Private methods
 
-		public static JObject Get(Uri uri)
+		/// <summary>
+		/// Gets from the Mercury service an object of the specified type.
+		/// </summary>
+		/// <typeparam name="T">The object type.</typeparam>
+		/// <param name="uri">The API URI.</param>
+		/// <returns>The object deserialized from the JSON response.</returns>
+		private static T Get<T>(Uri uri) where T : class
 		{
 			try
 			{
@@ -58,20 +63,18 @@ namespace MercuryApi.Api
 				{
 					if (response.StatusCode == HttpStatusCode.OK)
 					{
-						using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
-						{
-							using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
-							{
-								return JObject.Load(jsonReader);
-							}
-						}
+						// Create the serializer.
+						DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
+
+						// Create the object.
+						return serializer.ReadObject(response.GetResponseStream()) as T;
 					}
 				}
 			}
 			catch { }
 
-			// Else, return null.
-			return null;
+			// Else, return the default object.
+			return default(T);
 		}
 
 		#endregion
