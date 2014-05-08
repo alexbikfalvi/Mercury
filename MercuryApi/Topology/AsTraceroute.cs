@@ -20,6 +20,7 @@ using System;
 using System.Threading;
 using InetApi.Net.Core;
 using Mercury.Api;
+using Mercury.Services;
 
 namespace Mercury.Topology
 {
@@ -55,7 +56,8 @@ namespace Mercury.Topology
 		/// <returns>The AS-level traceroute.</returns>
 		public ASTracerouteResult Run(MultipathTracerouteResult traceroute, CancellationToken cancel, ASTracerouteCallback callback)
 		{
-			LocalInformation localInformation = MercuryService.GetLocalInformation();
+			//LocalInformation localInformation = MercuryService.GetLocalInformation();
+            MyInfo myInfo = MercuryWebClient.GetMyInfo();
 
 			return null;
 		}
