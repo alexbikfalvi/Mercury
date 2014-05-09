@@ -44,11 +44,16 @@ namespace Mercury.Api
         public TracerouteASStats tracerouteASStats { get; set; }
 
 
-        public TracerouteAS() { }
+        public TracerouteAS()
+        {
+            this.tracerouteIpAttemptIds = new List<string>();
+            this.tracerouteASHops = new List<TracerouteASHop>();
+            this.tracerouteASRelationships = new List<TracerouteASRelationship>();
+        }
         public TracerouteAS(int srcAS, String srcASName, String srcIp,
                     String srcPublicIp, String srcCity, String srcCountry, int dstAS,
                     String dstASName, String dstIp, String dst, String dstCity,
-                    String dstCountry/*, DateTime timeStamp*/)
+                    String dstCountry,/* DateTime timeStamp,*/ TracerouteASStats tracerouteASStats)
         {
             this.srcAS = srcAS;
             this.srcASName = srcASName;
@@ -63,6 +68,11 @@ namespace Mercury.Api
             this.dstCity = dstCity;
             this.dstCountry = dstCountry;
             //this.timeStamp = timeStamp;
+            this.tracerouteASStats = tracerouteASStats;
+
+            this.tracerouteIpAttemptIds = new List<string>();
+            this.tracerouteASHops = new List<TracerouteASHop>();
+            this.tracerouteASRelationships = new List<TracerouteASRelationship>();
         }
     }
 
@@ -77,7 +87,7 @@ namespace Mercury.Api
         public int nfRels { get; set; }
         public bool completed { get; set; }
         public int flags { get; set; }
-       
+
 
         public TracerouteASStats() { }
 
@@ -107,18 +117,41 @@ namespace Mercury.Api
         public int as0 { get; set; }
         public int as1 { get; set; }
         public int hop { get; set; }
+
+        public TracerouteASRelationship() { }
+
+        public TracerouteASRelationship(Relationship relationship, int as0, int as1, int hop)
+        {
+            this.relationship = relationship;
+            this.as0 = as0;
+            this.as1 = as1;
+            this.hop = hop;
+        }
+
     }
 
     public class TracerouteASHop
     {
-        public enum Type{AS, IXP};
+        public enum Type { AS, IXP };
 
-	    public int hop;
+        public int hop;
         [JsonProperty("as")]
-	    public int asNumber;
-	    public String asName;
-	    public String ixpName;
-	    public Type type;
-	    public bool inferred;//We use an heuristic to determine what is the most suitable AS
+        public int asNumber;
+        public String asName;
+        public String ixpName;
+        public Type type;
+        public bool inferred;//We use an heuristic to determine what is the most suitable AS
+
+        public TracerouteASHop() { }
+
+        public TracerouteASHop(int hop, int asNumber, String asName, String ixpName, Type type, bool inferred)
+        {
+            this.hop = hop;
+            this.asNumber = asNumber;
+            this.asName = asName;
+            this.ixpName = ixpName;
+            this.type = type;
+            this.inferred = inferred;
+        }
     }
 }
