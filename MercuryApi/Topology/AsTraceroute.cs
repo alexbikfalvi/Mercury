@@ -17,11 +17,11 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using InetApi.Net.Core;
 using Mercury.Api;
 using Mercury.Services;
+using System.Collections.Generic;
 
 namespace Mercury.Topology
 {
@@ -58,48 +58,49 @@ namespace Mercury.Topology
 		public ASTracerouteResult Run(MultipathTracerouteResult traceroute, CancellationToken cancel, ASTracerouteCallback callback)
 		{
 			//LocalInformation localInformation = MercuryService.GetLocalInformation();
-            MercuryLocalInformation myInfo = MercuryService.GetLocalInformation();
-            /*
+            MyInfo myInfo = MercuryWebClient.GetMyInfo();
+
             //An example for obtaining the AS rel betwenn AS2 and AS3
-            AsRelationship asRel = MercuryService.GetASRelationship(2, 3);
+            ASRelationship asRel = MercuryWebClient.GetASRelationship(2, 3);
 
             //An example for obtaining the AS rels in BULK mode
             string myParameters1 = "pairs=2-3,766-3356,2589-6985";
-            List<AsRelationship> asRels = MercuryService.GetASRelationships(myParameters1);
+            List<ASRelationship> asRels = MercuryWebClient.GetASRelationships(myParameters1);
 
             //An example for obtaining the IP2ASN mappings in BULK max 1000 ips
             string myParameters2 = "ips=193.145.48.3,8.8.8.85";
-            List<List<Ip2AsnMapping>> ip2asMappings = MercuryService.GetIp2AsnMappings(myParameters2);
+            List<List<Ip2AsnMapping>> ip2asMappings = MercuryWebClient.GetIp2AsnMappings(myParameters2);
 
             //An example for obtaining the IP2GEO in BULK mode max 1000 ips
             string myParameters3 = "ips=193.145.48.3,8.8.8.85";
-            List<Ip2GeoMapping> ip2geoMappings = MercuryService.GetIp2GeoMappings(myParameters3);
+            List<Ip2GeoMapping> ip2geoMappings = MercuryWebClient.GetIp2GeoMappings(myParameters3);
 
             //Alex you don't need this... but just in case...
-            //An example for obtaining TracerouteASes by destination domain*/
+            //An example for obtaining TracerouteASes by destination domain
             String dst = "yimg.com";
-            List<MercuryAsTraceroute> tases = MercuryService.GetTracerouteASesByDst(dst);
+            List<TracerouteAS> tases = MercuryWebClient.GetTracerouteASesByDst(dst);
 
             //An example for uploading a TracerouteAS
             //First we generate a dummy object. Then this must be obtained from the result of the algorithm
-            MercuryAsTraceroute tas = MercuryService.generateTracerouteAS();
-            String result1 = MercuryService.addTracerouteAS(tas);
+            TracerouteAS tas = MercuryWebClient.generateTracerouteAS();
+            String result1 = MercuryWebClient.addTracerouteAS(tas);
             //An example for uploading many TracerouteASes in BULK mode
             //First we generate dummy objects. Then this must be obtained from the result of the processing algorithm
-            List<MercuryAsTraceroute> tases2 = new List<MercuryAsTraceroute>();
+            List<TracerouteAS> tases2 = new List<TracerouteAS>();
             tases.Add(tas);
             tases.Add(tas);
             tases.Add(tas);
-            String result2 = MercuryService.addTracerouteASes(tases2);
+            String result2 = MercuryWebClient.addTracerouteASes(tases2);
 
             //An example for uploading TracerouteSettings. 
             //It returns the same ID if is new, it returns the existing ID if it already exists
-            MercuryTracerouteSettings tset = MercuryService.generateTracerouteSettings();
-            Guid result3 = MercuryService.AddTracerouteSettings(tset);
+            Mercury.Api.TracerouteSettings tset = MercuryWebClient.generateTracerouteSettings();
+            String result3 = MercuryWebClient.addTracerouteSettings(tset);
 
             //An example for uploading a TracerouteIp. Then this must be obtained from the result of the alogrithm
-            MercuryIpTraceroute tip = MercuryService.generateTracerouteIp();
-            String result4 = MercuryService.addTracerouteIp(tip);
+            TracerouteIp tip = MercuryWebClient.generateTracerouteIp();
+            String result4 = MercuryWebClient.addTracerouteIp(tip);
+
 
 
 			return null;
