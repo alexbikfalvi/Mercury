@@ -30,6 +30,8 @@ namespace Mercury.Services
     /// </summary>
     public static class MercuryService
     {
+        public const int maximumAddressesPerRequest = 1000;
+
         /// <summary>
         /// Gets the local information.
         /// </summary>
@@ -46,6 +48,22 @@ namespace Mercury.Services
         /// <summary>
         /// Gets the list of AS mappings corresponding to the specified list of IP addresses.
         /// </summary>
+        /// <param name="address">The IP addresses.</param>
+        /// <returns>The list of AS mappings.</returns>
+        public static List<MercuryIpToAsMapping> GetIpToAsMappings(IPAddress address)
+        {
+            using (WebClient client = new WebClient())
+            {
+                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                return JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(
+                    client.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST",
+                    string.Format("ips={0}", address)))[0];
+            }
+        }
+
+        /// <summary>
+        /// Gets the list of AS mappings corresponding to the specified list of IP addresses.
+        /// </summary>
         /// <param name="addresses">The list of IP addresses.</param>
         /// <returns>The list of AS mappings.</returns>
         public static List<List<MercuryIpToAsMapping>> GetIpToAsMappings(IEnumerable<IPAddress> addresses)
@@ -56,6 +74,27 @@ namespace Mercury.Services
                 foreach (IPAddress address in addresses)
                 {
                     builder.AppendFormat("{0},", address);
+                }
+                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                return JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(
+                    client.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST", builder.ToString()));
+            }
+        }
+
+        /// <summary>
+        /// Gets the list of AS mappings corresponding to the specified list of IP addresses.
+        /// </summary>
+        /// <param name="addresses">The collection of IP addresses.</param>
+        /// <
+        /// <returns>The list of AS mappings.</returns>
+        public static List<List<MercuryIpToAsMapping>> GetIpToAsMappings(IList<IPAddress> addresses, int start, int length)
+        {
+            using (WebClient client = new WebClient())
+            {
+                StringBuilder builder = new StringBuilder("ips=");
+                for (int index = start; index < start + length; index++)
+                {
+                    builder.AppendFormat("{0},", addresses[index]);
                 }
                 client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
                 return JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(

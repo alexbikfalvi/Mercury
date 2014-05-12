@@ -19,6 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Linq;
+using Mercury.Api;
+using Mercury.Services;
 
 namespace Mercury.Topology
 {
@@ -27,28 +30,10 @@ namespace Mercury.Topology
 	/// </summary>
 	public sealed class ASTracerouteCache
 	{
-		/// <summary>
-		/// A structure representing the information for an IP address.
-		/// </summary>
-		public struct IPAddressInformation
-		{
-			#region Public fields
-
-			/// <summary>
-			/// The IP address.
-			/// </summary>
-			public IPAddress Address;
-			/// <summary>
-			/// The number of the corresponding autonomous system.
-			/// </summary>
-			public int ASNumber;
-
-			#endregion
-		}
-
 		private readonly ASTracerouteSettings settings;
 
-		private readonly Dictionary<IPAddress, IPAddressInformation> cache = new Dictionary<IPAddress, IPAddressInformation>();
+        private readonly Dictionary<IPAddress, List<MercuryIpToAsMapping>> cache =
+            new Dictionary<IPAddress, List<MercuryIpToAsMapping>>();
 
 		/// <summary>
 		/// Creates a new AS traceroute cache.
@@ -75,34 +60,77 @@ namespace Mercury.Topology
 		/// </summary>
 		/// <param name="address">The IP address.</param>
 		/// <returns>The address information.</returns>
-		//public IPAddressInformation Get(IPAddress address)
-		//{
-		//	IPAddressInformation info;
+        public List<MercuryIpToAsMapping> Get(IPAddress address)
+        {
+            List<MercuryIpToAsMapping> mapping;
 
-		//	// Try and get the value from the cache.
-		//	if (this.cache.TryGetValue(address, out info))
-		//	{
-		//		return info;
-		//	}
-		//	else
-		//	{
+            // Try and get the value from the cache.
+            if (this.cache.TryGetValue(address, out mapping))
+            {
+                // If the value is found, return the mapping.
+                return mapping;
+            }
+            else
+            {
+                // Get the mapping using the Mercury service.
+                mapping = MercuryService.GetIpToAsMappings(address);
+                // Add the mapping to the cache.
+                this.cache.Add(address, mapping);
+                // Return the mapping.
+                return mapping;
+            }
+        }
 
-		//	}
-		//}
+        /// <summary>
+        /// Gets from the cache the information for the specified IP addresses.
+        /// </summary>
+        /// <param name="addresses">The list of IP addresses.</param>
+        /// <returns>The address information.</returns>
+        public List<List<MercuryIpToAsMapping>> Get(IEnumerable<IPAddress> addresses)
+        {
+            // The list of mappings.
+            List<List<MercuryIpToAsMapping>> mappings = new List<List<MercuryIpToAsMapping>>();
+            HashSet<IPAddress> notFoundAddresses = new HashSet<IPAddress>();
 
-		#endregion
+            List<MercuryIpToAsMapping> mapping;
 
-		#region Private methods
+            // Add the mappings found in the cache.
+            foreach (IPAddress address in addresses)
+            {
+                // Try and get the value from the cache.
+                if (this.cache.TryGetValue(address, out mapping))
+                {
+                    // If the value is found, add it to the mappings.
+                    mappings.Add(mapping);
+                }
+                else
+                {
+                    // If the value is not found, add the address to the not found addresses list.
+                    notFoundAddresses.Add(address);
+                }
+            }
+            
+            // Convert the hash set to a list.
+            List<IPAddress> notFoundAddressesList = notFoundAddresses.ToList();
 
-		/// <summary>
-		/// Updates the cache information for the specified IP address.
-		/// </summary>
-		/// <param name="address">The IP address.</param>
-		/// <returns>The IP address information.</returns>
-		//private IPAddressInformation Update(IPAddress address)
-		//{
-		//	return null;
-		//}
+            // Request the unknown addresses to the Mercury service in groups.
+            for (int index = 0, count; index < notFoundAddresses.Count; index += MercuryService.maximumAddressesPerRequest)
+            {
+                // Compute the number of addresses included in the current request.
+                count = notFoundAddresses.Count - index > MercuryService.maximumAddressesPerRequest ?
+                    MercuryService.maximumAddressesPerRequest : notFoundAddresses.Count - index;
+
+                // Request
+                foreach(List<MercuryIpToAsMapping> result in MercuryService.GetIpToAsMappings(notFoundAddressesList, index, count))
+                {
+                    // Add the result to the cache.
+                    //this.cache.Add(result[])
+                }
+            }
+
+            // Return the mappings.
+            return mappings;
+        }
 
 		#endregion
 	}
