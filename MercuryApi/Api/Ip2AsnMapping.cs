@@ -24,8 +24,8 @@ namespace Mercury.Api
 	    public int IxpParticipant{ get; set; }
         [JsonProperty("ixpParticipantName")]
 	    public String IxpParticipantName{ get; set; }
-        //[JsonProperty("timeStamp")]
-        //public DateTime TimeStamp { get; set; }
+        [JsonProperty("timeStamp")]
+        public DateTime TimeStamp { get; set; }
         [JsonProperty("type")]
 	    public String Type{ get; set; }
         [JsonProperty("ip")]

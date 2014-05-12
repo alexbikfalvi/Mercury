@@ -114,7 +114,7 @@ namespace Mercury.Services
             }
         }
 
-        public static ASRelationship GetASRelationship(int as0, int as1)
+        public static TracerouteASRelationship GetASRelationship(int as0, int as1)
         {
             using (WebClient wc = new WebClient())
             {
@@ -122,34 +122,34 @@ namespace Mercury.Services
                 //int as1 = 3;
                 var json = wc.DownloadString("http://mercury.upf.edu/mercury/api/services/getASRelationship/" + as0 + "/" + as1);
                 //Console.WriteLine("**************\n"+json+"\n*********************");
-                var asRelationship = JsonConvert.DeserializeObject<ASRelationship>(json);
+                var asRelationship = JsonConvert.DeserializeObject<TracerouteASRelationship>(json);
 
                 return asRelationship;
             }
         }
 
-        public static List<ASRelationship> GetASRelationships(string myParameters)
+        public static List<TracerouteASRelationship> GetASRelationships(string pairs)
         {
             using (WebClient wc = new WebClient())
             {
-                //string myParameters = "pairs=2-3,766-3356,2589-6985";
+                //string pairs = "pairs=2-3,766-3356,2589-6985";
                 wc.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                var json = wc.UploadString("http://mercury.upf.edu/mercury/api/services/getASRelationshipsPOST", myParameters);
+                var json = wc.UploadString("http://mercury.upf.edu/mercury/api/services/getASRelationshipsPOST", pairs);
                 //Console.WriteLine("**************\n"+json+"\n*********************");
-                var asRelationships = JsonConvert.DeserializeObject<List<ASRelationship>>(json);
+                var asRelationships = JsonConvert.DeserializeObject<List<TracerouteASRelationship>>(json);
 
                 return asRelationships;
             }
         }
 
 
-        public static List<List<Ip2AsnMapping>> GetIp2AsnMappings(string myParameters)
+        public static List<List<Ip2AsnMapping>> GetIp2AsnMappings(string ips)
         {
             using (WebClient wc = new WebClient())
             {
-                //string myParameters = "ips=193.145.48.3,8.8.8.85";
+                //string ips = "ips=193.145.48.3,8.8.8.85";
                 wc.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                var json = wc.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST", myParameters);
+                var json = wc.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST", ips);
                 //Console.WriteLine("**************\n"+json+"\n*********************");
                 var ip2AsnMappings = JsonConvert.DeserializeObject<List<List<Ip2AsnMapping>>>(json);
 
@@ -158,13 +158,13 @@ namespace Mercury.Services
         }
 
 
-        public static List<Ip2GeoMapping> GetIp2GeoMappings(string myParameters)
+        public static List<Ip2GeoMapping> GetIp2GeoMappings(string ips)
         {
             using (WebClient wc = new WebClient())
             {
-                //string myParameters = "ips=193.145.48.3,8.8.8.85";
+                //string ips = "ips=193.145.48.3,8.8.8.85";
                 wc.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                var json = wc.UploadString("http://mercury.upf.edu/mercury/api/services/getIps2GeoPOST", myParameters);
+                var json = wc.UploadString("http://mercury.upf.edu/mercury/api/services/getIps2GeoPOST", ips);
                 //Console.WriteLine("**************\n"+json+"\n*********************");
                 var ip2GeoMappings = JsonConvert.DeserializeObject<List<Ip2GeoMapping>>(json);
 
@@ -204,12 +204,12 @@ namespace Mercury.Services
 
             //Now we create the TracerouteStats. Notice the flags value set to 2 because we have used the inference algorithm. 
             //  We have to decide which are the binary flags (int32bit)
-            TracerouteASStats tstats = new TracerouteASStats(2, 0, 1, 0, 1, 0, 0, true, 2);
+            TracerouteASStats tstats = new TracerouteASStats(2, 0, 1, 0, 1, 0, 0, true, 1);
 
             //Finally we generate the TracerouteAS
             TracerouteAS tas = new TracerouteAS(3352, "Telefonica de Espana", "192.168.1.2",
                 "80.33.0.24", "Barcelona", "Spain", 10310,
-                "Yahoo-3", "98.139.102.145", "yimg.com", "Sunny Valley", "United States", tstats);
+                "Yahoo-3", "98.139.102.145", "y.com", "Sunny Valley", "United States", DateTime.UtcNow, tstats);
 
             tas.tracerouteASHops.Add(hop0);
             tas.tracerouteASHops.Add(hop1);
@@ -305,7 +305,7 @@ namespace Mercury.Services
             tflow.tracerouteIpAttemps.Add(tatt);
 
             //We create 1 traceroute
-            TracerouteIp tip = new TracerouteIp("192.168.1.2", "80.33.0.24", "98.139.102.145", "yimg.com", addTracerouteSettings(generateTracerouteSettings()) );
+            TracerouteIp tip = new TracerouteIp("192.168.1.2", "80.33.0.24", "98.139.102.145", "yimg.com", addTracerouteSettings(generateTracerouteSettings()), DateTime.UtcNow );
             tip.tracerouteIpFlows.Add(tflow);
 
             return tip;

@@ -18,7 +18,7 @@ namespace Mercury.Api
         //[JsonProperty("asName")]
         public string ASName { get; set; }
 
-        //[JsonProperty("timeStamp")]
-        //public DateTime TimeStamp { get; set; }
+        [JsonProperty("timeStamp")]
+        public DateTime TimeStamp { get; set; }
     }
 }

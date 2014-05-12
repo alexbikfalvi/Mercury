@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,12 +15,14 @@ namespace Mercury.Api
         public String dst { get; set; }
         public List<TracerouteIpFlow> tracerouteIpFlows { get; set; }
         public String tracerouteSettingsId { get; set; }
+        [JsonConverter(typeof(IsoDateTimeConverter))]
+        public DateTime timeStamp { get; set; }
 
         public TracerouteIp()
         {
             this.tracerouteIpFlows = new List<TracerouteIpFlow>();
         }
-        public TracerouteIp(String srcIp, String srcPublicIp, String dstIp, String dst, String tracerouteSettingsId)
+        public TracerouteIp(String srcIp, String srcPublicIp, String dstIp, String dst, String tracerouteSettingsId, DateTime timeStamp)
         {
             this.srcIp = srcIp;
             this.srcPublicIp = srcPublicIp;
@@ -26,6 +30,7 @@ namespace Mercury.Api
             this.dst = dst;
             this.tracerouteSettingsId = tracerouteSettingsId;
             this.tracerouteIpFlows = new List<TracerouteIpFlow>();
+            this.timeStamp = timeStamp;
         }
     }
 
@@ -84,8 +89,10 @@ namespace Mercury.Api
         public TracerouteIpHop.Type type { get; set; }
         public String ipAddr { get; set; }
         public int ttl { get; set; }
-        //public DateTime reqTimeStamp{ get; set; }
-        //public DateTime respTimeStamp{ get; set; }
+        [JsonConverter(typeof(IsoDateTimeConverter))]
+        public DateTime reqTimeStamp{ get; set; }
+        [JsonConverter(typeof(IsoDateTimeConverter))]
+        public DateTime respTimeStamp{ get; set; }
 
         public TracerouteIpHop() { }
 

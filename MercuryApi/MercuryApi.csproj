@@ -40,7 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\ASRelationship.cs" />
     <Compile Include="Api\Ip2AsnMapping.cs" />
     <Compile Include="Api\Ip2GeoMapping.cs" />
     <Compile Include="Api\LocalInformation.cs" />

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,8 +33,9 @@ namespace Mercury.Api
         public String dstCity { get; set; }
         [JsonProperty("dstCountry")]
         public String dstCountry { get; set; }
-        //[JsonProperty("timeStamp")]
-        //public DateTime timeStamp { get; set; }
+        [JsonProperty("timeStamp")]
+        [JsonConverter(typeof(IsoDateTimeConverter))]
+        public DateTime timeStamp { get; set; }
         [JsonProperty("tracerouteIpAttemptIds")]
         public List<String> tracerouteIpAttemptIds { get; set; }
         [JsonProperty("tracerouteASHops")]
@@ -53,7 +55,7 @@ namespace Mercury.Api
         public TracerouteAS(int srcAS, String srcASName, String srcIp,
                     String srcPublicIp, String srcCity, String srcCountry, int dstAS,
                     String dstASName, String dstIp, String dst, String dstCity,
-                    String dstCountry,/* DateTime timeStamp,*/ TracerouteASStats tracerouteASStats)
+                    String dstCountry, DateTime timeStamp, TracerouteASStats tracerouteASStats)
         {
             this.srcAS = srcAS;
             this.srcASName = srcASName;
@@ -67,7 +69,7 @@ namespace Mercury.Api
             this.dst = dst;
             this.dstCity = dstCity;
             this.dstCountry = dstCountry;
-            //this.timeStamp = timeStamp;
+            this.timeStamp = timeStamp;
             this.tracerouteASStats = tracerouteASStats;
 
             this.tracerouteIpAttemptIds = new List<string>();

@@ -61,11 +61,11 @@ namespace Mercury.Topology
             MyInfo myInfo = MercuryWebClient.GetMyInfo();
 
             //An example for obtaining the AS rel betwenn AS2 and AS3
-            ASRelationship asRel = MercuryWebClient.GetASRelationship(2, 3);
+            TracerouteASRelationship asRel = MercuryWebClient.GetASRelationship(2, 3);
 
             //An example for obtaining the AS rels in BULK mode
             string myParameters1 = "pairs=2-3,766-3356,2589-6985";
-            List<ASRelationship> asRels = MercuryWebClient.GetASRelationships(myParameters1);
+            List<TracerouteASRelationship> asRels = MercuryWebClient.GetASRelationships(myParameters1);
 
             //An example for obtaining the IP2ASN mappings in BULK max 1000 ips
             string myParameters2 = "ips=193.145.48.3,8.8.8.85";
@@ -87,9 +87,9 @@ namespace Mercury.Topology
             //An example for uploading many TracerouteASes in BULK mode
             //First we generate dummy objects. Then this must be obtained from the result of the processing algorithm
             List<TracerouteAS> tases2 = new List<TracerouteAS>();
-            tases.Add(tas);
-            tases.Add(tas);
-            tases.Add(tas);
+            tases2.Add(tas);
+            tases2.Add(tas);
+            tases2.Add(tas);
             String result2 = MercuryWebClient.addTracerouteASes(tases2);
 
             //An example for uploading TracerouteSettings. 
