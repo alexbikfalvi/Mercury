@@ -41,7 +41,7 @@ namespace Mercury.Api
         [JsonProperty("tracerouteASHops")]
         public List<TracerouteASHop> tracerouteASHops { get; set; }
         [JsonProperty("tracerouteASRelationships")]
-        public List<TracerouteASRelationship> tracerouteASRelationships { get; set; }
+        public List<MercuryAsTracerouteRelationship> tracerouteASRelationships { get; set; }
         [JsonProperty("tracerouteASStats")]
         public TracerouteASStats tracerouteASStats { get; set; }
 
@@ -50,7 +50,7 @@ namespace Mercury.Api
         {
             this.tracerouteIpAttemptIds = new List<string>();
             this.tracerouteASHops = new List<TracerouteASHop>();
-            this.tracerouteASRelationships = new List<TracerouteASRelationship>();
+            this.tracerouteASRelationships = new List<MercuryAsTracerouteRelationship>();
         }
         public TracerouteAS(int srcAS, String srcASName, String srcIp,
                     String srcPublicIp, String srcCity, String srcCountry, int dstAS,
@@ -74,7 +74,7 @@ namespace Mercury.Api
 
             this.tracerouteIpAttemptIds = new List<string>();
             this.tracerouteASHops = new List<TracerouteASHop>();
-            this.tracerouteASRelationships = new List<TracerouteASRelationship>();
+            this.tracerouteASRelationships = new List<MercuryAsTracerouteRelationship>();
         }
     }
 
@@ -106,28 +106,6 @@ namespace Mercury.Api
             this.nfRels = nfRels;
             this.completed = completed;
             this.flags = flags;
-        }
-
-    }
-
-
-    public class TracerouteASRelationship
-    {
-        public enum Relationship { C2P, P2P, P2C, S2S, IXP, NF };
-
-        public Relationship relationship { get; set; }
-        public int as0 { get; set; }
-        public int as1 { get; set; }
-        public int hop { get; set; }
-
-        public TracerouteASRelationship() { }
-
-        public TracerouteASRelationship(Relationship relationship, int as0, int as1, int hop)
-        {
-            this.relationship = relationship;
-            this.as0 = as0;
-            this.as1 = as1;
-            this.hop = hop;
         }
 
     }

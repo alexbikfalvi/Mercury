@@ -1,174 +1,120 @@
-﻿using Mercury.Api;
-using Newtonsoft.Json;
+﻿/* 
+ * Copyright (C) 2014 Manuel Palacin, Alex Bikfalvi
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or (at
+ * your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text;
+using Mercury.Api;
+using Newtonsoft.Json;
 
 namespace Mercury.Services
 {
-    class MercuryWebClient
+    /// <summary>
+    /// A static class with methods for the Mercury API.
+    /// </summary>
+    public static class MercuryService
     {
-
-
-        //public static void Main(string[] args)
-        //{
-        //    //User user = GetUser();
-        //    //Console.WriteLine("User name is: "+user.Name );
-
-
-        //    //My Info
-        //    MyInfo myInfo = GetMyInfo();
-        //    Console.WriteLine("My as is " + myInfo.As + " and my AS name is: " + myInfo.ASName);
-
-        //    //AS Relationships
-        //    ASRelationship asRelationship = GetASRelationship();
-        //    Console.WriteLine("AS Relationship between AS0 " + asRelationship.As0 + " and AS1 " + asRelationship.As1 + " is " + asRelationship.Relationship);
-
-        //    Console.WriteLine("\nAS Relationships:");
-        //    List<ASRelationship> asRelationships = GetASRelationships();
-        //    foreach (ASRelationship asRel in asRelationships)
-        //    {
-        //        Console.WriteLine("AS rels between " + asRel.As0 + " and : " + asRel.As1 + " is " + asRel.Relationship);
-        //    }
-
-
-        //    //IP-2-AS Mappings
-        //    Console.WriteLine("\nIP-2-AS Mappings:");
-        //    List<List<Ip2AsnMapping>> auxMappings = GetIp2AsnMappings();
-        //    foreach (List<Ip2AsnMapping> ip2AsnMappings in auxMappings)
-        //    {
-        //        foreach (Ip2AsnMapping ip2AsnMapping in ip2AsnMappings)
-        //        {
-        //            Console.WriteLine("IP-2-AS for ip: " + ip2AsnMapping.Ip + " is AS " + ip2AsnMapping.As + " - " + ip2AsnMapping.AsName);
-        //        }
-        //    }
-
-        //    //IP-2-Geo mappings
-        //    Console.WriteLine("\nIP-2-GEO Mappings:");
-        //    List<Ip2GeoMapping> ip2GeoMappings = GetIp2GeoMappings();
-        //    foreach (Ip2GeoMapping ip2GeoMapping in ip2GeoMappings)
-        //    {
-        //        Console.WriteLine("IP-2-GEO for ip " + ip2GeoMapping.Ip + " is country : " + ip2GeoMapping.CountryName + " and city: " + ip2GeoMapping.City);
-        //    }
-
-
-        //    //Getting TracerouteASes by destination
-        //    Console.WriteLine("\nGet TracerouteASes by Destination:");
-        //    List<TracerouteAS> tracerouteASes = GetTracerouteASesByDst();
-        //    foreach (TracerouteAS tracerouteAS in tracerouteASes)
-        //    {
-        //        Console.WriteLine("Traceroute AS DomainDst: " + tracerouteAS.dst + " from sourceAS: " + tracerouteAS.srcAS + " and destAS: " + tracerouteAS.dstAS + " and asHops: " + tracerouteAS.tracerouteASStats.asHops);
-        //        foreach (TracerouteASRelationship trRel in tracerouteAS.tracerouteASRelationships)
-        //        {
-        //            Console.WriteLine("Hop " + trRel.hop + " has a relationship " + trRel.relationship);
-        //        }
-        //        foreach (String attemptId in tracerouteAS.tracerouteIpAttemptIds)
-        //        {
-        //            Console.WriteLine("Attempt id: " + attemptId);
-        //        }
-        //        foreach (TracerouteASHop trHop in tracerouteAS.tracerouteASHops)
-        //        {
-        //            Console.WriteLine("Hop id: " + trHop.hop + " of AS " + trHop.asName + " of type " + trHop.type + " has been inferred " + trHop.inferred);
-        //        }
-        //    }
-
-        //    //Adding TracerouteSettings
-        //    Console.WriteLine("Adding one Traceroute Settings... obtained id: " + addTracerouteSettings());
-        //    Console.WriteLine("Adding another Traceroute Settings... obtained id: " + addTracerouteSettings());
-
-        //    //Adding TracerouteIp
-        //    Console.WriteLine("Adding one TracerouteIp... the response is:\n" + addTracerouteIp());
-
-        //    //Adding TracerouteAS
-        //    Console.WriteLine("Adding one TracerouteAS... the response is:\n" + addTracerouteAS());
-
-        //    //Adding TracerouteASes
-        //    Console.WriteLine("Adding one TracerouteASes... the response is:\n" + addTracerouteASes());
-
-        //    Console.Write("\nPress any key to quit!");
-        //    ConsoleKeyInfo cki = Console.ReadKey();
-        //}
-
-        public static User GetUser()
+        /// <summary>
+        /// Gets the local information.
+        /// </summary>
+        /// <returns>An object with the local information.</returns>
+        public static MercuryLocalInformation GetLocalInformation()
         {
-            using (WebClient wc = new WebClient())
+            using (WebClient client = new WebClient())
             {
-                var json = wc.DownloadString("http://coderwall.com/mdeiters.json");
-                var user = JsonConvert.DeserializeObject<User>(json);
-
-                return user;
+                return JsonConvert.DeserializeObject<MercuryLocalInformation>(
+                    client.DownloadString("http://mercury.upf.edu/mercury/api/services/myInfo"));
             }
         }
 
-        public static MyInfo GetMyInfo()
+        /// <summary>
+        /// Gets the list of AS mappings corresponding to the specified list of IP addresses.
+        /// </summary>
+        /// <param name="addresses">The list of IP addresses.</param>
+        /// <returns>The list of AS mappings.</returns>
+        public static List<List<MercuryIpToAsMapping>> GetIpToAsMappings(IEnumerable<IPAddress> addresses)
         {
-            using (WebClient wc = new WebClient())
+            using (WebClient client = new WebClient())
             {
-                var json = wc.DownloadString("http://mercury.upf.edu/mercury/api/services/myInfo");
-                //Console.WriteLine("**************\n"+json+"\n*********************");
-                var myInfo = JsonConvert.DeserializeObject<MyInfo>(json);
-
-                return myInfo;
+                StringBuilder builder = new StringBuilder("ips=");
+                foreach (IPAddress address in addresses)
+                {
+                    builder.AppendFormat("{0},", address);
+                }
+                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                return JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(
+                    client.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST", builder.ToString()));
             }
         }
 
-        public static TracerouteASRelationship GetASRelationship(int as0, int as1)
+        /// <summary>
+        /// Gets the list of geoinformation mappings corresponding to the specified list of IP addresses.
+        /// </summary>
+        /// <param name="addresses">The list of IP addresses.</param>
+        /// <returns>The list of geo mappings.</returns>
+        public static List<MercuryIpToGeoMapping> GetIp2GeoMappings(IEnumerable<IPAddress> addresses)
         {
-            using (WebClient wc = new WebClient())
+            using (WebClient client = new WebClient())
             {
-                //int as0 = 2;
-                //int as1 = 3;
-                var json = wc.DownloadString("http://mercury.upf.edu/mercury/api/services/getASRelationship/" + as0 + "/" + as1);
-                //Console.WriteLine("**************\n"+json+"\n*********************");
-                var asRelationship = JsonConvert.DeserializeObject<TracerouteASRelationship>(json);
-
-                return asRelationship;
+                StringBuilder builder = new StringBuilder("ips=");
+                foreach (IPAddress address in addresses)
+                {
+                    builder.AppendFormat("{0},", address);
+                }
+                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                return JsonConvert.DeserializeObject<List<MercuryIpToGeoMapping>>(
+                    client.UploadString("http://mercury.upf.edu/mercury/api/services/getIps2GeoPOST", builder.ToString()));
             }
         }
 
-        public static List<TracerouteASRelationship> GetASRelationships(string pairs)
+        /// <summary>
+        /// Gets the relationship between the specified AS pair.
+        /// </summary>
+        /// <param name="asFirst">The first AS.</param>
+        /// <param name="asSecond">The second AS></param>
+        /// <returns>The relationship object.</returns>
+        public static MercuryAsTracerouteRelationship GetAsRelationship(int asFirst, int asSecond)
         {
-            using (WebClient wc = new WebClient())
+            using (WebClient client = new WebClient())
             {
-                //string pairs = "pairs=2-3,766-3356,2589-6985";
-                wc.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                var json = wc.UploadString("http://mercury.upf.edu/mercury/api/services/getASRelationshipsPOST", pairs);
-                //Console.WriteLine("**************\n"+json+"\n*********************");
-                var asRelationships = JsonConvert.DeserializeObject<List<TracerouteASRelationship>>(json);
-
-                return asRelationships;
+                return JsonConvert.DeserializeObject<MercuryAsTracerouteRelationship>(
+                    client.DownloadString(string.Format("http://mercury.upf.edu/mercury/api/services/getASRelationship/{0}/{1}", asFirst, asSecond)));
             }
         }
 
-
-        public static List<List<Ip2AsnMapping>> GetIp2AsnMappings(string ips)
+        /// <summary>
+        /// Gets the relationships between the specified list of AS pairs.
+        /// </summary>
+        /// <param name="pairs">The list of AS pairs.</param>
+        /// <returns>A list of relationship objects.</returns>
+        public static List<MercuryAsTracerouteRelationship> GetAsRelationships(IEnumerable<Tuple<int, int>> pairs)
         {
-            using (WebClient wc = new WebClient())
+            using (WebClient client = new WebClient())
             {
-                //string ips = "ips=193.145.48.3,8.8.8.85";
-                wc.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                var json = wc.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST", ips);
-                //Console.WriteLine("**************\n"+json+"\n*********************");
-                var ip2AsnMappings = JsonConvert.DeserializeObject<List<List<Ip2AsnMapping>>>(json);
-
-                return ip2AsnMappings;
-            }
-        }
-
-
-        public static List<Ip2GeoMapping> GetIp2GeoMappings(string ips)
-        {
-            using (WebClient wc = new WebClient())
-            {
-                //string ips = "ips=193.145.48.3,8.8.8.85";
-                wc.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                var json = wc.UploadString("http://mercury.upf.edu/mercury/api/services/getIps2GeoPOST", ips);
-                //Console.WriteLine("**************\n"+json+"\n*********************");
-                var ip2GeoMappings = JsonConvert.DeserializeObject<List<Ip2GeoMapping>>(json);
-
-                return ip2GeoMappings;
+                StringBuilder builder = new StringBuilder("pairs=");
+                foreach (Tuple<int, int> pair in pairs)
+                {
+                    builder.AppendFormat("{0}-{1},", pair.Item1, pair.Item2);
+                }
+                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                return JsonConvert.DeserializeObject<List<MercuryAsTracerouteRelationship>>(
+                    client.UploadString("http://mercury.upf.edu/mercury/api/services/getASRelationshipsPOST", builder.ToString()));
             }
         }
 
@@ -199,8 +145,8 @@ namespace Mercury.Services
 
 
             //Then we create the 2 AS Relationships
-            TracerouteASRelationship trel0 = new TracerouteASRelationship(TracerouteASRelationship.Relationship.S2S, 3352, 12956, 0);
-            TracerouteASRelationship trel1 = new TracerouteASRelationship(TracerouteASRelationship.Relationship.P2P, 12956, 10310, 1);
+            MercuryAsTracerouteRelationship trel0 = new MercuryAsTracerouteRelationship(MercuryAsTracerouteRelationship.RelationshipType.SiblingToSibling, 3352, 12956, 0);
+            MercuryAsTracerouteRelationship trel1 = new MercuryAsTracerouteRelationship(MercuryAsTracerouteRelationship.RelationshipType.PeerToPeer, 12956, 10310, 1);
 
             //Now we create the TracerouteStats. Notice the flags value set to 2 because we have used the inference algorithm. 
             //  We have to decide which are the binary flags (int32bit)
@@ -258,17 +204,17 @@ namespace Mercury.Services
         }
 
 
-        public static TracerouteSettings generateTracerouteSettings()
+        public static MercuryTracerouteSettings generateTracerouteSettings()
         {
             String UUID = Guid.NewGuid().ToString();
             Console.WriteLine("UUID generated: " + UUID);
-            TracerouteSettings ts = new TracerouteSettings(
+            MercuryTracerouteSettings ts = new MercuryTracerouteSettings(
                 UUID, 3, 3, 0, 32, 500, 1000, 35000, 36000, 20);
             return ts;
 
         }
 
-        public static String addTracerouteSettings(TracerouteSettings tracerouteSettings)
+        public static String addTracerouteSettings(MercuryTracerouteSettings tracerouteSettings)
         {
             using (WebClient wc = new WebClient())
             {
