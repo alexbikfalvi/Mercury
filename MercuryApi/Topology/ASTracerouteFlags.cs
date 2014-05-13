@@ -7,6 +7,7 @@ namespace Mercury.Topology
 {
     public enum ASTracerouteFlags
     {
+        None = 0,
         // Attempt traceroute
         MultipleAsEqualNeighbor = 0x1,
         MultipleAsDifferentNeighbor = 0x10000,

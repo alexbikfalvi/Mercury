@@ -9,6 +9,6 @@ namespace Mercury.Topology
     public sealed class ASTraceroutePath
     {
         private readonly List<TracerouteASHop> hops = new List<TracerouteASHop>();
-        private uint flag = 0;
+        private ASTracerouteFlags flag = ASTracerouteFlags.None;
     }
 }
