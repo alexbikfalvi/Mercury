@@ -120,11 +120,16 @@ namespace Mercury.Topology
                 count = notFoundAddresses.Count - index > MercuryService.maximumAddressesPerRequest ?
                     MercuryService.maximumAddressesPerRequest : notFoundAddresses.Count - index;
 
-                // Request
+                // Request the IP to AS mappings.
                 foreach(List<MercuryIpToAsMapping> result in MercuryService.GetIpToAsMappings(notFoundAddressesList, index, count))
                 {
+                    if (0 == result.Count) continue;
+
                     // Add the result to the cache.
-                    //this.cache.Add(result[])
+                    this.cache.Add(result[0].Address, result);
+
+                    // Add the result to the mappings result.
+                    mappings.Add(result);
                 }
             }
 

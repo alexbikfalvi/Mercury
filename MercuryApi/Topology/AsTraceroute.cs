@@ -47,6 +47,7 @@ namespace Mercury.Topology
 		public ASTraceroute(ASTracerouteSettings settings)
 		{
 			this.settings = settings;
+            this.cache = new ASTracerouteCache(this.settings);
 		}
 
 		/// <summary>
@@ -58,8 +59,12 @@ namespace Mercury.Topology
 		/// <returns>The AS-level traceroute.</returns>
 		public ASTracerouteResult Run(MultipathTracerouteResult traceroute, CancellationToken cancel, ASTracerouteCallback callback)
 		{
+            /*
+
 			//LocalInformation localInformation = MercuryService.GetLocalInformation();
             MercuryLocalInformation myInfo = MercuryService.GetLocalInformation();
+
+            List<MercuryIpToAsMapping> map = MercuryService.GetIpToAsMappings(IPAddress.Parse("8.8.8.85"));
 
             //An example for obtaining the IP2ASN mappings in BULK max 1000 ips
             List<List<MercuryIpToAsMapping>> ip2asMappings = MercuryService.GetIpToAsMappings(new IPAddress[]
@@ -109,7 +114,7 @@ namespace Mercury.Topology
             //An example for uploading a TracerouteIp. Then this must be obtained from the result of the alogrithm
             TracerouteIp tip = MercuryService.generateTracerouteIp();
             String result4 = MercuryService.addTracerouteIp(tip);
-
+            */
 
 
 			return null;

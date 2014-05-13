@@ -31,6 +31,9 @@ using InetCommon.Net;
 using Mercury.Properties;
 using Mercury.Topology;
 
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+
 namespace Mercury
 {
 	/// <summary>
@@ -286,7 +289,6 @@ namespace Mercury
 				try
 				{
 					// Run an IP-level traceroute.
-					/*
 					MultipathTracerouteResult resultIp = this.tracerouteIp.RunIpv4(localAddress, remoteAddress, cancel.Token, (MultipathTracerouteResult result, MultipathTracerouteState state) =>
 						{
 							// Level 3 verbosity.
@@ -632,7 +634,13 @@ namespace Mercury
 								}
 							}
 						});
-					 */
+					
+ 
+                    using (FileStream file = File.Create("TracerouteResult.dat"))
+                    {
+                        BinaryFormatter formatter = new BinaryFormatter();
+                        formatter.Serialize(file, resultIp);
+                    }
 
 					// Run the AS-level traceroute.
 					ASTracerouteResult resultAs = this.tracerouteAs.Run(null, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
