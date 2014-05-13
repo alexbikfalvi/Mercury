@@ -9,7 +9,7 @@ namespace Mercury.Api
 {
     public class TracerouteAS
     {
-        //[JsonProperty("srcAS")]
+        [JsonProperty("srcAS")]
         public int srcAS { get; set; }
         [JsonProperty("srcASName")]
         public String srcASName { get; set; }
