@@ -51,6 +51,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Topology\ASTraceroute.cs" />
     <Compile Include="Topology\ASTracerouteCache.cs" />
+    <Compile Include="Topology\ASTracerouteFlags.cs" />
+    <Compile Include="Topology\ASTraceroutePath.cs" />
     <Compile Include="Topology\ASTracerouteResult.cs" />
     <Compile Include="Topology\ASTracerouteSettings.cs" />
     <Compile Include="Topology\ASTracerouteState.cs" />

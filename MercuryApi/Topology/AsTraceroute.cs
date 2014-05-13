@@ -82,7 +82,8 @@ namespace Mercury.Topology
             }
 
             // Solve the list of IP addresses to AS information.
-            List<List<MercuryIpToAsMapping>> mappings = MercuryService.GetIpToAsMappings(addresses);
+            List<List<MercuryIpToAsMapping>> mappings = this.cache.Get(addresses);
+            //MercuryService.GetIpToAsMappings(addresses);
 
                 /*
 

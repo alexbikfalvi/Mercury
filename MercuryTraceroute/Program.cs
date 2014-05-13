@@ -644,7 +644,7 @@ namespace Mercury
                      */
 
 					// Run the AS-level traceroute.
-					ASTracerouteResult resultAs = this.tracerouteAs.Run(null, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
+					ASTracerouteResult resultAs = this.tracerouteAs.Run(resultIp, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
 						{
 						});
 				}
