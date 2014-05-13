@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Linq;
+using InetApi.Net;
 using Mercury.Api;
 using Mercury.Services;
 
@@ -45,15 +46,6 @@ namespace Mercury.Topology
 		}
 
 		#region Public methods
-
-		/// <summary>
-		/// Adds to the cache the information for the specified list of IP addresses.
-		/// </summary>
-		/// <param name="addresses">The list of IP addresses.</param>
-		public void Add(IEnumerable<IPAddress> addresses)
-		{
-
-		}
 
 		/// <summary>
 		/// Gets from the cache the information for the specified IP address.
@@ -97,6 +89,9 @@ namespace Mercury.Topology
             // Add the mappings found in the cache.
             foreach (IPAddress address in addresses)
             {
+                // If the IP address is private
+                if (!address.IsDnsEligible()) continue;
+
                 // Try and get the value from the cache.
                 if (this.cache.TryGetValue(address, out mapping))
                 {

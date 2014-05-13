@@ -635,12 +635,13 @@ namespace Mercury
 							}
 						});
 					
- 
+                    /*
                     using (FileStream file = File.Create("TracerouteResult.dat"))
                     {
                         BinaryFormatter formatter = new BinaryFormatter();
                         formatter.Serialize(file, resultIp);
                     }
+                     */
 
 					// Run the AS-level traceroute.
 					ASTracerouteResult resultAs = this.tracerouteAs.Run(null, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>

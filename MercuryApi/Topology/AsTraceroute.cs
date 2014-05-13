@@ -59,65 +59,90 @@ namespace Mercury.Topology
 		/// <returns>The AS-level traceroute.</returns>
 		public ASTracerouteResult Run(MultipathTracerouteResult traceroute, CancellationToken cancel, ASTracerouteCallback callback)
 		{
-            /*
-
-			//LocalInformation localInformation = MercuryService.GetLocalInformation();
-            MercuryLocalInformation myInfo = MercuryService.GetLocalInformation();
-
-            List<MercuryIpToAsMapping> map = MercuryService.GetIpToAsMappings(IPAddress.Parse("8.8.8.85"));
-
-            //An example for obtaining the IP2ASN mappings in BULK max 1000 ips
-            List<List<MercuryIpToAsMapping>> ip2asMappings = MercuryService.GetIpToAsMappings(new IPAddress[]
+            // Create a list of IP addresses.
+            HashSet<IPAddress> addresses = new HashSet<IPAddress>();
+            
+            // Add the addresses from the ICMP data.
+            for (byte flow = 0; flow < traceroute.Settings.FlowCount; flow++)
+            {
+                for (byte ttl = 0; ttl < traceroute.Settings.MaximumHops - traceroute.Settings.MinimumHops + 1; ttl++)
                 {
-                    IPAddress.Parse("193.145.48.3"), IPAddress.Parse("8.8.8.85")
-                });
+                    for (byte attempt = 0; attempt < traceroute.Settings.AttemptsPerFlow; attempt++)
+                    {
+                        if (traceroute.IcmpData[flow, ttl, attempt].Type != MultipathTracerouteData.ResponseType.Unknown)
+                        {
+                            addresses.Add(traceroute.IcmpData[flow, ttl, attempt].Address);
+                        }
+                        if (traceroute.UdpData[flow, ttl, attempt].Type != MultipathTracerouteData.ResponseType.Unknown)
+                        {
+                            addresses.Add(traceroute.UdpData[flow, ttl, attempt].Address);
+                        }
+                    }
+                }
+            }
 
-            //An example for obtaining the IP2GEO in BULK mode max 1000 ips
-            List<MercuryIpToGeoMapping> ip2geoMappings = MercuryService.GetIp2GeoMappings(new IPAddress[]
-                {
-                    IPAddress.Parse("193.145.48.3"), IPAddress.Parse("8.8.8.85")
-                });
+            // Solve the list of IP addresses to AS information.
+            List<List<MercuryIpToAsMapping>> mappings = MercuryService.GetIpToAsMappings(addresses);
 
-            //An example for obtaining the AS rels in BULK mode
-            List<MercuryAsTracerouteRelationship> asRels = MercuryService.GetAsRelationships(new Tuple<int, int>[]
-                {
-                    new Tuple<int, int>(2, 3),
-                    new Tuple<int, int>(766, 3356),
-                    new Tuple<int, int>(2589, 6985)
-                });
+                /*
 
-            //An example for obtaining the AS rel betwenn AS2 and AS3
-            MercuryAsTracerouteRelationship asRel = MercuryService.GetAsRelationship(2, 3);
+                //LocalInformation localInformation = MercuryService.GetLocalInformation();
+                MercuryLocalInformation myInfo = MercuryService.GetLocalInformation();
 
-            //Alex you don't need this... but just in case...
-            //An example for obtaining TracerouteASes by destination domain
-            String dst = "yimg.com";
-            List<TracerouteAS> tases = MercuryService.GetTracerouteASesByDst(dst);
+                List<MercuryIpToAsMapping> map = MercuryService.GetIpToAsMappings(IPAddress.Parse("8.8.8.85"));
 
-            //An example for uploading a TracerouteAS
-            //First we generate a dummy object. Then this must be obtained from the result of the algorithm
-            TracerouteAS tas = MercuryService.generateTracerouteAS();
-            String result1 = MercuryService.addTracerouteAS(tas);
-            //An example for uploading many TracerouteASes in BULK mode
-            //First we generate dummy objects. Then this must be obtained from the result of the processing algorithm
-            List<TracerouteAS> tases2 = new List<TracerouteAS>();
-            tases2.Add(tas);
-            tases2.Add(tas);
-            tases2.Add(tas);
-            String result2 = MercuryService.addTracerouteASes(tases2);
+                //An example for obtaining the IP2ASN mappings in BULK max 1000 ips
+                List<List<MercuryIpToAsMapping>> ip2asMappings = MercuryService.GetIpToAsMappings(new IPAddress[]
+                    {
+                        IPAddress.Parse("193.145.48.3"), IPAddress.Parse("8.8.8.85")
+                    });
 
-            //An example for uploading TracerouteSettings. 
-            //It returns the same ID if is new, it returns the existing ID if it already exists
-            Mercury.Api.MercuryTracerouteSettings tset = MercuryService.generateTracerouteSettings();
-            String result3 = MercuryService.addTracerouteSettings(tset);
+                //An example for obtaining the IP2GEO in BULK mode max 1000 ips
+                List<MercuryIpToGeoMapping> ip2geoMappings = MercuryService.GetIp2GeoMappings(new IPAddress[]
+                    {
+                        IPAddress.Parse("193.145.48.3"), IPAddress.Parse("8.8.8.85")
+                    });
 
-            //An example for uploading a TracerouteIp. Then this must be obtained from the result of the alogrithm
-            TracerouteIp tip = MercuryService.generateTracerouteIp();
-            String result4 = MercuryService.addTracerouteIp(tip);
-            */
+                //An example for obtaining the AS rels in BULK mode
+                List<MercuryAsTracerouteRelationship> asRels = MercuryService.GetAsRelationships(new Tuple<int, int>[]
+                    {
+                        new Tuple<int, int>(2, 3),
+                        new Tuple<int, int>(766, 3356),
+                        new Tuple<int, int>(2589, 6985)
+                    });
+
+                //An example for obtaining the AS rel betwenn AS2 and AS3
+                MercuryAsTracerouteRelationship asRel = MercuryService.GetAsRelationship(2, 3);
+
+                //Alex you don't need this... but just in case...
+                //An example for obtaining TracerouteASes by destination domain
+                String dst = "yimg.com";
+                List<TracerouteAS> tases = MercuryService.GetTracerouteASesByDst(dst);
+
+                //An example for uploading a TracerouteAS
+                //First we generate a dummy object. Then this must be obtained from the result of the algorithm
+                TracerouteAS tas = MercuryService.generateTracerouteAS();
+                String result1 = MercuryService.addTracerouteAS(tas);
+                //An example for uploading many TracerouteASes in BULK mode
+                //First we generate dummy objects. Then this must be obtained from the result of the processing algorithm
+                List<TracerouteAS> tases2 = new List<TracerouteAS>();
+                tases2.Add(tas);
+                tases2.Add(tas);
+                tases2.Add(tas);
+                String result2 = MercuryService.addTracerouteASes(tases2);
+
+                //An example for uploading TracerouteSettings. 
+                //It returns the same ID if is new, it returns the existing ID if it already exists
+                Mercury.Api.MercuryTracerouteSettings tset = MercuryService.generateTracerouteSettings();
+                String result3 = MercuryService.addTracerouteSettings(tset);
+
+                //An example for uploading a TracerouteIp. Then this must be obtained from the result of the alogrithm
+                TracerouteIp tip = MercuryService.generateTracerouteIp();
+                String result4 = MercuryService.addTracerouteIp(tip);
+                */
 
 
-			return null;
+                return null;
 		}
 	}
 }
