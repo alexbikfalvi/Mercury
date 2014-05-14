@@ -61,8 +61,10 @@ namespace Mercury.Topology
 		{
             // Create a list of IP addresses.
             HashSet<IPAddress> addresses = new HashSet<IPAddress>();
+
             
-            // Add the addresses from the ICMP data.
+
+            // Add the addresses from the ICMP and UDP data.
             for (byte flow = 0; flow < traceroute.Settings.FlowCount; flow++)
             {
                 for (byte ttl = 0; ttl < traceroute.Settings.MaximumHops - traceroute.Settings.MinimumHops + 1; ttl++)
@@ -81,9 +83,82 @@ namespace Mercury.Topology
                 }
             }
 
-            // Solve the list of IP addresses to AS information.
+            
+
+            // Solve the list of IP addresses to AS information and we stored it in cache.
             List<List<MercuryIpToAsMapping>> mappings = this.cache.Get(addresses);
-            //MercuryService.GetIpToAsMappings(addresses);
+
+            // We create a multidemensional array with the AS mappings inside the "paths" variable
+            ASPreviewHops[,,] paths = new ASPreviewHops[traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow, 2];
+            for (byte flow = 0; flow < traceroute.Settings.FlowCount; flow++)
+            {
+                for (byte attempt = 0; attempt < traceroute.Settings.AttemptsPerFlow; attempt++)
+                {
+                    paths[flow, attempt, 0] = new ASPreviewHops();
+                    for (byte ttl = 0; ttl < traceroute.IcmpStatistics[flow, attempt].MaximumTimeToLive; ttl++)
+                    {
+                        if (traceroute.IcmpData[flow, ttl, attempt].Type != MultipathTracerouteData.ResponseType.Unknown)
+                        {
+                            List<MercuryIpToAsMapping> maps = this.cache.Get(traceroute.IcmpData[flow, ttl, attempt].Address);
+                            
+                            List<TracerouteASHop> hops = new List<TracerouteASHop>();
+                            foreach(MercuryIpToAsMapping map in maps){
+                                int hopTTL = ttl;
+                                hops.Add( new TracerouteASHop(hopTTL, map.AsNumber, map.AsName, map.IxpName, (TracerouteASHop.Type)map.type, false) );
+                            }
+                            paths[flow, attempt, 0].addHops(hops);
+                        }
+                    }
+
+                    paths[flow, attempt, 1] = new ASPreviewHops();
+                    for (byte ttl = 0; ttl < traceroute.UdpStatistics[flow, attempt].MaximumTimeToLive; ttl++)
+                    {
+                        if (traceroute.UdpData[flow, ttl, attempt].Type != MultipathTracerouteData.ResponseType.Unknown)
+                        {
+                            List<MercuryIpToAsMapping> maps = this.cache.Get(traceroute.UdpData[flow, ttl, attempt].Address);
+                            
+                            List<TracerouteASHop> hops = new List<TracerouteASHop>();
+                            foreach (MercuryIpToAsMapping map in maps)
+                            {
+                                int hopTTL = ttl;
+                                hops.Add(new TracerouteASHop(hopTTL, map.AsNumber, map.AsName, map.IxpName, (TracerouteASHop.Type)map.type, false));
+                            }
+                            paths[flow, attempt, 1].addHops(hops);
+                        }
+                    }
+
+                }
+            }
+
+
+            /*
+             * AQUIIIIIIIIIIIIIIII
+             * 
+             */ 
+            // ALEX I AM HERE
+            //Now we check missing and multiple hops and we try to correct it
+            int flows = paths.GetLength(0);
+            int attemptsPerFlow = paths.GetLength(1);
+            int algorithms = paths.GetLength(2);
+            ASPreviewHops[, ,] pathsAggrAS = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
+            for (int flow = 0; flow < flows; flow++)
+            {
+                for (int attempt = 0; attempt < attemptsPerFlow; attempt++)
+                {
+                    for (int alg = 0; alg < algorithms; alg++)
+                    {
+                        if (alg == 0) //ICMP
+                        {
+                            //processASPreviewHops(paths[flow, attempt, alg]);
+                        }
+                        if (alg == 1) //UDP
+                        {
+                            //processASPreviewHops(paths[flow, attempt, alg]);
+                        }
+            
+                    }
+                }
+            }
 
                 /*
 
@@ -145,5 +220,69 @@ namespace Mercury.Topology
 
                 return null;
 		}
-	}
+
+
+
+        /*
+         *AQUIIIIIIIIIIIIIIIIIIIII 
+         * 
+         */
+        //I am here, preparing the algorithm
+        private ASPreviewHops processASPreviewHops(ASPreviewHops asPreviewHops)
+        {
+            ASPreviewHops asPreviewHopsNew = new ASPreviewHops();
+
+            TracerouteASHop prevHop = null;
+            TracerouteASHop currentHop = null;
+            TracerouteASHop nextHop = null;
+           //TracerouteASHop auxHop = null;
+            foreach (List<TracerouteASHop> hopStructure in asPreviewHops.hops)
+            {
+                if (prevHop != null) //first check if first hop
+                {
+                    if (hopStructure.Count > 0) // check if missing hop
+                    {
+                        if (hopStructure.Count == 1) // check if only 1 as
+                        {
+                            if (prevHop.asNumber.Equals(hopStructure[0].asNumber)) //If same as previous
+                            {
+
+                            }
+                            else
+                            {
+                                prevHop = hopStructure[0];
+                            }
+
+
+                        }
+                        else // multiple ases
+                        {
+                            foreach (TracerouteASHop auxHop in hopStructure)
+                            {
+                                if (prevHop.asNumber.Equals(auxHop.asNumber))
+                                {
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+
+                    }
+                }
+            }
+
+            return null;
+        }
+    
+    
+    
+    
+    
+    
+    
+    
+    }
 }

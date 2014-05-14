@@ -90,7 +90,7 @@ namespace Mercury.Topology
             foreach (IPAddress address in addresses)
             {
                 // If the IP address is private
-                if (!address.IsDnsEligible()) continue;
+                if (!address.IsGlobalUnicastAddress()) continue;
 
                 // Try and get the value from the cache.
                 if (this.cache.TryGetValue(address, out mapping))

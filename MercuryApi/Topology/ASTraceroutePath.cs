@@ -10,5 +10,10 @@ namespace Mercury.Topology
     {
         private readonly List<TracerouteASHop> hops = new List<TracerouteASHop>();
         private ASTracerouteFlags flag = ASTracerouteFlags.None;
+
+        public void addHop(TracerouteASHop asHop){
+            this.hops.Add(asHop);
+        }
+
     }
 }
