@@ -140,7 +140,11 @@ namespace Mercury.Topology
             int flows = paths.GetLength(0);
             int attemptsPerFlow = paths.GetLength(1);
             int algorithms = paths.GetLength(2);
-            ASPreviewHops[, ,] pathsAggrAS = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
+            ASPreviewHops[, ,] pathsAggrAS1 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
+            ASPreviewHops[, ,] pathsAggrAS2 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
+            ASPreviewHops[, ,] pathsAggrAS3 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
+            //ASPreviewHops[, ,] pathsAggrAS4 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
+            //ASPreviewHops[, ,] pathsAggrAS5 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
             for (int flow = 0; flow < flows; flow++)
             {
                 for (int attempt = 0; attempt < attemptsPerFlow; attempt++)
@@ -150,6 +154,13 @@ namespace Mercury.Topology
                         if (alg == 0) //ICMP
                         {
                             //processASPreviewHops(paths[flow, attempt, alg]);
+
+                            pathsAggrAS1[flow, attempt, alg] = aggregateMissings(paths[flow, attempt, alg]);
+                            pathsAggrAS2[flow, attempt, alg] = removeMissingInMiddleSameAS(pathsAggrAS1[flow, attempt, alg]);
+                            pathsAggrAS3[flow, attempt, alg] = aggregateSameASes(pathsAggrAS2[flow, attempt, alg]);
+                            //pathsAggrAS4[flow, attempt, alg] = removeLoops(pathsAggrAS3[flow, attempt, alg]);
+                            //pathsAggrAS5[flow, attempt, alg] = aggregateSameASes(pathsAggrAS4[flow, attempt, alg]);
+
                         }
                         if (alg == 1) //UDP
                         {
@@ -218,7 +229,7 @@ namespace Mercury.Topology
                 */
 
 
-                return null;
+              return null;
 		}
 
 
@@ -228,61 +239,220 @@ namespace Mercury.Topology
          * 
          */
         //I am here, preparing the algorithm
-        private ASPreviewHops processASPreviewHops(ASPreviewHops asPreviewHops)
+
+        private ASPreviewHops aggregateMissings(ASPreviewHops asPreviewHops)
         {
-            ASPreviewHops asPreviewHopsNew = new ASPreviewHops();
 
-            TracerouteASHop prevHop = null;
-            TracerouteASHop currentHop = null;
-            TracerouteASHop nextHop = null;
-           //TracerouteASHop auxHop = null;
-            foreach (List<TracerouteASHop> hopStructure in asPreviewHops.hops)
+            ASPreviewHops asPreviewHopsAux = new ASPreviewHops();
+            bool prevHopMissing = false;
+            for (int i = 0; i < asPreviewHops.hops.Count; i++ )
             {
-                if (prevHop != null) //first check if first hop
-                {
-                    if (hopStructure.Count > 0) // check if missing hop
+                    if (asPreviewHops.hops[i].Count != 0) //If not missing we add it
                     {
-                        if (hopStructure.Count == 1) // check if only 1 as
+                        if (prevHopMissing == false)
                         {
-                            if (prevHop.asNumber.Equals(hopStructure[0].asNumber)) //If same as previous
-                            {
-
-                            }
-                            else
-                            {
-                                prevHop = hopStructure[0];
-                            }
-
-
+                            asPreviewHopsAux.addHops(asPreviewHops.hops[i]);
                         }
-                        else // multiple ases
+                        else
                         {
-                            foreach (TracerouteASHop auxHop in hopStructure)
-                            {
-                                if (prevHop.asNumber.Equals(auxHop.asNumber))
-                                {
-
-                                    break;
-                                }
-                            }
+                            asPreviewHopsAux.addHops(asPreviewHops.hops[i-1]); //We add the previous missing. ONly 1
+                            asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We add the hops
                         }
+                        prevHopMissing = false;
                     }
-                    else
+                    else //If missing
                     {
+                        prevHopMissing = true;
+                    }
+             }
+
+            return asPreviewHopsAux;
+        }
+
+        private ASPreviewHops removeMissingInMiddleSameAS(ASPreviewHops asPreviewHops)
+        {
+            ASPreviewHops asPreviewHopsAux = new ASPreviewHops();
+
+            //First we add the first and/or last hop if they are missings
+            if (asPreviewHops.hops[0].Count == 0) //missing at position 0 
+            {
+                asPreviewHopsAux.addHops(asPreviewHops.hops[0]);
+            }
+            if (asPreviewHops.hops[asPreviewHops.hops.Count-1].Count == 0) //missing at last hop
+            {
+                asPreviewHopsAux.addHops(asPreviewHops.hops[0]);
+            }
+
+            if (asPreviewHops.hops.Count > 2) //We need at least 3 hops
+            {
+
+                for (int i = 1; i < asPreviewHops.hops.Count - 1; i++) //We do not need to start from position 0 and we need to end at Count-1
+                {
+                    if (asPreviewHops.hops[i].Count != 0) //If not missing we add it
+                    {
+                        asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We add the hops
+                    }
+                    else //If missing
+                    {
+                        //We only add the missing hop when it is not in the middle of same AS
+                        if (asPreviewHops.hops[i - 1][0].asNumber != asPreviewHops.hops[i + 1][0].asNumber)
+                        {
+                            asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We add the missing hops
+                        }
 
                     }
                 }
             }
-
-            return null;
+            return asPreviewHopsAux;
         }
-    
-    
-    
-    
-    
-    
-    
+
+        private ASPreviewHops aggregateSameASes(ASPreviewHops asPreviewHops)
+        {
+
+            ASPreviewHops asPreviewHopsAux = new ASPreviewHops();
+            bool firstHop = true;
+            bool prevHopMissing = false;
+            bool prevHopSame = false;
+            bool prevHopMulti = false;
+            for (int i = 0; i < asPreviewHops.hops.Count; i++)
+            {
+
+                if (firstHop) //If first hop...
+                {
+                    if (asPreviewHops.hops[i].Count != 0) //If not missing...
+                    {
+                        if (asPreviewHops.hops[i].Count > 1) //If multi...
+                        {
+                            prevHopMissing = false;
+                            prevHopSame = false;
+                            prevHopMulti = true;
+                            asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We save the multi
+                        }
+                        else //If not multi...
+                        {
+                            prevHopMissing = false;
+                            prevHopSame = false;
+                            prevHopMulti = false;
+                        }
+                    }
+                    else //If missing
+                    {
+                        prevHopMissing = true;
+                        prevHopSame = false;
+                        prevHopMulti = false;
+                        asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We save the missing
+                    }
+                    firstHop = false;
+                }
+                
+                
+                
+                else //If more than second hop...
+                {
+                    if (asPreviewHops.hops[i].Count != 0) //If not missing...
+                    {
+                        if (asPreviewHops.hops[i].Count > 1) //If multi...
+                        {
+                            if (prevHopMissing == prevHopSame == prevHopMulti == false) //If previous was an AS hop
+                            {
+                                asPreviewHopsAux.addHops(asPreviewHops.hops[i - 1]);
+                            }
+                            prevHopMissing = false;
+                            prevHopSame = false;
+                            prevHopMulti = true;
+                            asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We save the multi
+                        }
+                        else //If not multi...
+                        {
+                            if ( !prevHopMissing && !prevHopMulti ) //If previous hop is NOT missing and NOT multi
+                            {
+                                if (asPreviewHops.hops[i][0].asNumber == asPreviewHops.hops[i - 1][0].asNumber) //if same as previous
+                                {
+                                    prevHopMissing = false;
+                                    prevHopSame = true;
+                                    prevHopMulti = false;
+                                }
+                                else
+                                {
+                                    //if (prevHopSame) //If previous was same but now is different, we add the previous same, only 1
+                                    //{
+                                        asPreviewHopsAux.addHops(asPreviewHops.hops[i - 1]);
+                                    //}
+                                    prevHopMissing = false;
+                                    prevHopSame = false;
+                                    prevHopMulti = false;
+                                }
+                                //We check if last Hop and we add it
+                                if (i == asPreviewHops.hops.Count-1)
+                                {
+                                    asPreviewHopsAux.addHops(asPreviewHops.hops[i]);
+                                }
+                            }
+                            else //If previous is missing or multi
+                            {
+                                prevHopMissing = false;
+                                prevHopSame = false;
+                                prevHopMulti = false;
+                            }
+
+                        }
+                    }
+                    else //If missing
+                    {
+                        if (prevHopMissing == prevHopSame == prevHopMulti == false) //If previous was an AS hop
+                        {
+                            asPreviewHopsAux.addHops(asPreviewHops.hops[i - 1]);
+                        }
+                        prevHopMissing = true;
+                        prevHopSame = false;
+                        prevHopMulti = false;
+                        asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We save the missing
+                    }
+                }
+
+            }
+
+            return asPreviewHopsAux;
+        }
+
+        //private ASPreviewHops removeLoops(ASPreviewHops asPreviewHops)
+        //{
+        //    ASPreviewHops asPreviewHopsAux = new ASPreviewHops();
+
+        //    //First we add the first and/or last hop if they are missings
+        //    if (asPreviewHops.hops[0].Count == 0) //missing at position 0 
+        //    {
+        //        asPreviewHopsAux.addHops(asPreviewHops.hops[0]);
+        //    }
+        //    if (asPreviewHops.hops[asPreviewHops.hops.Count - 1].Count == 0) //missing at last hop
+        //    {
+        //        asPreviewHopsAux.addHops(asPreviewHops.hops[0]);
+        //    }
+
+        //    if (asPreviewHops.hops.Count > 2) //We need at least 3 hops
+        //    {
+
+        //        for (int i = 1; i < asPreviewHops.hops.Count - 1; i++) //We do not need to start from position 0 and we need to end at Count-1
+        //        {
+        //            if (asPreviewHops.hops[i].Count != 0) //If not missing we add it
+        //            {
+        //                //First we check if its in the middle of some missing
+        //                if (asPreviewHops.hops[i - 1].Count != asPreviewHops.hops[i + 1][0].asNumber)
+
+        //                //We only add the AS hop when it is not in the middle of same AS
+        //                if (asPreviewHops.hops[i - 1][0].asNumber != asPreviewHops.hops[i + 1][0].asNumber)
+        //                {
+        //                    asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We add the missing hops
+        //                }
+        //            }
+        //            else //If missing
+        //            {
+        //                asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We add the hops
+        //            }
+        //        }
+        //    }
+        //    return asPreviewHopsAux;
+        //}
     
     }
 }
