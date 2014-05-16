@@ -117,6 +117,7 @@ namespace Mercury.Services
                     builder.AppendFormat("{0},", address);
                 }
                 client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+
                 return JsonConvert.DeserializeObject<List<MercuryIpToGeoMapping>>(
                     client.UploadString("http://mercury.upf.edu/mercury/api/services/getIps2GeoPOST", builder.ToString()));
             }

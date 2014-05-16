@@ -38,6 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\Ip2GeoMapping.cs" />
     <Compile Include="Api\MercuryIpToAsMapping.cs" />
     <Compile Include="Api\MercuryIpToGeoMapping.cs" />
     <Compile Include="Api\MercuryLocalInformation.cs" />

@@ -83,10 +83,30 @@ namespace Mercury.Topology
                 }
             }
 
-            
+            //We add the publicIp address and remote address 
+            MercuryLocalInformation myInfo = MercuryService.GetLocalInformation();
+            addresses.Add(myInfo.Address);
+            addresses.Add(traceroute.RemoteAddress);
 
             // Solve the list of IP addresses to AS information and we stored it in cache.
             List<List<MercuryIpToAsMapping>> mappings = this.cache.Get(addresses);
+
+            //We pre-load the publicIp and the dstIp mappings
+            //public src
+            List<MercuryIpToAsMapping> publicMaps = this.cache.Get(myInfo.Address);
+            List<TracerouteASHop> publicHops = new List<TracerouteASHop>();
+            foreach (MercuryIpToAsMapping map in publicMaps)
+            {
+                publicHops.Add(new TracerouteASHop(0, map.AsNumber, map.AsName, map.IxpName, (TracerouteASHop.Type)map.type, false));
+            }
+            //remote dst
+            List<MercuryIpToAsMapping> remoteMaps = this.cache.Get(traceroute.RemoteAddress);
+            List<TracerouteASHop> remoteHops = new List<TracerouteASHop>();
+
+
+            //We preload the src and dst geoMappings
+            String[] geoMappings = getGeoMappings(myInfo.Address, traceroute.RemoteAddress);
+
 
             // We create a multidemensional array with the AS mappings inside the "paths" variable
             ASPreviewHops[,,] paths = new ASPreviewHops[traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow, 2];
@@ -94,6 +114,7 @@ namespace Mercury.Topology
             {
                 for (byte attempt = 0; attempt < traceroute.Settings.AttemptsPerFlow; attempt++)
                 {
+                    //ICMP
                     paths[flow, attempt, 0] = new ASPreviewHops();
                     for (byte ttl = 0; ttl < traceroute.IcmpStatistics[flow, attempt].MaximumTimeToLive; ttl++)
                     {
@@ -109,7 +130,7 @@ namespace Mercury.Topology
                             paths[flow, attempt, 0].addHops(hops);
                         }
                     }
-
+                    //UDP
                     paths[flow, attempt, 1] = new ASPreviewHops();
                     for (byte ttl = 0; ttl < traceroute.UdpStatistics[flow, attempt].MaximumTimeToLive; ttl++)
                     {
@@ -126,6 +147,17 @@ namespace Mercury.Topology
                             paths[flow, attempt, 1].addHops(hops);
                         }
                     }
+
+                    //Here we add the publicAddress
+                    paths[flow, attempt, 0].addHopsAtBegining(publicHops); //ICMP
+                    paths[flow, attempt, 1].addHopsAtBegining(publicHops); //UDP
+                    //Here we add the remoteAddress
+                    foreach (MercuryIpToAsMapping map in remoteMaps)
+                    {
+                        remoteHops.Add(new TracerouteASHop(traceroute.UdpStatistics[flow, attempt].MaximumTimeToLive, map.AsNumber, map.AsName, map.IxpName, (TracerouteASHop.Type)map.type, false));
+                    }
+                    paths[flow, attempt, 0].addHopsAtEnd(remoteHops); //ICMP
+                    paths[flow, attempt, 1].addHopsAtEnd(remoteHops); //UDP
 
                 }
             }
@@ -145,6 +177,9 @@ namespace Mercury.Topology
             ASPreviewHops[, ,] pathsAggrAS3 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
             //ASPreviewHops[, ,] pathsAggrAS4 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
             //ASPreviewHops[, ,] pathsAggrAS5 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
+            ASPreviewHops[, ,] pathsAggrAS6 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
+
+            List<TracerouteAS> tracerouteASes = new List<TracerouteAS>();
             for (int flow = 0; flow < flows; flow++)
             {
                 for (int attempt = 0; attempt < attemptsPerFlow; attempt++)
@@ -160,7 +195,10 @@ namespace Mercury.Topology
                             pathsAggrAS3[flow, attempt, alg] = aggregateSameASes(pathsAggrAS2[flow, attempt, alg]);
                             //pathsAggrAS4[flow, attempt, alg] = removeLoops(pathsAggrAS3[flow, attempt, alg]);
                             //pathsAggrAS5[flow, attempt, alg] = aggregateSameASes(pathsAggrAS4[flow, attempt, alg]);
-
+                            pathsAggrAS6[flow, attempt, alg] = obtainASRelationships(pathsAggrAS3[flow, attempt, alg]);
+                            TracerouteAS tAS = generateTracerouteAS(pathsAggrAS6[flow, attempt, alg], "domain.com", myInfo.Address, traceroute.LocalAddress, traceroute.RemoteAddress,
+                                geoMappings[0], geoMappings[1], geoMappings[2], geoMappings[3]);
+                            tracerouteASes.Add(tAS);
                         }
                         if (alg == 1) //UDP
                         {
@@ -170,6 +208,11 @@ namespace Mercury.Topology
                     }
                 }
             }
+
+
+            //Finally we add the TracerouteAS(es) to the Mercury Platform
+            //String result = MercuryService.addTracerouteASes(tracerouteASes);
+
 
                 /*
 
@@ -228,7 +271,7 @@ namespace Mercury.Topology
                 String result4 = MercuryService.addTracerouteIp(tip);
                 */
 
-
+ 
               return null;
 		}
 
@@ -437,7 +480,7 @@ namespace Mercury.Topology
         //            if (asPreviewHops.hops[i].Count != 0) //If not missing we add it
         //            {
         //                //First we check if its in the middle of some missing
-        //                if (asPreviewHops.hops[i - 1].Count != asPreviewHops.hops[i + 1][0].asNumber)
+        //                //if (asPreviewHops.hops[i - 1].Count != asPreviewHops.hops[i + 1][0].asNumber)
 
         //                //We only add the AS hop when it is not in the middle of same AS
         //                if (asPreviewHops.hops[i - 1][0].asNumber != asPreviewHops.hops[i + 1][0].asNumber)
@@ -453,6 +496,127 @@ namespace Mercury.Topology
         //    }
         //    return asPreviewHopsAux;
         //}
-    
+
+
+        private ASPreviewHops obtainASRelationships(ASPreviewHops asPreviewHops)
+        {
+            for (int i = 0; i < asPreviewHops.hops.Count - 1; i++) //We end before the last hop
+            {
+                if (asPreviewHops.hops[i].Count != 0 && asPreviewHops.hops[i + 1].Count != 0) //If NOT missing hops
+                {
+                    int as0 = asPreviewHops.hops[i][0].asNumber;
+                    int as1 = asPreviewHops.hops[i + 1][0].asNumber;
+                    MercuryAsTracerouteRelationship rel = MercuryService.GetAsRelationship(as0, as1);
+                    rel.hop = i;
+                    asPreviewHops.relationships[i] = rel;
+                }
+            }
+            return asPreviewHops;
+        }
+
+
+        private TracerouteASStats obtainTracerouteStatistics(ASPreviewHops asPreviewHops)
+        {
+            int asHops = 0;
+            int c2pRels = 0,p2pRels = 0,p2cRels = 0,s2sRels = 0,ixpRels = 0,nfRels = 0;
+            bool completed = false;
+            int flags = 0x0; //asPreviewHops.flags.
+
+            //We count the asHops
+            foreach( List<TracerouteASHop> asHop in asPreviewHops.hops){
+                if(asHop.Count>0) asHops++;
+            }
+
+            //We count the asRelationships
+            foreach (MercuryAsTracerouteRelationship rel in asPreviewHops.relationships.Values)
+            {
+                if (rel.relationship == MercuryAsTracerouteRelationship.RelationshipType.CustomerToProvider) {c2pRels++;}
+                else if(rel.relationship == MercuryAsTracerouteRelationship.RelationshipType.PeerToPeer) {p2pRels++;}
+                else if(rel.relationship == MercuryAsTracerouteRelationship.RelationshipType.ProviderToCustomer) {p2cRels++;}
+                else if(rel.relationship == MercuryAsTracerouteRelationship.RelationshipType.SiblingToSibling) {s2sRels++;}
+                else if (rel.relationship == MercuryAsTracerouteRelationship.RelationshipType.InternerExchangePoint) { ixpRels++; }
+                else if (rel.relationship == MercuryAsTracerouteRelationship.RelationshipType.NotFound) { nfRels++; }
+            }
+
+            if (flags < 0x2) completed = true;
+
+            return new TracerouteASStats(asHops,c2pRels,p2pRels,p2cRels,s2sRels,ixpRels,nfRels,completed,flags);
+        }
+
+
+        private String[] getGeoMappings(IPAddress srcIp, IPAddress dstIp)
+        {
+            //Geo
+            
+            String srcCity = "", srcCountry = "", dstCity = "", dstCountry = "";
+            List<MercuryIpToGeoMapping> ip2geoMappings = MercuryService.GetIp2GeoMappings(new IPAddress[]
+                    {
+                        srcIp,dstIp
+                    });
+            foreach (MercuryIpToGeoMapping geo in ip2geoMappings)
+            {
+                if (geo.Address.ToString() == srcIp.ToString())
+                {
+                    srcCity = geo.City;
+                    srcCountry = geo.CountryName;
+                }
+                if (geo.Address.ToString() == dstIp.ToString())
+                {
+                    dstCity = geo.City;
+                    dstCountry = geo.CountryName;
+                }
+            }
+
+            return new string[] { srcCity, srcCountry, dstCity, dstCountry };
+        }
+
+        private TracerouteAS generateTracerouteAS(ASPreviewHops asPreviewHops, String dst,
+                                                    IPAddress publicIP, IPAddress srcIp, IPAddress dstIp, String srcCity, String srcCountry, String dstCity, String dstCountry )
+        {
+
+            TracerouteASStats tracerouteASStats = obtainTracerouteStatistics(asPreviewHops);
+            List<MercuryAsTracerouteRelationship> tracerouteASRelationships = new List<MercuryAsTracerouteRelationship>(asPreviewHops.relationships.Values);
+
+            //Let's play with hops!
+            List<TracerouteASHop> asHopsAux = new List<TracerouteASHop>();
+            foreach (List<TracerouteASHop> asHops in asPreviewHops.hops)
+            {
+                foreach (TracerouteASHop hop in asHops)
+                {
+                    asHopsAux.Add(hop);
+                }
+            }
+
+            //Now we search the src and the dst hops
+            int srcAs = -1, dstAs = -1;
+            String srcAsName = null, dstAsName = null;
+            if (asPreviewHops.hops.Count > 0)
+            {
+                if (asPreviewHops.hops[0].Count > 0)
+                {
+                    srcAs = asPreviewHops.hops[0][0].asNumber;
+                    srcAsName = asPreviewHops.hops[0][0].asName;
+                }
+
+                if (asPreviewHops.hops[asPreviewHops.hops.Count-1].Count > 0)
+                {
+                    dstAs = asPreviewHops.hops[asPreviewHops.hops.Count - 1][0].asNumber;
+                    dstAsName = asPreviewHops.hops[asPreviewHops.hops.Count - 1][0].asName;
+                }
+
+            }
+
+
+            TracerouteAS tracerouteAS = new TracerouteAS(srcAs, srcAsName, srcIp.ToString(), publicIP.ToString(), srcCity, srcCountry,
+                dstAs, dstAsName, dstIp.ToString(), dst, dstCity, dstCountry, DateTime.UtcNow, tracerouteASStats);
+
+            tracerouteAS.tracerouteASHops = asHopsAux;
+            tracerouteAS.tracerouteASRelationships = tracerouteASRelationships;
+
+            return tracerouteAS;
+        }
+
+
+
     }
 }
