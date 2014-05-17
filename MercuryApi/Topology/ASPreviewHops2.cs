@@ -11,26 +11,26 @@ namespace Mercury.Topology
         public List<Hop> hops = new List<Hop>(); 
         public Dictionary<int, MercuryAsTracerouteRelationship> relationships = new Dictionary<int, MercuryAsTracerouteRelationship>();
 
-        public void addHopsAtBegining(List<TracerouteASHop> asHops)
+        public void addHopsAtBegining(List<MercuryAsTracerouteHop> asHops)
         {
-            Dictionary<int, TracerouteASHop> dictionary = new Dictionary<int, TracerouteASHop>();
+            Dictionary<int, MercuryAsTracerouteHop> dictionary = new Dictionary<int, MercuryAsTracerouteHop>();
             //First we remove duplicate multiple ases
-            foreach (TracerouteASHop hop in asHops)
+            foreach (MercuryAsTracerouteHop hop in asHops)
             {
-                dictionary[hop.asNumber] = hop;
+                dictionary[hop.AsNumber] = hop;
             }
             Hop h = new Hop();
             h.candidates = dictionary;
             this.hops.Insert(0, h);
         }
 
-        public void addHopsAtEnd(List<TracerouteASHop> asHops)
+        public void addHopsAtEnd(List<MercuryAsTracerouteHop> asHops)
         {
-            Dictionary<int, TracerouteASHop> dictionary = new Dictionary<int, TracerouteASHop>();
+            Dictionary<int, MercuryAsTracerouteHop> dictionary = new Dictionary<int, MercuryAsTracerouteHop>();
             //First we remove duplicate multiple ases
-            foreach (TracerouteASHop hop in asHops)
+            foreach (MercuryAsTracerouteHop hop in asHops)
             {
-                dictionary[hop.asNumber] = hop;
+                dictionary[hop.AsNumber] = hop;
             }
             Hop h = new Hop();
             h.candidates = dictionary;
@@ -44,8 +44,8 @@ namespace Mercury.Topology
 
     public class Hop
     {
-        //key=ASnumber, value=TracerouteASHop
-        public Dictionary<int, TracerouteASHop> candidates = new Dictionary<int, TracerouteASHop>();
+        //key=ASnumber, value=MercuryAsTracerouteHop
+        public Dictionary<int, MercuryAsTracerouteHop> candidates = new Dictionary<int, MercuryAsTracerouteHop>();
 
 
         public bool isMissing(Hop hop2)
@@ -65,9 +65,9 @@ namespace Mercury.Topology
             if (candidates.Count == 0 && hop2.candidates.Count > 0 & hop3.candidates.Count > 0)
             {
                 int matchings = 0;
-                foreach (TracerouteASHop hop in hop3.candidates.Values)
+                foreach (MercuryAsTracerouteHop hop in hop3.candidates.Values)
                 {
-                        if (hop2.candidates.ContainsKey(hop.asNumber))
+                        if (hop2.candidates.ContainsKey(hop.AsNumber))
                         {
                             matchings++;
                         }
@@ -93,7 +93,7 @@ namespace Mercury.Topology
         {
             if (candidates.Count == 1 && hop2.candidates.Count == 1)
             {
-                if (candidates[0].asNumber == hop2.candidates[0].asNumber)
+                if (candidates[0].AsNumber == hop2.candidates[0].AsNumber)
                 {
                     return true;
                 }
@@ -108,16 +108,16 @@ namespace Mercury.Topology
             }
         }
 
-        public TracerouteASHop getEqualUnique(Hop hop2)
+        public MercuryAsTracerouteHop getEqualUnique(Hop hop2)
         {
             if (candidates.Count == 1 && hop2.candidates.Count == 1)
             {
-                foreach (TracerouteASHop hop in candidates.Values)
+                foreach (MercuryAsTracerouteHop hop in candidates.Values)
                 {
 
-                        if (hop2.candidates.ContainsKey(hop.asNumber))
+                        if (hop2.candidates.ContainsKey(hop.AsNumber))
                         {
-                            return hop2.candidates[hop.asNumber];
+                            return hop2.candidates[hop.AsNumber];
                         }
                 }
 
@@ -130,9 +130,9 @@ namespace Mercury.Topology
         {
             if ( (candidates.Count == 1 && hop2.candidates.Count > 1) || (candidates.Count > 1 && hop2.candidates.Count == 1) )
             {
-                foreach (TracerouteASHop hop in candidates.Values)
+                foreach (MercuryAsTracerouteHop hop in candidates.Values)
                 {
-                    if (hop2.candidates.ContainsKey(hop.asNumber))
+                    if (hop2.candidates.ContainsKey(hop.AsNumber))
                     {
                         return true;
                     }
@@ -145,16 +145,16 @@ namespace Mercury.Topology
             }
         }
 
-        public TracerouteASHop getEqualUniqueToMultiple(Hop hop2)
+        public MercuryAsTracerouteHop getEqualUniqueToMultiple(Hop hop2)
         {
             if ((candidates.Count == 1 && hop2.candidates.Count > 1) || (candidates.Count > 1 && hop2.candidates.Count == 1))
             {
-                foreach (TracerouteASHop hop in candidates.Values)
+                foreach (MercuryAsTracerouteHop hop in candidates.Values)
                 {
 
-                        if (hop2.candidates.ContainsKey(hop.asNumber))
+                        if (hop2.candidates.ContainsKey(hop.AsNumber))
                         {
-                            return hop2.candidates[hop.asNumber];
+                            return hop2.candidates[hop.AsNumber];
                         }
 
                 }
@@ -168,9 +168,9 @@ namespace Mercury.Topology
             if (candidates.Count > 1 && hop2.candidates.Count > 1)
             {
                 int matchings = 0;
-                foreach (TracerouteASHop hop in candidates.Values)
+                foreach (MercuryAsTracerouteHop hop in candidates.Values)
                 {
-                    if (hop2.candidates.ContainsKey(hop.asNumber))
+                    if (hop2.candidates.ContainsKey(hop.AsNumber))
                     {
                        matchings++;
                     }
@@ -189,29 +189,27 @@ namespace Mercury.Topology
             }
         }
 
-
         //We might return just one AS, instead of all the list again...
-        public TracerouteASHop getEqualMultipleToMultiple(Hop hop2)
+        public MercuryAsTracerouteHop getEqualMultipleToMultiple(Hop hop2)
         {
-            Dictionary<int, TracerouteASHop> cands = new Dictionary<int, TracerouteASHop>();
-            
+            Dictionary<int, MercuryAsTracerouteHop> cands = new Dictionary<int, MercuryAsTracerouteHop>();
 
             if (candidates.Count > 1 && hop2.candidates.Count > 1)
             {
                 int matchings = 0;
-                foreach (TracerouteASHop hop in candidates.Values)
+                foreach (MercuryAsTracerouteHop hop in candidates.Values)
                 {
 
-                        if (hop2.candidates.ContainsKey(hop.asNumber))
+                        if (hop2.candidates.ContainsKey(hop.AsNumber))
                         {
                             matchings++;
-                            cands[hop.asNumber] = hop2.candidates[hop.asNumber];
+                            cands[hop.AsNumber] = hop2.candidates[hop.AsNumber];
                         }
 
                 }
                 if (matchings > 1)
                 {
-                    List<TracerouteASHop> asHops = new List<TracerouteASHop>(cands.Values);
+                    List<MercuryAsTracerouteHop> asHops = new List<MercuryAsTracerouteHop>(cands.Values);
                     return asHops[0];
                 }
             }

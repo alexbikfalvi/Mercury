@@ -77,8 +77,6 @@ namespace Mercury.Api
             this.Statistics = tracerouteASStats;
 
             this.Attempts = new List<string>();
-            this.Hops = new List<MercuryAsTracerouteHop>();
-            this.Relationships = new List<MercuryAsTracerouteRelationship>();
         }
 
         #region Public properties
@@ -113,9 +111,9 @@ namespace Mercury.Api
         [JsonProperty("tracerouteIpAttemptIds")]
         public List<string> Attempts { get; private set; }
         [JsonProperty("tracerouteASHops")]
-        public List<MercuryAsTracerouteHop> Hops { get; private set; }
+        public List<MercuryAsTracerouteHop> Hops { get; set; }
         [JsonProperty("tracerouteASRelationships")]
-        public List<MercuryAsTracerouteRelationship> Relationships { get; private set; }
+        public List<MercuryAsTracerouteRelationship> Relationships { get; set; }
         [JsonProperty("tracerouteASStats")]
         public MercuryAsTracerouteStats Statistics { get; private set; }
 

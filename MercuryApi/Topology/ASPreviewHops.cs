@@ -9,42 +9,42 @@ namespace Mercury.Topology
 {
     public class ASPreviewHops
     {
-        public List<List<TracerouteASHop>> hops = new List<List<TracerouteASHop>>();
+        public List<List<MercuryAsTracerouteHop>> hops = new List<List<MercuryAsTracerouteHop>>();
         public Dictionary<int, MercuryAsTracerouteRelationship> relationships = new Dictionary<int, MercuryAsTracerouteRelationship>();
 
         public ASTracerouteFlags flags = ASTracerouteFlags.None;
 
-        public void addHops(List<TracerouteASHop> asHops)
+        public void addHops(List<MercuryAsTracerouteHop> asHops)
         {
-            Dictionary<int, TracerouteASHop> dictionary = new Dictionary<int, TracerouteASHop>();
+            Dictionary<int, MercuryAsTracerouteHop> dictionary = new Dictionary<int, MercuryAsTracerouteHop>();
             //First we remove duplicate multiple ases
-            foreach (TracerouteASHop hop in asHops)
+            foreach (MercuryAsTracerouteHop hop in asHops)
             {
-                dictionary[hop.asNumber] = hop;
+                dictionary[hop.AsNumber] = hop;
             }
-            this.hops.Add(new List<TracerouteASHop>(dictionary.Values));
+            this.hops.Add(new List<MercuryAsTracerouteHop>(dictionary.Values));
         }
 
-        public void addHopsAtBegining(List<TracerouteASHop> asHops)
+        public void addHopsAtBegining(List<MercuryAsTracerouteHop> asHops)
         {
-            Dictionary<int, TracerouteASHop> dictionary = new Dictionary<int, TracerouteASHop>();
+            Dictionary<int, MercuryAsTracerouteHop> dictionary = new Dictionary<int, MercuryAsTracerouteHop>();
             //First we remove duplicate multiple ases
-            foreach (TracerouteASHop hop in asHops)
+            foreach (MercuryAsTracerouteHop hop in asHops)
             {
-                dictionary[hop.asNumber] = hop;
+                dictionary[hop.AsNumber] = hop;
             }
-            this.hops.Insert(0, new List<TracerouteASHop>(dictionary.Values));
+            this.hops.Insert(0, new List<MercuryAsTracerouteHop>(dictionary.Values));
         }
 
-        public void addHopsAtEnd(List<TracerouteASHop> asHops)
+        public void addHopsAtEnd(List<MercuryAsTracerouteHop> asHops)
         {
-            Dictionary<int, TracerouteASHop> dictionary = new Dictionary<int, TracerouteASHop>();
+            Dictionary<int, MercuryAsTracerouteHop> dictionary = new Dictionary<int, MercuryAsTracerouteHop>();
             //First we remove duplicate multiple ases
-            foreach (TracerouteASHop hop in asHops)
+            foreach (MercuryAsTracerouteHop hop in asHops)
             {
-                dictionary[hop.asNumber] = hop;
+                dictionary[hop.AsNumber] = hop;
             }
-            this.hops.Add(new List<TracerouteASHop>(dictionary.Values));
+            this.hops.Add(new List<MercuryAsTracerouteHop>(dictionary.Values));
         }
 
     }
