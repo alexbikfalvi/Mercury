@@ -46,23 +46,49 @@ namespace Mercury.Api
             NotFound
         };
 
+        /// <summary>
+        /// Private constructor.
+        /// </summary>
         public MercuryAsTracerouteRelationship() { }
 
-        public MercuryAsTracerouteRelationship(RelationshipType relationship, int as0, int as1, int hop)
+        /// <summary>
+        /// Creates a new AS relationship.
+        /// </summary>
+        /// <param name="relationship">The relationship type.</param>
+        /// <param name="asFirst">The first AS.</param>
+        /// <param name="asSecond">The second AS.</param>
+        /// <param name="hop">The hop index.</param>
+        public MercuryAsTracerouteRelationship(RelationshipType relationship, int asFirst, int asSecond, byte hop)
         {
-            this.relationship = relationship;
-            this.as0 = as0;
-            this.as1 = as1;
-            this.hop = hop;
+            this.Relationship = relationship;
+            this.AsFirst = asFirst;
+            this.AsSecond = asSecond;
+            this.Hop = hop;
         }
 
         #region Public properties
 
+        /// <summary>
+        /// The relationship.
+        /// </summary>
         [JsonConverter(typeof(JsonEnumConverter))]
-        public RelationshipType relationship { get; set; }
-        public int as0 { get; set; }
-        public int as1 { get; set; }
-        public int hop { get; set; }
+        [JsonProperty("relationship")]
+        public RelationshipType Relationship { get; private set; }
+        /// <summary>
+        /// The first AS.
+        /// </summary>
+        [JsonProperty("as0")]
+        public int AsFirst { get; private set; }
+        /// <summary>
+        /// The second AS.
+        /// </summary>
+        [JsonProperty("as1")]
+        public int AsSecond { get; private set; }
+        /// <summary>
+        /// The hop index.
+        /// </summary>
+        [JsonProperty("hop")]
+        public byte Hop { get; set; }
 
         #endregion
     }

@@ -20,6 +20,7 @@ using System;
 using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Mercury.Json;
 
 namespace Mercury.Api
 {
@@ -31,13 +32,7 @@ namespace Mercury.Api
         [JsonProperty("ip")]
         private string address = IPAddress.Any.ToString();
 
-
-
-
         #region Public properties
-
-
-        public enum Type { AS, IXP };
 
         /// <summary>
         /// The AS number.
@@ -74,7 +69,6 @@ namespace Mercury.Api
         /// </summary>
         [JsonProperty("ixpName")]
 	    public string IxpName { get; private set; }
-
         /// <summary>
         /// The information timestamp.
         /// </summary>
@@ -85,7 +79,8 @@ namespace Mercury.Api
         /// The mapping type.
         /// </summary>
         [JsonProperty("type")]
-	    public Type type { get; private set; }
+        [JsonConverter(typeof(JsonEnumConverter))]
+        public MercuryAsTracerouteHop.HopType Type { get; private set; }
         /// <summary>
         /// The mapping request address.
         /// </summary>

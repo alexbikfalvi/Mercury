@@ -158,14 +158,14 @@ namespace Mercury.Services
             }
         }
 
-        public static List<TracerouteAS> GetTracerouteASesByDst(String dst)
+        public static List<MercuryAsTraceroute> GetTracerouteASesByDst(String dst)
         {
             using (WebClient wc = new WebClient())
             {
                 //String dst = "yimg.com";
                 var json = wc.DownloadString("http://mercury.upf.edu/mercury/api/services/getTracerouteASesByDst/" + dst);
                 //Console.WriteLine("**************\n"+json+"\n*********************");
-                var tracerouteASes = JsonConvert.DeserializeObject<List<TracerouteAS>>(json);
+                var tracerouteASes = JsonConvert.DeserializeObject<List<MercuryAsTraceroute>>(json);
 
                 return tracerouteASes;
             }
@@ -173,15 +173,15 @@ namespace Mercury.Services
 
 
 
-        public static TracerouteAS generateTracerouteAS()
+        public static MercuryAsTraceroute generateTracerouteAS()
         {
 
             //First we create 3 AS hops. Notice that we hace two HOPs number 1. 
             //     This is because we use the inferrence algorithm "true" to select the best hop
-            TracerouteASHop hop0 = new TracerouteASHop(0, 3352, "Telefonica de Espana", "", TracerouteASHop.Type.AS, false);
-            TracerouteASHop hop1 = new TracerouteASHop(1, 12956, "Telefonica Backbone", "", TracerouteASHop.Type.AS, true);
-            TracerouteASHop hop2 = new TracerouteASHop(1, 3356, "Level-3", "", TracerouteASHop.Type.AS, false);
-            TracerouteASHop hop3 = new TracerouteASHop(2, 10310, "Yahoo-3", "", TracerouteASHop.Type.AS, false);
+            MercuryAsTracerouteHop hop0 = new MercuryAsTracerouteHop(0, 3352, "Telefonica de Espana", "", MercuryAsTracerouteHop.HopType.As, false);
+            MercuryAsTracerouteHop hop1 = new MercuryAsTracerouteHop(1, 12956, "Telefonica Backbone", "", MercuryAsTracerouteHop.HopType.As, true);
+            MercuryAsTracerouteHop hop2 = new MercuryAsTracerouteHop(1, 3356, "Level-3", "", MercuryAsTracerouteHop.HopType.As, false);
+            MercuryAsTracerouteHop hop3 = new MercuryAsTracerouteHop(2, 10310, "Yahoo-3", "", MercuryAsTracerouteHop.HopType.As, false);
 
 
             //Then we create the 2 AS Relationships
@@ -190,26 +190,26 @@ namespace Mercury.Services
 
             //Now we create the TracerouteStats. Notice the flags value set to 2 because we have used the inference algorithm. 
             //  We have to decide which are the binary flags (int32bit)
-            TracerouteASStats tstats = new TracerouteASStats(2, 0, 1, 0, 1, 0, 0, true, 1);
+            MercuryAsTracerouteStats tstats = new MercuryAsTracerouteStats(2, 0, 1, 0, 1, 0, 0, true, 1);
 
             //Finally we generate the TracerouteAS
-            TracerouteAS tas = new TracerouteAS(3352, "Telefonica de Espana", "192.168.1.2",
+            MercuryAsTraceroute tas = new MercuryAsTraceroute(3352, "Telefonica de Espana", "192.168.1.2",
                 "80.33.0.24", "Barcelona", "Spain", 10310,
                 "Yahoo-3", "98.139.102.145", "y.com", "Sunny Valley", "United States", DateTime.UtcNow, tstats);
 
-            tas.tracerouteASHops.Add(hop0);
-            tas.tracerouteASHops.Add(hop1);
-            tas.tracerouteASHops.Add(hop2);
-            tas.tracerouteASHops.Add(hop3);
+            tas.Hops.Add(hop0);
+            tas.Hops.Add(hop1);
+            tas.Hops.Add(hop2);
+            tas.Hops.Add(hop3);
 
-            tas.tracerouteASRelationships.Add(trel0);
-            tas.tracerouteASRelationships.Add(trel1);
+            tas.Relationships.Add(trel0);
+            tas.Relationships.Add(trel1);
 
             return tas;
 
         }
 
-        public static String addTracerouteAS(TracerouteAS tracerouteAS)
+        public static String addTracerouteAS(MercuryAsTraceroute tracerouteAS)
         {
             using (WebClient wc = new WebClient())
             {
@@ -224,7 +224,7 @@ namespace Mercury.Services
             }
         }
 
-        public static String addTracerouteASes(List<TracerouteAS> tases)
+        public static String addTracerouteASes(List<MercuryAsTraceroute> tases)
         {
             using (WebClient wc = new WebClient())
             {
