@@ -29,6 +29,22 @@ namespace Mercury.Topology
     {
         public readonly List<ASTracerouteHop> hops = new List<ASTracerouteHop>();
 
+        /// <summary>
+        /// Creates an empty AS traceroute path.
+        /// </summary>
+        public ASTraceroutePath()
+        {
+        }
+
+        /// <summary>
+        /// Creates an empty AS traceroute path with the specified flags.
+        /// </summary>
+        /// <param name="flags">The flags.</param>
+        public ASTraceroutePath(ASTracerouteFlags flags)
+        {
+            this.Flags = flags;
+        }
+
         #region Public properties
 
         /// <summary>

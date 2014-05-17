@@ -18,6 +18,7 @@
 
 using System;
 using System.Net;
+using System.Linq;
 using System.Threading;
 using InetApi.Net.Core;
 using Mercury.Api;
@@ -59,6 +60,11 @@ namespace Mercury.Topology
 		/// <returns>The AS-level traceroute.</returns>
 		public ASTracerouteResult Run(MultipathTracerouteResult traceroute, CancellationToken cancel, ASTracerouteCallback callback)
 		{
+            // Create the list of algorithms.
+            List<byte> algorithms = new List<byte>();
+            if ((traceroute.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.Icmp) != 0) algorithms.Add(0);
+            if ((traceroute.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.Udp) != 0) algorithms.Add(1);
+
             // Create a list of IP addresses.
             HashSet<IPAddress> addresses = new HashSet<IPAddress>();
 
@@ -108,13 +114,23 @@ namespace Mercury.Topology
             String[] geoMappings = getGeoMappings(myInfo.Address, traceroute.RemoteAddress);
 
             // We create a multidemensional array with the AS mappings inside the "paths" variable
-            ASTraceroutePath[, ,] paths = new ASTraceroutePath[traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow, 2];
+            ASTraceroutePath[, ,] pathsStep1 = new ASTraceroutePath[traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow, 2];
+
+            //if ((traceroute.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.Icmp) != 0)
+            //{
+            //
+            //}
+            //if ((traceroute.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.Udp) != 0)
+            //{
+//
+ //           }
+
             for (byte flow = 0; flow < traceroute.Settings.FlowCount; flow++)
             {
                 for (byte attempt = 0; attempt < traceroute.Settings.AttemptsPerFlow; attempt++)
                 {
                     //ICMP
-                    paths[flow, attempt, 0] = new ASTraceroutePath();
+                    pathsStep1[flow, attempt, 0] = new ASTraceroutePath();
                     for (byte ttl = 0; ttl < traceroute.IcmpStatistics[flow, attempt].MaximumTimeToLive; ttl++)
                     {
                         if (traceroute.IcmpData[flow, ttl, attempt].Type != MultipathTracerouteData.ResponseType.Unknown)
@@ -128,11 +144,11 @@ namespace Mercury.Topology
                             }
                             ASTracerouteHop h = new ASTracerouteHop();
                             h.candidates = hops;
-                            paths[flow, attempt, 0].hops.Add(h);
+                            pathsStep1[flow, attempt, 0].hops.Add(h);
                         }
                     }
                     //UDP
-                    paths[flow, attempt, 1] = new ASTraceroutePath();
+                    pathsStep1[flow, attempt, 1] = new ASTraceroutePath();
                     for (byte ttl = 0; ttl < traceroute.UdpStatistics[flow, attempt].MaximumTimeToLive; ttl++)
                     {
                         if (traceroute.UdpData[flow, ttl, attempt].Type != MultipathTracerouteData.ResponseType.Unknown)
@@ -146,168 +162,93 @@ namespace Mercury.Topology
                             }
                             ASTracerouteHop h = new ASTracerouteHop();
                             h.candidates = hops;
-                            paths[flow, attempt, 1].hops.Add(h);
+                            pathsStep1[flow, attempt, 1].hops.Add(h);
                         }
                     }
 
                     //Here we add the publicAddress
-                    paths[flow, attempt, 0].addHopsAtBegining(publicHops); //ICMP
-                    paths[flow, attempt, 1].addHopsAtBegining(publicHops); //UDP
+                    pathsStep1[flow, attempt, 0].addHopsAtBegining(publicHops); //ICMP
+                    pathsStep1[flow, attempt, 1].addHopsAtBegining(publicHops); //UDP
                     //Here we add the remoteAddress
                     foreach (MercuryIpToAsMapping map in remoteMaps)
                     {
                         remoteHops.Add(new MercuryAsTracerouteHop(traceroute.UdpStatistics[flow, attempt].MaximumTimeToLive, map.AsNumber, map.AsName, map.IxpName, map.Type, false));
                     }
-                    paths[flow, attempt, 0].addHopsAtEnd(remoteHops); //ICMP
-                    paths[flow, attempt, 1].addHopsAtEnd(remoteHops); //UDP
+                    pathsStep1[flow, attempt, 0].addHopsAtEnd(remoteHops); //ICMP
+                    pathsStep1[flow, attempt, 1].addHopsAtEnd(remoteHops); //UDP
 
                 }
             }
 
-
-            //// We create a multidemensional array with the AS mappings inside the "paths" variable
-            //ASPreviewHops[,,] paths = new ASPreviewHops[traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow, 2];
-            //for (byte flow = 0; flow < traceroute.Settings.FlowCount; flow++)
-            //{
-            //    for (byte attempt = 0; attempt < traceroute.Settings.AttemptsPerFlow; attempt++)
-            //    {
-            //        //ICMP
-            //        paths[flow, attempt, 0] = new ASPreviewHops();
-            //        for (byte ttl = 0; ttl < traceroute.IcmpStatistics[flow, attempt].MaximumTimeToLive; ttl++)
-            //        {
-            //            if (traceroute.IcmpData[flow, ttl, attempt].Type != MultipathTracerouteData.ResponseType.Unknown)
-            //            {
-            //                List<MercuryIpToAsMapping> maps = this.cache.Get(traceroute.IcmpData[flow, ttl, attempt].Address);
-                            
-            //                List<MercuryAsTracerouteHop> hops = new List<MercuryAsTracerouteHop>();
-            //                foreach(MercuryIpToAsMapping map in maps){
-            //                    int hopTTL = ttl;
-            //                    hops.Add( new MercuryAsTracerouteHop(hopTTL, map.AsNumber, map.AsName, map.IxpName, (MercuryAsTracerouteHop.Type)map.type, false) );
-            //                }
-            //                paths[flow, attempt, 0].addHops(hops);
-            //            }
-            //        }
-            //        //UDP
-            //        paths[flow, attempt, 1] = new ASPreviewHops();
-            //        for (byte ttl = 0; ttl < traceroute.UdpStatistics[flow, attempt].MaximumTimeToLive; ttl++)
-            //        {
-            //            if (traceroute.UdpData[flow, ttl, attempt].Type != MultipathTracerouteData.ResponseType.Unknown)
-            //            {
-            //                List<MercuryIpToAsMapping> maps = this.cache.Get(traceroute.UdpData[flow, ttl, attempt].Address);
-                            
-            //                List<MercuryAsTracerouteHop> hops = new List<MercuryAsTracerouteHop>();
-            //                foreach (MercuryIpToAsMapping map in maps)
-            //                {
-            //                    int hopTTL = ttl;
-            //                    hops.Add(new MercuryAsTracerouteHop(hopTTL, map.AsNumber, map.AsName, map.IxpName, (MercuryAsTracerouteHop.Type)map.type, false));
-            //                }
-            //                paths[flow, attempt, 1].addHops(hops);
-            //            }
-            //        }
-
-            //        //Here we add the publicAddress
-            //        paths[flow, attempt, 0].addHopsAtBegining(publicHops); //ICMP
-            //        paths[flow, attempt, 1].addHopsAtBegining(publicHops); //UDP
-            //        //Here we add the remoteAddress
-            //        foreach (MercuryIpToAsMapping map in remoteMaps)
-            //        {
-            //            remoteHops.Add(new MercuryAsTracerouteHop(traceroute.UdpStatistics[flow, attempt].MaximumTimeToLive, map.AsNumber, map.AsName, map.IxpName, (MercuryAsTracerouteHop.Type)map.type, false));
-            //        }
-            //        paths[flow, attempt, 0].addHopsAtEnd(remoteHops); //ICMP
-            //        paths[flow, attempt, 1].addHopsAtEnd(remoteHops); //UDP
-
-            //    }
-            //}
-
-
             /*
-             * AQUIIIIIIIIIIIIIIII
-             * 
+             * STEP 3: Aggregate hops for the same path.
              */
 
-            int flows = paths.GetLength(0);
-            int attemptsPerFlow = paths.GetLength(1);
-            int algorithms = paths.GetLength(2);
-            ASTraceroutePath[, ,] pathsAggrAS1 = new ASTraceroutePath[flows, attemptsPerFlow, algorithms];
-            ASTraceroutePath[, ,] pathsAggrAS2 = new ASTraceroutePath[flows, attemptsPerFlow, algorithms];
+            int flows = pathsStep1.GetLength(0);
+            int attemptsPerFlow = pathsStep1.GetLength(1);
+            ASTraceroutePath[, ,] pathsStep2 = new ASTraceroutePath[flows, attemptsPerFlow, 2];
+            //ASTraceroutePath[, ,] pathsAggrAS2 = new ASTraceroutePath[flows, attemptsPerFlow, algorithms];
 
-            List<MercuryAsTraceroute> tracerouteASes = new List<MercuryAsTraceroute>();
-            for (int flow = 0; flow < flows; flow++)
+            //List<MercuryAsTraceroute> tracerouteASes = new List<MercuryAsTraceroute>();
+            foreach (byte algorithm in algorithms)
             {
-                for (int attempt = 0; attempt < attemptsPerFlow; attempt++)
+                for (int flow = 0; flow < flows; flow++)
                 {
-                    for (int alg = 0; alg < algorithms; alg++)
+                    for (int attempt = 0; attempt < attemptsPerFlow; attempt++)
                     {
-                        if (alg == 0) //ICMP
-                        {
-                            //processASPreviewHops(paths[flow, attempt, alg]);
-
-                            pathsAggrAS1[flow, attempt, alg] = aggregateHops(paths[flow, attempt, alg]);
-                            pathsAggrAS2[flow, attempt, alg] = obtainASRelationships(pathsAggrAS1[flow, attempt, alg]);
-
-                            MercuryAsTraceroute tAS = generateTracerouteAS(pathsAggrAS2[flow, attempt, alg], "domain.com", myInfo.Address, traceroute.LocalAddress, traceroute.RemoteAddress,
-                                geoMappings[0], geoMappings[1], geoMappings[2], geoMappings[3]);
-                            tracerouteASes.Add(tAS);
-                        }
-                        if (alg == 1) //UDP
-                        {
-                            //processASPreviewHops(paths[flow, attempt, alg]);
-
-                            pathsAggrAS1[flow, attempt, alg] = aggregateHops(paths[flow, attempt, alg]);
-
-                        }
-
+                        pathsStep2[flow, attempt, algorithm] = aggregateHops(pathsStep1[flow, attempt, algorithm]);
                     }
                 }
             }
 
+            /*
+             * STEP 3: Aggregate attempt paths for the same flow.
+             */
 
+            // Create the list of flow aggregated paths.
+            ASTraceroutePath[,] pathsStep3 = new ASTraceroutePath[traceroute.Settings.FlowCount, 2];
+            // Compare the paths for different attempts in the same flow.
+            HashSet<ASTraceroutePath> attempts = new HashSet<ASTraceroutePath>();
+            foreach (byte algorithm in algorithms)
+            {
+                for (byte flow = 0; flow < traceroute.Settings.AttemptsPerFlow; flow++)
+                {
+                    // Clear the attempt.
+                    attempts.Clear();
+                    for (byte attempt = 0; attempt < traceroute.Settings.AttemptsPerFlow; attempt++)
+                    {
+                        // Add the attempt to the list of attempts.
+                        attempts.Add(pathsStep2[flow, attempt, algorithm]);
+                    }
+                    // If there is only one path.
+                    if (attempts.Count == 1)
+                    {
+                        // Add the path to the result.
+                        pathsStep3[flow, algorithm] = attempts.First();
+                    }
+                    else
+                    {
+                        pathsStep3[flow, algorithm] = new ASTraceroutePath(ASTracerouteFlags.FlowDistinctAttempts);
+                    }
+                }
+            }
 
-            // ALEX I AM HERE
-            //Now we check missing and multiple hops and we try to correct it
-            //int flows = paths.GetLength(0);
-            //int attemptsPerFlow = paths.GetLength(1);
-            //int algorithms = paths.GetLength(2);
-            //ASPreviewHops[, ,] pathsAggrAS1 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
-            //ASPreviewHops[, ,] pathsAggrAS2 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
-            //ASPreviewHops[, ,] pathsAggrAS3 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
-            ////ASPreviewHops[, ,] pathsAggrAS4 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
-            ////ASPreviewHops[, ,] pathsAggrAS5 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
-            //ASPreviewHops[, ,] pathsAggrAS6 = new ASPreviewHops[flows, attemptsPerFlow, algorithms];
+            /*
+             * Step 4: Save unique flows.
+             */
 
-            //List<MercuryAsTraceroute> tracerouteASes = new List<MercuryAsTraceroute>();
-            //for (int flow = 0; flow < flows; flow++)
-            //{
-            //    for (int attempt = 0; attempt < attemptsPerFlow; attempt++)
-            //    {
-            //        for (int alg = 0; alg < algorithms; alg++)
-            //        {
-            //            if (alg == 0) //ICMP
-            //            {
-            //                //processASPreviewHops(paths[flow, attempt, alg]);
+            // Create the list of unique flows.
+            HashSet<ASTraceroutePath> pathsStep4 = new HashSet<ASTraceroutePath>();
+            foreach (byte algorithm in algorithms)
+            {
+                for (byte flow = 0; flow < traceroute.Settings.AttemptsPerFlow; flow++)
+                {
+                    pathsStep4.Add(pathsStep3[flow, algorithm]);
+                }
+            }
 
-            //                pathsAggrAS1[flow, attempt, alg] = aggregateMissings(paths[flow, attempt, alg]);
-            //                pathsAggrAS2[flow, attempt, alg] = removeMissingInMiddleSameAS(pathsAggrAS1[flow, attempt, alg]);
-            //                pathsAggrAS3[flow, attempt, alg] = aggregateSameASes(pathsAggrAS2[flow, attempt, alg]);
-            //                //pathsAggrAS4[flow, attempt, alg] = removeLoops(pathsAggrAS3[flow, attempt, alg]);
-            //                //pathsAggrAS5[flow, attempt, alg] = aggregateSameASes(pathsAggrAS4[flow, attempt, alg]);
-            //                pathsAggrAS6[flow, attempt, alg] = obtainASRelationships(pathsAggrAS3[flow, attempt, alg]);
-            //                MercuryAsTraceroute tAS = generateTracerouteAS(pathsAggrAS6[flow, attempt, alg], "domain.com", myInfo.Address, traceroute.LocalAddress, traceroute.RemoteAddress,
-            //                    geoMappings[0], geoMappings[1], geoMappings[2], geoMappings[3]);
-            //                tracerouteASes.Add(tAS);
-            //            }
-            //            if (alg == 1) //UDP
-            //            {
-            //                //processASPreviewHops(paths[flow, attempt, alg]);
-            //            }
-            
-            //        }
-            //    }
-            //}
-
-
-            //Finally we add the MercuryAsTraceroute(es) to the Mercury Platform
-            //String result = MercuryService.addTracerouteASes(tracerouteASes);
+                //Finally we add the MercuryAsTraceroute(es) to the Mercury Platform
+                //String result = MercuryService.addTracerouteASes(tracerouteASes);
 
 
                 /*
@@ -368,8 +309,8 @@ namespace Mercury.Topology
                 */
 
 
- 
-              return null;
+
+                return null;
 		}
 
 
@@ -529,6 +470,7 @@ namespace Mercury.Topology
 
 
             //We count the asRelationships
+            /*
             foreach (MercuryAsTracerouteRelationship rel in asPreviewHops.relationships.Values)
             {
                 if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.CustomerToProvider) {c2pRels++;}
@@ -538,6 +480,7 @@ namespace Mercury.Topology
                 else if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.InternerExchangePoint) { ixpRels++; }
                 else if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.NotFound) { nfRels++; }
             }
+             */
 
             if (flags < 0x2) completed = true;
 
