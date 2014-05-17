@@ -139,6 +139,8 @@ Options:
   -t-max &lt;number&gt;  The maximum TTL (default is 32).
   -v &lt;number&gt;      The verbosity level (default is 1).
   -w &lt;url&gt;         The verbosity level (default is 1).
+  --ip-in &lt;file&gt;   Load the IP traceroute from the specified file.
+  --ip-out &lt;file&gt;  Save the IP traceroute to the specified file.
 
 Algorithms:
   0                ICMP and UDP with constant identification (default)
