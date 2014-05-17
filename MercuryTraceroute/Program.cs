@@ -102,7 +102,8 @@ namespace Mercury
 			}
 
 			// If not all parameters are set, throw an exception.
-			if (null == this.destination) throw new ArgumentException("The destination is missing.");
+			if ((null == this.destination) && (null == this.fileLoadIp))
+                throw new ArgumentException("The destination or input file are missing.");
 		}
 
 		#region Public methods
@@ -419,7 +420,7 @@ namespace Mercury
             // Show the local IP address.
             Program.WriteLine(ConsoleColor.Gray, "Local address..........................", ConsoleColor.Cyan, resultIp.LocalAddress.ToString());
 
-            // Show the remote IP address.
+            // Show the remote IP address.f
             Program.WriteLine(ConsoleColor.Gray, "Remote address.........................", ConsoleColor.Cyan, resultIp.RemoteAddress.ToString());
 
             // Show the traceroute settings.
