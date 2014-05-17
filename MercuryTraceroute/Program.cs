@@ -447,6 +447,15 @@ namespace Mercury
 			{
 				this.DisplayIpTracerouteResult(resultIp, MultipathTraceroute.MultipathAlgorithm.UdpTest);
 			}
+
+			// Create a cancellation token source.
+            using (CancellationTokenSource cancel = new CancellationTokenSource())
+            {
+                // Run the AS-level traceroute.
+                ASTracerouteResult resultAs = this.tracerouteAs.Run(resultIp, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
+                {
+                });
+            }
 		}
 
         /// <summary>
