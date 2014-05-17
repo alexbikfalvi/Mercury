@@ -243,11 +243,11 @@ namespace Mercury.Topology
                             //processASPreviewHops(paths[flow, attempt, alg]);
 
                             pathsAggrAS1[flow, attempt, alg] = aggregateHops(paths[flow, attempt, alg]);
-
                             pathsAggrAS2[flow, attempt, alg] = obtainASRelationships(pathsAggrAS1[flow, attempt, alg]);
-                            //TracerouteAS tAS = generateTracerouteAS(pathsAggrAS6[flow, attempt, alg], "domain.com", myInfo.Address, traceroute.LocalAddress, traceroute.RemoteAddress,
-                            //    geoMappings[0], geoMappings[1], geoMappings[2], geoMappings[3]);
-                            //tracerouteASes.Add(tAS);
+
+                            MercuryAsTraceroute tAS = generateTracerouteAS(pathsAggrAS2[flow, attempt, alg], "domain.com", myInfo.Address, traceroute.LocalAddress, traceroute.RemoteAddress,
+                                geoMappings[0], geoMappings[1], geoMappings[2], geoMappings[3]);
+                            tracerouteASes.Add(tAS);
                         }
                         if (alg == 1) //UDP
                         {
@@ -496,219 +496,7 @@ namespace Mercury.Topology
             return asPreviewHopsAux;
         }
 
-        //private ASPreviewHops aggregateMissings(ASPreviewHops asPreviewHops)
-        //{
 
-        //    ASPreviewHops asPreviewHopsAux = new ASPreviewHops();
-        //    bool prevHopMissing = false;
-        //    for (int i = 0; i < asPreviewHops.hops.Count; i++ )
-        //    {
-        //            if (asPreviewHops.hops[i].Count != 0) //If not missing we add it
-        //            {
-        //                if (prevHopMissing == false)
-        //                {
-        //                    asPreviewHopsAux.addHops(asPreviewHops.hops[i]);
-        //                }
-        //                else
-        //                {
-        //                    asPreviewHopsAux.addHops(asPreviewHops.hops[i-1]); //We add the previous missing. ONly 1
-        //                    asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We add the hops
-        //                }
-        //                prevHopMissing = false;
-        //            }
-        //            else //If missing
-        //            {
-        //                prevHopMissing = true;
-        //            }
-        //     }
-
-        //    return asPreviewHopsAux;
-        //}
-
-        //private ASPreviewHops removeMissingInMiddleSameAS(ASPreviewHops asPreviewHops)
-        //{
-        //    ASPreviewHops asPreviewHopsAux = new ASPreviewHops();
-
-        //    //First we add the first and/or last hop if they are missings
-        //    if (asPreviewHops.hops[0].Count == 0) //missing at position 0 
-        //    {
-        //        asPreviewHopsAux.addHops(asPreviewHops.hops[0]);
-        //    }
-        //    if (asPreviewHops.hops[asPreviewHops.hops.Count-1].Count == 0) //missing at last hop
-        //    {
-        //        asPreviewHopsAux.addHops(asPreviewHops.hops[0]);
-        //    }
-
-        //    if (asPreviewHops.hops.Count > 2) //We need at least 3 hops
-        //    {
-
-        //        for (int i = 1; i < asPreviewHops.hops.Count - 1; i++) //We do not need to start from position 0 and we need to end at Count-1
-        //        {
-        //            if (asPreviewHops.hops[i].Count != 0) //If not missing we add it
-        //            {
-        //                asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We add the hops
-        //            }
-        //            else //If missing
-        //            {
-        //                //We only add the missing hop when it is not in the middle of same AS
-        //                if (asPreviewHops.hops[i - 1][0].AsNumber != asPreviewHops.hops[i + 1][0].AsNumber)
-        //                {
-        //                    asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We add the missing hops
-        //                }
-
-        //            }
-        //        }
-        //    }
-        //    return asPreviewHopsAux;
-        //}
-
-        //private ASPreviewHops aggregateSameASes(ASPreviewHops asPreviewHops)
-        //{
-
-        //    ASPreviewHops asPreviewHopsAux = new ASPreviewHops();
-        //    bool firstHop = true;
-        //    bool prevHopMissing = false;
-        //    bool prevHopSame = false;
-        //    bool prevHopMulti = false;
-        //    for (int i = 0; i < asPreviewHops.hops.Count; i++)
-        //    {
-
-        //        if (firstHop) //If first hop...
-        //        {
-        //            if (asPreviewHops.hops[i].Count != 0) //If not missing...
-        //            {
-        //                if (asPreviewHops.hops[i].Count > 1) //If multi...
-        //                {
-        //                    prevHopMissing = false;
-        //                    prevHopSame = false;
-        //                    prevHopMulti = true;
-        //                    asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We save the multi
-        //                }
-        //                else //If not multi...
-        //                {
-        //                    prevHopMissing = false;
-        //                    prevHopSame = false;
-        //                    prevHopMulti = false;
-        //                }
-        //            }
-        //            else //If missing
-        //            {
-        //                prevHopMissing = true;
-        //                prevHopSame = false;
-        //                prevHopMulti = false;
-        //                asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We save the missing
-        //            }
-        //            firstHop = false;
-        //        }
-                
-                
-                
-        //        else //If more than second hop...
-        //        {
-        //            if (asPreviewHops.hops[i].Count != 0) //If not missing...
-        //            {
-        //                if (asPreviewHops.hops[i].Count > 1) //If multi...
-        //                {
-        //                    if (prevHopMissing == prevHopSame == prevHopMulti == false) //If previous was an AS hop
-        //                    {
-        //                        asPreviewHopsAux.addHops(asPreviewHops.hops[i - 1]);
-        //                    }
-        //                    prevHopMissing = false;
-        //                    prevHopSame = false;
-        //                    prevHopMulti = true;
-        //                    asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We save the multi
-        //                }
-        //                else //If not multi...
-        //                {
-        //                    if ( !prevHopMissing && !prevHopMulti ) //If previous hop is NOT missing and NOT multi
-        //                    {
-        //                        if (asPreviewHops.hops[i][0].AsNumber == asPreviewHops.hops[i - 1][0].AsNumber) //if same as previous
-        //                        {
-        //                            prevHopMissing = false;
-        //                            prevHopSame = true;
-        //                            prevHopMulti = false;
-        //                        }
-        //                        else
-        //                        {
-        //                            //if (prevHopSame) //If previous was same but now is different, we add the previous same, only 1
-        //                            //{
-        //                                asPreviewHopsAux.addHops(asPreviewHops.hops[i - 1]);
-        //                            //}
-        //                            prevHopMissing = false;
-        //                            prevHopSame = false;
-        //                            prevHopMulti = false;
-        //                        }
-        //                        //We check if last ASTracerouteHop and we add it
-        //                        if (i == asPreviewHops.hops.Count-1)
-        //                        {
-        //                            asPreviewHopsAux.addHops(asPreviewHops.hops[i]);
-        //                        }
-        //                    }
-        //                    else //If previous is missing or multi
-        //                    {
-        //                        prevHopMissing = false;
-        //                        prevHopSame = false;
-        //                        prevHopMulti = false;
-        //                    }
-
-        //                }
-        //            }
-        //            else //If missing
-        //            {
-        //                if (prevHopMissing == prevHopSame == prevHopMulti == false) //If previous was an AS hop
-        //                {
-        //                    asPreviewHopsAux.addHops(asPreviewHops.hops[i - 1]);
-        //                }
-        //                prevHopMissing = true;
-        //                prevHopSame = false;
-        //                prevHopMulti = false;
-        //                asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We save the missing
-        //            }
-        //        }
-
-        //    }
-
-        //    return asPreviewHopsAux;
-        //}
-
-        //private ASPreviewHops removeLoops(ASPreviewHops asPreviewHops)
-        //{
-        //    ASPreviewHops asPreviewHopsAux = new ASPreviewHops();
-
-        //    //First we add the first and/or last hop if they are missings
-        //    if (asPreviewHops.hops[0].Count == 0) //missing at position 0 
-        //    {
-        //        asPreviewHopsAux.addHops(asPreviewHops.hops[0]);
-        //    }
-        //    if (asPreviewHops.hops[asPreviewHops.hops.Count - 1].Count == 0) //missing at last hop
-        //    {
-        //        asPreviewHopsAux.addHops(asPreviewHops.hops[0]);
-        //    }
-
-        //    if (asPreviewHops.hops.Count > 2) //We need at least 3 hops
-        //    {
-
-        //        for (int i = 1; i < asPreviewHops.hops.Count - 1; i++) //We do not need to start from position 0 and we need to end at Count-1
-        //        {
-        //            if (asPreviewHops.hops[i].Count != 0) //If not missing we add it
-        //            {
-        //                //First we check if its in the middle of some missing
-        //                //if (asPreviewHops.hops[i - 1].Count != asPreviewHops.hops[i + 1][0].AsNumber)
-
-        //                //We only add the AS hop when it is not in the middle of same AS
-        //                if (asPreviewHops.hops[i - 1][0].AsNumber != asPreviewHops.hops[i + 1][0].AsNumber)
-        //                {
-        //                    asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We add the missing hops
-        //                }
-        //            }
-        //            else //If missing
-        //            {
-        //                asPreviewHopsAux.addHops(asPreviewHops.hops[i]); //We add the hops
-        //            }
-        //        }
-        //    }
-        //    return asPreviewHopsAux;
-        //}
 
 
 
@@ -728,8 +516,8 @@ namespace Mercury.Topology
             return asPreviewHops;
         }
 
-        /*
-        private MercuryAsTracerouteStats obtainTracerouteStatistics(ASPreviewHops asPreviewHops)
+
+        private MercuryAsTracerouteStats obtainTracerouteStatistics(ASTraceroutePath asPreviewHops)
         {
             int asHops = 0;
             int c2pRels = 0,p2pRels = 0,p2cRels = 0,s2sRels = 0,ixpRels = 0,nfRels = 0;
@@ -737,9 +525,8 @@ namespace Mercury.Topology
             int flags = 0x0; //asPreviewHops.flags.
 
             //We count the asHops
-            foreach( List<MercuryAsTracerouteHop> asHop in asPreviewHops.hops){
-                if(asHop.Count>0) asHops++;
-            }
+            asHops=asPreviewHops.hops.Count;
+
 
             //We count the asRelationships
             foreach (MercuryAsTracerouteRelationship rel in asPreviewHops.relationships.Values)
@@ -756,7 +543,7 @@ namespace Mercury.Topology
 
             return new MercuryAsTracerouteStats(asHops,c2pRels,p2pRels,p2cRels,s2sRels,ixpRels,nfRels,completed,flags);
         }
-        */
+        
 
         private String[] getGeoMappings(IPAddress srcIp, IPAddress dstIp)
         {
@@ -784,19 +571,19 @@ namespace Mercury.Topology
             return new string[] { srcCity, srcCountry, dstCity, dstCountry };
         }
 
-        /*
-        private MercuryAsTraceroute generateTracerouteAS(ASPreviewHops asPreviewHops, String dst,
+
+        private MercuryAsTraceroute generateTracerouteAS(ASTraceroutePath asPreviewHops, String dst,
                                                     IPAddress publicIP, IPAddress srcIp, IPAddress dstIp, String srcCity, String srcCountry, String dstCity, String dstCountry )
         {
 
             MercuryAsTracerouteStats tracerouteASStats = obtainTracerouteStatistics(asPreviewHops);
-            List<MercuryAsTracerouteRelationship> tracerouteASRelationships = new List<MercuryAsTracerouteRelationship>(asPreviewHops.relationships.Values);
+            //List<MercuryAsTracerouteRelationship> tracerouteASRelationships = new List<MercuryAsTracerouteRelationship>(asPreviewHops.relationships.Values);
 
             //Let's play with hops!
             List<MercuryAsTracerouteHop> asHopsAux = new List<MercuryAsTracerouteHop>();
-            foreach (List<MercuryAsTracerouteHop> asHops in asPreviewHops.hops)
+            foreach (ASTracerouteHop asHop in asPreviewHops.hops)
             {
-                foreach (MercuryAsTracerouteHop hop in asHops)
+                foreach (MercuryAsTracerouteHop hop in asHop.candidates.Values)
                 {
                     asHopsAux.Add(hop);
                 }
@@ -807,16 +594,19 @@ namespace Mercury.Topology
             String srcAsName = null, dstAsName = null;
             if (asPreviewHops.hops.Count > 0)
             {
-                if (asPreviewHops.hops[0].Count > 0)
+
+                if (asPreviewHops.hops[0].candidates.Count > 0)
                 {
-                    srcAs = asPreviewHops.hops[0][0].AsNumber;
-                    srcAsName = asPreviewHops.hops[0][0].AsName;
+
+                    srcAs = new List<MercuryAsTracerouteHop>(asPreviewHops.hops[0].candidates.Values)[0].AsNumber;
+                    srcAsName = new List<MercuryAsTracerouteHop>(asPreviewHops.hops[0].candidates.Values)[0].AsName;
                 }
 
-                if (asPreviewHops.hops[asPreviewHops.hops.Count-1].Count > 0)
+                if (asPreviewHops.hops[asPreviewHops.hops.Count-1].candidates.Count > 0)
                 {
-                    dstAs = asPreviewHops.hops[asPreviewHops.hops.Count - 1][0].AsNumber;
-                    dstAsName = asPreviewHops.hops[asPreviewHops.hops.Count - 1][0].AsName;
+
+                    dstAs = new List<MercuryAsTracerouteHop>(asPreviewHops.hops[asPreviewHops.hops.Count - 1].candidates.Values)[0].AsNumber;
+                    dstAsName = new List<MercuryAsTracerouteHop>(asPreviewHops.hops[asPreviewHops.hops.Count - 1].candidates.Values)[0].AsName;
                 }
 
             }
@@ -826,11 +616,11 @@ namespace Mercury.Topology
                 dstAs, dstAsName, dstIp.ToString(), dst, dstCity, dstCountry, DateTime.UtcNow, tracerouteASStats);
 
             tracerouteAS.Hops = asHopsAux;
-            tracerouteAS.Relationships = tracerouteASRelationships;
+            //tracerouteAS.Relationships = tracerouteASRelationships;
 
             return tracerouteAS;
         }
-        */
+        
 
 
     }
