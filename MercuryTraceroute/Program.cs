@@ -153,7 +153,7 @@ namespace Mercury
 		private void Run()
 		{
             // If the traceroute file is null.
-            if (null != this.fileLoadIp)
+            if (null == this.fileLoadIp)
             {
                 // Run the live traceroute.
                 this.RunLive();
@@ -432,7 +432,21 @@ namespace Mercury
             Program.WriteLine(ConsoleColor.Gray, "Attempt delay (ms).....................", ConsoleColor.Cyan, resultIp.Settings.AttemptDelay.ToString());
             Program.WriteLine(ConsoleColor.Gray, "Hop timeout (ms).......................", ConsoleColor.Cyan, resultIp.Settings.HopTimeout.ToString());
             Program.WriteLine(ConsoleColor.Gray, "Data length (bytes)....................", ConsoleColor.Cyan, resultIp.Settings.DataLength.ToString());
-        }
+
+			// Show the traceroute result.
+			if ((resultIp.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.Icmp) != 0)
+			{
+				this.DisplayIpTracerouteResult(resultIp, MultipathTraceroute.MultipathAlgorithm.Icmp);
+			}
+			if ((resultIp.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.Udp) != 0)
+			{
+				this.DisplayIpTracerouteResult(resultIp, MultipathTraceroute.MultipathAlgorithm.Udp);
+			}
+			if ((resultIp.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.UdpTest) != 0)
+			{
+				this.DisplayIpTracerouteResult(resultIp, MultipathTraceroute.MultipathAlgorithm.UdpTest);
+			}
+		}
 
         /// <summary>
 		/// Display the result of the IP traceroute.
