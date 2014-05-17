@@ -189,9 +189,12 @@ namespace Mercury.Topology
             }
         }
 
-        public Dictionary<int, TracerouteASHop> getEqualMultipleToMultiple(Hop hop2)
+
+        //We might return just one AS, instead of all the list again...
+        public TracerouteASHop getEqualMultipleToMultiple(Hop hop2)
         {
             Dictionary<int, TracerouteASHop> cands = new Dictionary<int, TracerouteASHop>();
+            
 
             if (candidates.Count > 1 && hop2.candidates.Count > 1)
             {
@@ -208,7 +211,8 @@ namespace Mercury.Topology
                 }
                 if (matchings > 1)
                 {
-                    return cands;
+                    List<TracerouteASHop> asHops = new List<TracerouteASHop>(cands.Values);
+                    return asHops[0];
                 }
             }
             return null;

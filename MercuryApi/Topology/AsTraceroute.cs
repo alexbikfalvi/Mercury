@@ -231,6 +231,7 @@ namespace Mercury.Topology
             int attemptsPerFlow = paths.GetLength(1);
             int algorithms = paths.GetLength(2);
             ASPreviewHops2[, ,] pathsAggrAS1 = new ASPreviewHops2[flows, attemptsPerFlow, algorithms];
+            ASPreviewHops2[, ,] pathsAggrAS2 = new ASPreviewHops2[flows, attemptsPerFlow, algorithms];
 
             List<TracerouteAS> tracerouteASes = new List<TracerouteAS>();
             for (int flow = 0; flow < flows; flow++)
@@ -245,7 +246,7 @@ namespace Mercury.Topology
 
                             pathsAggrAS1[flow, attempt, alg] = aggregateHops(paths[flow, attempt, alg]);
 
-                            //pathsAggrAS6[flow, attempt, alg] = obtainASRelationships(pathsAggrAS3[flow, attempt, alg]);
+                            pathsAggrAS2[flow, attempt, alg] = obtainASRelationships(pathsAggrAS1[flow, attempt, alg]);
                             //TracerouteAS tAS = generateTracerouteAS(pathsAggrAS6[flow, attempt, alg], "domain.com", myInfo.Address, traceroute.LocalAddress, traceroute.RemoteAddress,
                             //    geoMappings[0], geoMappings[1], geoMappings[2], geoMappings[3]);
                             //tracerouteASes.Add(tAS);
@@ -412,9 +413,9 @@ namespace Mercury.Topology
                             {
                                 if (asPreviewHops.hops[i].getEqualMultipleToMultiple(asPreviewHopsAux.hops[asPreviewHopsAux.hops.Count - 1]) != null)
                                 {
-                                    Dictionary<int, TracerouteASHop> lh = asPreviewHops.hops[i].getEqualMultipleToMultiple(asPreviewHopsAux.hops[asPreviewHopsAux.hops.Count - 1]);
+                                    TracerouteASHop h = asPreviewHops.hops[i].getEqualMultipleToMultiple(asPreviewHopsAux.hops[asPreviewHopsAux.hops.Count - 1]);
                                     Hop hop = new Hop();
-                                    hop.candidates = lh;
+                                    hop.candidates.Add(h.asNumber, h);
                                     asPreviewHopsAux.hops.Add(hop);
                                     
                                 }
@@ -478,9 +479,9 @@ namespace Mercury.Topology
                             {
                                 if (asPreviewHops.hops[i].getEqualMultipleToMultiple(asPreviewHops.hops[i - 1]) != null)
                                 {
-                                    Dictionary<int, TracerouteASHop> lh = asPreviewHops.hops[i].getEqualMultipleToMultiple(asPreviewHops.hops[i - 1]);
+                                    TracerouteASHop h = asPreviewHops.hops[i].getEqualMultipleToMultiple(asPreviewHops.hops[i - 1]);
                                     Hop hop = new Hop();
-                                    hop.candidates = lh;
+                                    hop.candidates.Add(h.asNumber, h);
                                     asPreviewHopsAux.hops.Add(hop);
                                 }
                                 else //is differentes ases (AS0-AS1) or missing-AS
@@ -712,6 +713,23 @@ namespace Mercury.Topology
         //}
 
 
+
+        private ASPreviewHops2 obtainASRelationships(ASPreviewHops2 asPreviewHops)
+        {
+            for (int i = 0; i < asPreviewHops.hops.Count - 1; i++) //We end before the last hop
+            {
+                if (asPreviewHops.hops[i].candidates.Count != 0 && asPreviewHops.hops[i + 1].candidates.Count != 0) //If NOT missing hops
+                {
+                    int as0 = new List<TracerouteASHop>(asPreviewHops.hops[i].candidates.Values)[0].asNumber;
+                    int as1 = new List<TracerouteASHop>(asPreviewHops.hops[i+1].candidates.Values)[0].asNumber;
+                    MercuryAsTracerouteRelationship rel = MercuryService.GetAsRelationship(as0, as1);
+                    rel.hop = i;
+                    asPreviewHops.relationships[i] = rel;
+                }
+            }
+            return asPreviewHops;
+        }
+
         private ASPreviewHops obtainASRelationships(ASPreviewHops asPreviewHops)
         {
             for (int i = 0; i < asPreviewHops.hops.Count - 1; i++) //We end before the last hop
@@ -727,6 +745,7 @@ namespace Mercury.Topology
             }
             return asPreviewHops;
         }
+
 
 
         private TracerouteASStats obtainTracerouteStatistics(ASPreviewHops asPreviewHops)
