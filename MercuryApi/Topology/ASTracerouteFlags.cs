@@ -1,10 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿/* 
+ * Copyright (C) 2014 Manuel Palacin, Alex Bikfalvi
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or (at
+ * your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
+
+using System;
 
 namespace Mercury.Topology
 {
+    /// <summary>
+    /// An enumeration with AS traceroute flags.
+    /// </summary>
     public enum ASTracerouteFlags
     {
         None = 0,
@@ -20,6 +38,22 @@ namespace Mercury.Topology
         LoopPath = 0x200000,
         // Flow traceroute
         FlowNotEnoughAttempts = 0x400000,
-        FlowDistinctAttempts = 0x800000
+        FlowDistinctAttempts = 0x800000,
+    }
+
+    /// <summary>
+    /// A class with extension methods for AS traceroute flag.
+    /// </summary>
+    public static class ASTracerouteFlagsExtensions
+    {
+        /// <summary>
+        /// Checks whether an AS traceroute flag is successful.
+        /// </summary>
+        /// <param name="flag">The flag.</param>
+        /// <returns><b>True</b> if the flag is successful, <b>false</b> otherwise.</returns>
+        public static bool IsSuccessful(this ASTracerouteFlags flag)
+        {
+            return (int)flag < 0x10000;
+        }
     }
 }

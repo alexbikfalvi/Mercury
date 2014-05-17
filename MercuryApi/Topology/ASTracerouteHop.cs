@@ -30,6 +30,72 @@ namespace Mercury.Topology
         //key=ASnumber, value=MercuryAsTracerouteHop
         public Dictionary<int, MercuryAsTracerouteHop> candidates = new Dictionary<int, MercuryAsTracerouteHop>();
 
+        #region Public properties
+
+        /// <summary>
+        /// Returns the final AS number for this hop.
+        /// </summary>
+        public int AsNumber { get; private set; }
+        /// <summary>
+        /// Returns the flags for this AS hop.
+        /// </summary>
+        public ASTracerouteFlags Flags { get; private set; }
+        /// <summary>
+        /// Returns true if this hop can be successfully solved to an AS number.
+        /// </summary>
+        public bool IsSuccessful { get { return this.Flags.IsSuccessful(); } }
+
+        #endregion
+
+        #region Static methods
+
+        /// <summary>
+        /// Compares two AS traceroute hops for equality.
+        /// </summary>
+        /// <param name="left">The left hop.</param>
+        /// <param name="right">The right hop.</param>
+        /// <returns><b>True</b> if the hops are equal, <b>false</b> otherwise.</returns>
+        public static bool operator==(ASTracerouteHop left, ASTracerouteHop right)
+        {
+            if (object.ReferenceEquals(left, null) && object.ReferenceEquals(right, null)) return true;
+            if (object.ReferenceEquals(left, null)) return false;
+            if (object.ReferenceEquals(right, null)) return false;
+            return (left.IsSuccessful == right.IsSuccessful) && (left.AsNumber == right.AsNumber);
+        }
+
+        /// <summary>
+        /// Compare two AS traceroute hops for inequality.
+        /// </summary>
+        /// <param name="left">The first path.</param>
+        /// <param name="right">The second path.</param>
+        /// <returns><b>True</b> if the hops are different, <b>false</b> otherwise.</returns>
+        public static bool operator !=(ASTracerouteHop left, ASTracerouteHop right)
+        {
+            return !(left == right);
+        }
+
+        #endregion
+
+        #region Public methods
+
+        /// <summary>
+        /// Compares this AS traceroute hops for equality.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns><b>True</b> if the path is equal, <b>false</b> otherwise.</returns>
+        public override bool Equals(object path)
+        {
+            return this == (path as ASTracerouteHop);
+        }
+
+        /// <summary>
+        /// Gets the hash code for this AS traceroute hop.
+        /// </summary>
+        /// <returns>The hash code.</returns>
+        public override int GetHashCode()
+        {
+            return this.AsNumber.GetHashCode() ^ this.IsSuccessful.GetHashCode();
+        }
 
         public bool isMissing(ASTracerouteHop hop2)
         {
@@ -199,5 +265,7 @@ namespace Mercury.Topology
             }
             return null;
         }
+
+        #endregion
     }
 }

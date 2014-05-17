@@ -722,7 +722,7 @@ namespace Mercury.Topology
                     int as1 = new List<MercuryAsTracerouteHop>(asPreviewHops.hops[i+1].candidates.Values)[0].AsNumber;
                     MercuryAsTracerouteRelationship rel = MercuryService.GetAsRelationship(as0, as1);
                     rel.Hop = i;
-                    asPreviewHops.relationships[i] = rel;
+                    //asPreviewHops.relationships[i] = rel;
                 }
             }
             return asPreviewHops;
