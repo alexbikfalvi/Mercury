@@ -19,6 +19,7 @@
 using System;
 using Newtonsoft.Json;
 using Mercury.Json;
+using Mercury.Topology;
 
 namespace Mercury.Api
 {
@@ -38,7 +39,7 @@ namespace Mercury.Api
         /// <param name="hop">The hop index.</param>
         /// <param name="infos">The AS information.</param>
         /// <param name="isInferred">Indicates whether the hop AS is inferred.</param>
-        public MercuryAsTracerouteHop(byte hop, MercuryAsInformation info, bool isInferred)
+        public MercuryAsTracerouteHop(byte hop, ASInformation info, bool isInferred)
         {
             this.Hop = hop;
             this.AsNumber = info.AsNumber;
@@ -75,7 +76,7 @@ namespace Mercury.Api
         /// </summary>
         [JsonConverter(typeof(JsonEnumConverter))]
         [JsonProperty("type")]
-        public MercuryAsInformation.AsType Type { get; private set; }
+        public ASInformation.AsType Type { get; private set; }
         /// <summary>
         /// Indicates if we use an heuristic to determine what is the most suitable AS.
         /// </summary>

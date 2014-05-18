@@ -21,6 +21,7 @@ using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Mercury.Json;
+using Mercury.Topology;
 
 namespace Mercury.Api
 {
@@ -80,7 +81,7 @@ namespace Mercury.Api
         /// </summary>
         [JsonProperty("type")]
         [JsonConverter(typeof(JsonEnumConverter))]
-        public MercuryAsInformation.AsType Type { get; private set; }
+        public ASInformation.AsType Type { get; private set; }
         /// <summary>
         /// The mapping request address.
         /// </summary>

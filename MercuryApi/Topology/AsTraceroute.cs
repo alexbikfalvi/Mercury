@@ -139,7 +139,7 @@ namespace Mercury.Topology
                             if (traceroute.Data[(byte)algorithm, flow, attempt, ttl].State == MultipathTracerouteData.DataState.ResponseReceived)
                             {
                                 // Get the list of corresponding ASes.
-                                List<MercuryAsInformation> ases = this.cache.Get(traceroute.Data[(byte)algorithm, flow, attempt, ttl].Address);
+                                List<ASInformation> ases = this.cache.Get(traceroute.Data[(byte)algorithm, flow, attempt, ttl].Address);
 
                                 // Add a new hop for the list of ASes.
                                 result.PathsStep1[(byte)algorithm, flow, attempt].AddHop(ases);

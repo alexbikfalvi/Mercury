@@ -33,10 +33,10 @@ namespace Mercury.Topology
 	{
 		private readonly ASTracerouteSettings settings;
 
-        private readonly Dictionary<IPAddress, List<MercuryAsInformation>> ipMapping =
-            new Dictionary<IPAddress, List<MercuryAsInformation>>();
-        private readonly Dictionary<int, MercuryAsInformation> asMapping =
-            new Dictionary<int, MercuryAsInformation>();
+        private readonly Dictionary<IPAddress, List<ASInformation>> ipMapping =
+            new Dictionary<IPAddress, List<ASInformation>>();
+        private readonly Dictionary<int, ASInformation> asMapping =
+            new Dictionary<int, ASInformation>();
 
 		/// <summary>
 		/// Creates a new AS traceroute cache.
@@ -54,9 +54,9 @@ namespace Mercury.Topology
 		/// </summary>
 		/// <param name="address">The IP address.</param>
 		/// <returns>The address information.</returns>
-        public List<MercuryAsInformation> Get(IPAddress address)
+        public List<ASInformation> Get(IPAddress address)
         {
-            List<MercuryAsInformation> list;
+            List<ASInformation> list;
 
             // Try and get the value from the cache.
             if (this.ipMapping.TryGetValue(address, out list))
@@ -67,12 +67,12 @@ namespace Mercury.Topology
             else
             {
                 // Create a new list.
-                list = new List<MercuryAsInformation>();
+                list = new List<ASInformation>();
                 // Get the mapping using the Mercury service.
                 foreach (MercuryIpToAsMapping mapping in MercuryService.GetIpToAsMappings(address))
                 {
                     // Create a new AS information.
-                    MercuryAsInformation info = new MercuryAsInformation(mapping);
+                    ASInformation info = new ASInformation(mapping);
                     // Add the AS information to the list.
                     list.Add(info);
                     // Add the AS to the cache.
@@ -125,13 +125,13 @@ namespace Mercury.Topology
                     if (0 == result.Count) continue;
 
                     // Create a new list.
-                    List<MercuryAsInformation> list = new List<MercuryAsInformation>();
+                    List<ASInformation> list = new List<ASInformation>();
 
                     // For each mapping in the result.
                     foreach (MercuryIpToAsMapping mapping in result)
                     {
                         // Create an AS information.
-                        MercuryAsInformation info = new MercuryAsInformation(mapping);
+                        ASInformation info = new ASInformation(mapping);
                         // Add the information to the list.
                         list.Add(info);
                         // Add the AS to the cache.

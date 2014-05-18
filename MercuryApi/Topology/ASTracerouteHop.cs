@@ -28,7 +28,7 @@ namespace Mercury.Topology
     /// </summary>
     public class ASTracerouteHop
     {
-        private readonly HashSet<int> ases = new HashSet<int>();
+        private readonly HashSet<ASInformation> asSet = new HashSet<ASInformation>();
 
         /// <summary>
         /// Creates a new AS traceroute hop for a missing AS.
@@ -43,24 +43,35 @@ namespace Mercury.Topology
         /// Creates a new AS traceroute hop from the list of specified AS information.
         /// </summary>
         /// <param name="list">A list of AS information.</param>
-        public ASTracerouteHop(IEnumerable<MercuryAsInformation> list)
+        public ASTracerouteHop(IEnumerable<ASInformation> list)
         {
             // Set the list of ASes.
-            foreach (MercuryAsInformation info in list)
+            foreach (ASInformation info in list)
             {
-                this.ases.Add(info.AsNumber);
+                this.asSet.Add(info);
             }
-            if (0 == this.ases.Count)
+            if (0 == this.asSet.Count)
             {
                 // If the hop has no ASes.
                 this.AsNumber = null;
                 this.Flags = ASTracerouteFlags.MissingAs;
             }
-            else if (1 == this.ases.Count)
+            else if (1 == this.asSet.Count)
             {
-                // If the hop as one AS.
-                this.AsNumber = this.ases.First();
-                this.Flags = ASTracerouteFlags.None;
+                // If the hop has one AS, get the first AS information.
+                ASInformation info = this.asSet.First();
+                // If the AS number is positive.
+                if (info.AsNumber > 0)
+                {
+                    // If the hop as one AS.
+                    this.AsNumber = info.AsNumber;
+                    this.Flags = ASTracerouteFlags.None;
+                }
+                else
+                {
+                    this.AsNumber = null;
+                    this.Flags = ASTracerouteFlags.MissingAs;
+                }
             }
             else
             {
@@ -84,6 +95,10 @@ namespace Mercury.Topology
         /// Returns true if this hop can be successfully solved to an AS number.
         /// </summary>
         public bool IsSuccessful { get { return this.Flags.IsSuccessful(); } }
+        /// <summary>
+        /// Gets the set of AS information for this hop.
+        /// </summary>
+        public IEnumerable<ASInformation> AsSet { get { return this.asSet; } }
 
         #endregion
 

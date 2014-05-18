@@ -55,6 +55,10 @@ namespace Mercury.Topology
         /// Returns whether this AS path is successful.
         /// </summary>
         public bool IsSuccessful { get { return this.Flags.IsSuccessful(); } }
+        /// <summary>
+        /// Gets the list of hops for the path.
+        /// </summary>
+        public IEnumerable<ASTracerouteHop> Hops { get { return this.hops; } }
 
         #endregion
 
@@ -108,7 +112,7 @@ namespace Mercury.Topology
         /// Adds a new hop at the end of the path for the list of specified ASes.
         /// </summary>
         /// <param name="list">The list of ASes.</param>
-        public void AddHop(List<MercuryAsInformation> list)
+        public void AddHop(List<ASInformation> list)
         {
             this.hops.Add(new ASTracerouteHop(list));
         }

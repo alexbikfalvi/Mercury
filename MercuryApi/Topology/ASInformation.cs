@@ -17,14 +17,15 @@
  */
 
 using System;
+using Mercury.Api;
 using Mercury.Json;
 
-namespace Mercury.Api
+namespace Mercury.Topology
 {
     /// <summary>
     /// A class that stores AS information.
     /// </summary>
-    public class MercuryAsInformation
+    public class ASInformation
     {
         /// <summary>
         /// The AS type.
@@ -41,7 +42,7 @@ namespace Mercury.Api
         /// Creates a new AS information from the specified IP to AS mapping.
         /// </summary>
         /// <param name="mapping">The IP to AS mapping.</param>
-        public MercuryAsInformation(MercuryIpToAsMapping mapping)
+        public ASInformation(MercuryIpToAsMapping mapping)
         {
             this.AsNumber = mapping.AsNumber;
             this.AsName = mapping.AsName;
