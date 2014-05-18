@@ -318,61 +318,61 @@ namespace Mercury.Topology
         //I am here, preparing the algorithm
 
         /*
-        private ASTraceroutePath aggregateHops(ASTraceroutePath asPreviewHops)
+        private ASTraceroutePath aggregateHops(ASTraceroutePath asTraceroutePath)
         {
-            ASTraceroutePath asPreviewHopsAux = new ASTraceroutePath();
-            for (int i = 1; i < asPreviewHops.hops.Count-1; i++)
+            ASTraceroutePath asTraceroutePathAux = new ASTraceroutePath();
+            for (int i = 1; i < asTraceroutePath.hops.Count-1; i++)
             {
 
-                if (asPreviewHopsAux.hops.Count > 0)
+                if (asTraceroutePathAux.hops.Count > 0)
                 {
-                    if (! asPreviewHops.hops[i].isMissing(asPreviewHopsAux.hops[asPreviewHopsAux.hops.Count - 1])) //We compare with the last index of the aux list
+                    if (! asTraceroutePath.hops[i].isMissing(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1])) //We compare with the last index of the aux list
                     {
-                        if ( asPreviewHops.hops[i].getEqualUnique(asPreviewHopsAux.hops[asPreviewHopsAux.hops.Count - 1]) == null)
+                        if ( asTraceroutePath.hops[i].getEqualUnique(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1]) == null)
                         {
-                            if (asPreviewHops.hops[i].getEqualUniqueToMultiple(asPreviewHopsAux.hops[asPreviewHopsAux.hops.Count - 1]) != null)
+                            if (asTraceroutePath.hops[i].getEqualUniqueToMultiple(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1]) != null)
                             {
-                                MercuryAsTracerouteHop h = asPreviewHops.hops[i].getEqualUniqueToMultiple(asPreviewHopsAux.hops[asPreviewHopsAux.hops.Count - 1]);
+                                MercuryAsTracerouteHop h = asTraceroutePath.hops[i].getEqualUniqueToMultiple(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1]);
 
-                                //asPreviewHops.hops[i].candidates.Clear(); //First we clear the list
-                                //asPreviewHops.hops[i].candidates.Add( h.AsNumber, h); //then we add the hop
-                                //asPreviewHops.hops.RemoveAt(i - 1); //We remove the previous hop
+                                //asTraceroutePath.hops[i].candidates.Clear(); //First we clear the list
+                                //asTraceroutePath.hops[i].candidates.Add( h.AsNumber, h); //then we add the hop
+                                //asTraceroutePath.hops.RemoveAt(i - 1); //We remove the previous hop
 
-                                asPreviewHopsAux.hops.RemoveAt(asPreviewHopsAux.hops.Count - 1);
+                                asTraceroutePathAux.hops.RemoveAt(asTraceroutePathAux.hops.Count - 1);
                                 ASTracerouteHop hop = new ASTracerouteHop();
                                 hop.candidates.Add(h.AsNumber, h);
-                                asPreviewHopsAux.hops.Add(hop);
+                                asTraceroutePathAux.hops.Add(hop);
 
                             }
                             else
                             {
-                                if (asPreviewHops.hops[i].getEqualMultipleToMultiple(asPreviewHopsAux.hops[asPreviewHopsAux.hops.Count - 1]) != null)
+                                if (asTraceroutePath.hops[i].getEqualMultipleToMultiple(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1]) != null)
                                 {
-                                    MercuryAsTracerouteHop h = asPreviewHops.hops[i].getEqualMultipleToMultiple(asPreviewHopsAux.hops[asPreviewHopsAux.hops.Count - 1]);
+                                    MercuryAsTracerouteHop h = asTraceroutePath.hops[i].getEqualMultipleToMultiple(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1]);
                                     ASTracerouteHop hop = new ASTracerouteHop();
                                     hop.candidates.Add(h.AsNumber, h);
-                                    asPreviewHopsAux.hops.Add(hop);
+                                    asTraceroutePathAux.hops.Add(hop);
                                     
                                 }
                                 else //is differentes ases (AS0-AS1), different multiple ases (AS0/AS1 - AS2/AS3) or missing-AS
                                 {
                                     //We check for missings in the middle of same AS
                                     int j = 0;
-                                    for (j = i; j < asPreviewHops.hops.Count; j++)
+                                    for (j = i; j < asTraceroutePath.hops.Count; j++)
                                     {
-                                        if (asPreviewHops.hops[j].candidates.Count > 0)
+                                        if (asTraceroutePath.hops[j].candidates.Count > 0)
                                         {
                                             //z = j - i; //j is position of next hop with at least 1 AS.
                                             break;
                                         }
                                     }
-                                    if (asPreviewHops.hops[i].isMissingInMiddleSameAS(asPreviewHopsAux.hops[asPreviewHopsAux.hops.Count - 1], asPreviewHops.hops[j]))
+                                    if (asTraceroutePath.hops[i].isMissingInMiddleSameAS(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1], asTraceroutePath.hops[j]))
                                     {
                                         i = j;
                                     }
                                     else //No missing in the middle of same AS
                                     {
-                                        asPreviewHopsAux.hops.Add(asPreviewHops.hops[i]);
+                                        asTraceroutePathAux.hops.Add(asTraceroutePath.hops[i]);
                                     }
 
                                 }
@@ -383,45 +383,45 @@ namespace Mercury.Topology
                 }
                 else
                 {
-                    if (asPreviewHops.hops[i].isMissing(asPreviewHops.hops[i - 1])) 
+                    if (asTraceroutePath.hops[i].isMissing(asTraceroutePath.hops[i - 1])) 
                     {
-                        //asPreviewHops.hops.RemoveAt(i-1);
-                        asPreviewHopsAux.hops.Add(new ASTracerouteHop());
+                        //asTraceroutePath.hops.RemoveAt(i-1);
+                        asTraceroutePathAux.hops.Add(new ASTracerouteHop());
                     }
                     else
                     {
-                        if (asPreviewHops.hops[i].getEqualUnique(asPreviewHops.hops[i - 1]) != null)
+                        if (asTraceroutePath.hops[i].getEqualUnique(asTraceroutePath.hops[i - 1]) != null)
                         {
-                            //asPreviewHops.hops.RemoveAt(i - 1);
-                            asPreviewHopsAux.hops.Add(asPreviewHops.hops[i]);
+                            //asTraceroutePath.hops.RemoveAt(i - 1);
+                            asTraceroutePathAux.hops.Add(asTraceroutePath.hops[i]);
                         }
                         else
                         {
-                            if (asPreviewHops.hops[i].getEqualUniqueToMultiple(asPreviewHops.hops[i - 1]) != null)
+                            if (asTraceroutePath.hops[i].getEqualUniqueToMultiple(asTraceroutePath.hops[i - 1]) != null)
                             {
-                                MercuryAsTracerouteHop h = asPreviewHops.hops[i].getEqualUniqueToMultiple(asPreviewHops.hops[i - 1]);
+                                MercuryAsTracerouteHop h = asTraceroutePath.hops[i].getEqualUniqueToMultiple(asTraceroutePath.hops[i - 1]);
 
-                                //asPreviewHops.hops[i].candidates.Clear(); //First we clear the list
-                                //asPreviewHops.hops[i].candidates.Add( h.AsNumber, h); //then we add the hop
-                                //asPreviewHops.hops.RemoveAt(i - 1); //We remove the previous hop
+                                //asTraceroutePath.hops[i].candidates.Clear(); //First we clear the list
+                                //asTraceroutePath.hops[i].candidates.Add( h.AsNumber, h); //then we add the hop
+                                //asTraceroutePath.hops.RemoveAt(i - 1); //We remove the previous hop
 
                                 ASTracerouteHop hop = new ASTracerouteHop();
                                 hop.candidates.Add(h.AsNumber, h);
-                                asPreviewHopsAux.hops.Add(hop);
+                                asTraceroutePathAux.hops.Add(hop);
 
                             }
                             else
                             {
-                                if (asPreviewHops.hops[i].getEqualMultipleToMultiple(asPreviewHops.hops[i - 1]) != null)
+                                if (asTraceroutePath.hops[i].getEqualMultipleToMultiple(asTraceroutePath.hops[i - 1]) != null)
                                 {
-                                    MercuryAsTracerouteHop h = asPreviewHops.hops[i].getEqualMultipleToMultiple(asPreviewHops.hops[i - 1]);
+                                    MercuryAsTracerouteHop h = asTraceroutePath.hops[i].getEqualMultipleToMultiple(asTraceroutePath.hops[i - 1]);
                                     ASTracerouteHop hop = new ASTracerouteHop();
                                     hop.candidates.Add(h.AsNumber, h);
-                                    asPreviewHopsAux.hops.Add(hop);
+                                    asTraceroutePathAux.hops.Add(hop);
                                 }
                                 else //is differentes ases (AS0-AS1) or missing-AS
                                 {
-                                    asPreviewHopsAux.hops.Add(asPreviewHops.hops[i]);
+                                    asTraceroutePathAux.hops.Add(asTraceroutePath.hops[i]);
                                 }
                             }
                         }
@@ -430,45 +430,56 @@ namespace Mercury.Topology
                 
             }
 
-            return asPreviewHopsAux;
+            return asTraceroutePathAux;
         }
         */
 
 
-
         /*
-        private ASTraceroutePath obtainASRelationships(ASTraceroutePath asPreviewHops)
+        
+        private ASTraceroutePath obtainASRelationships(ASTraceroutePath asTraceroutePath)
         {
-            for (byte i = 0; i < asPreviewHops.hops.Count - 1; i++) //We end before the last hop
+            for (byte i = 0; i < asTraceroutePath.Hops.Count() - 1; i++) //We end before the last hop
             {
-                if (asPreviewHops.hops[i].candidates.Count != 0 && asPreviewHops.hops[i + 1].candidates.Count != 0) //If NOT missing hops
+                if (asTraceroutePath.Hops.ElementAt(i).AsSet.Count() != 0 && asTraceroutePath.Hops.ElementAt(i + 1).AsSet.Count() != 0) //If NOT missing hops
                 {
-                    int as0 = new List<MercuryAsTracerouteHop>(asPreviewHops.hops[i].candidates.Values)[0].AsNumber;
-                    int as1 = new List<MercuryAsTracerouteHop>(asPreviewHops.hops[i+1].candidates.Values)[0].AsNumber;
-                    MercuryAsTracerouteRelationship rel = MercuryService.GetAsRelationship(as0, as1);
-                    rel.Hop = i;
-                    //asPreviewHops.relationships[i] = rel;
+                    MercuryAsTracerouteRelationship rel = null;
+                    int as0 = (int)asTraceroutePath.Hops.ElementAt(i).AsNumber;
+                    int as1 = (int)asTraceroutePath.Hops.ElementAt(i+1).AsNumber;
+
+                    //If is IXP
+                    if (asTraceroutePath.Hops.ElementAt(i + 1).AsSet.First().Type == ASInformation.AsType.Ixp)
+                    {
+                        rel = new MercuryAsTracerouteRelationship(MercuryAsTracerouteRelationship.RelationshipType.InternerExchangePoint, as0, as1, i);
+                    }
+                    else
+                    {
+                        rel = MercuryService.GetAsRelationship(as0, as1);
+                        rel.Hop = i;
+                    }
+
+                    asTraceroutePath.relationships.Add(rel);
                 }
             }
-            return asPreviewHops;
+            return asTraceroutePath;
         }
-        */
+        
 
-        /*
-        private MercuryAsTracerouteStats obtainTracerouteStatistics(ASTraceroutePath asPreviewHops)
+        
+        private MercuryAsTracerouteStats obtainTracerouteStatistics(ASTraceroutePath asTraceroutePath)
         {
             int asHops = 0;
             int c2pRels = 0,p2pRels = 0,p2cRels = 0,s2sRels = 0,ixpRels = 0,nfRels = 0;
             bool completed = false;
-            int flags = 0x0; //asPreviewHops.flags.
+            int flags = 0x0; //asTraceroutePath.flags.
 
             //We count the asHops
-            asHops=asPreviewHops.hops.Count;
+            asHops=asTraceroutePath.Hops.Count();
 
 
             //We count the asRelationships
             
-            foreach (MercuryAsTracerouteRelationship rel in asPreviewHops.relationships.Values)
+            foreach (MercuryAsTracerouteRelationship rel in asTraceroutePath.relationships)
             {
                 if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.CustomerToProvider) {c2pRels++;}
                 else if(rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.PeerToPeer) {p2pRels++;}
@@ -509,45 +520,47 @@ namespace Mercury.Topology
 
             return new string[] { srcCity, srcCountry, dstCity, dstCountry };
         }
-         */
+         
 
 
-        /*
-        private MercuryAsTraceroute generateTracerouteAS(ASTraceroutePath asPreviewHops, String dst,
+        
+        private MercuryAsTraceroute generateTracerouteAS(ASTraceroutePath asTraceroutePath, String dst,
                                                     IPAddress publicIP, IPAddress srcIp, IPAddress dstIp, String srcCity, String srcCountry, String dstCity, String dstCountry )
         {
 
-            MercuryAsTracerouteStats tracerouteASStats = obtainTracerouteStatistics(asPreviewHops);
-            //List<MercuryAsTracerouteRelationship> tracerouteASRelationships = new List<MercuryAsTracerouteRelationship>(asPreviewHops.relationships.Values);
+            MercuryAsTracerouteStats tracerouteASStats = obtainTracerouteStatistics(asTraceroutePath);
+            //List<MercuryAsTracerouteRelationship> tracerouteASRelationships = new List<MercuryAsTracerouteRelationship>(asTraceroutePath.relationships.Values);
 
             //Let's play with hops!
             List<MercuryAsTracerouteHop> asHopsAux = new List<MercuryAsTracerouteHop>();
-            foreach (ASTracerouteHop asHop in asPreviewHops.hops)
+            byte hopCount = 0;
+            foreach (ASTracerouteHop asHop in asTraceroutePath.Hops)
             {
-                foreach (MercuryAsTracerouteHop hop in asHop.candidates.Values)
+                foreach (ASInformation info in asHop.AsSet)
                 {
+                    MercuryAsTracerouteHop hop = new MercuryAsTracerouteHop(hopCount, info, true);
                     asHopsAux.Add(hop);
                 }
+                hopCount++;
             }
 
             //Now we search the src and the dst hops
             int srcAs = -1, dstAs = -1;
             String srcAsName = null, dstAsName = null;
-            if (asPreviewHops.hops.Count > 0)
+            if (asTraceroutePath.Hops.Count() > 0)
             {
 
-                if (asPreviewHops.hops[0].candidates.Count > 0)
+                if (asTraceroutePath.Hops.First().AsSet.Count() > 0)
                 {
 
-                    srcAs = new List<MercuryAsTracerouteHop>(asPreviewHops.hops[0].candidates.Values)[0].AsNumber;
-                    srcAsName = new List<MercuryAsTracerouteHop>(asPreviewHops.hops[0].candidates.Values)[0].AsName;
+                    srcAs = (int)asTraceroutePath.Hops.First().AsNumber;
+                    srcAsName = asTraceroutePath.Hops.First().AsSet.First().AsName;
                 }
 
-                if (asPreviewHops.hops[asPreviewHops.hops.Count-1].candidates.Count > 0)
+                if (asTraceroutePath.Hops.Last().AsSet.Count() > 0)
                 {
-
-                    dstAs = new List<MercuryAsTracerouteHop>(asPreviewHops.hops[asPreviewHops.hops.Count - 1].candidates.Values)[0].AsNumber;
-                    dstAsName = new List<MercuryAsTracerouteHop>(asPreviewHops.hops[asPreviewHops.hops.Count - 1].candidates.Values)[0].AsName;
+                    dstAs = (int) asTraceroutePath.Hops.Last().AsSet.First().AsNumber;
+                    dstAsName = asTraceroutePath.Hops.Last().AsSet.First().AsName;
                 }
 
             }
@@ -561,8 +574,8 @@ namespace Mercury.Topology
 
             return tracerouteAS;
         }
+        
         */
-
 
     }
 }

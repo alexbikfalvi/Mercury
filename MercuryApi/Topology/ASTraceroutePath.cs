@@ -29,6 +29,8 @@ namespace Mercury.Topology
     {
         private readonly List<ASTracerouteHop> hops = new List<ASTracerouteHop>();
 
+        public List<MercuryAsTracerouteRelationship> relationships = new List<MercuryAsTracerouteRelationship>();
+
         /// <summary>
         /// Creates an empty AS traceroute path.
         /// </summary>
@@ -59,6 +61,7 @@ namespace Mercury.Topology
         /// Gets the list of hops for the path.
         /// </summary>
         public IEnumerable<ASTracerouteHop> Hops { get { return this.hops; } }
+
 
         #endregion
 
