@@ -57,6 +57,8 @@ namespace Mercury
 
 		private bool flagIpv6 = false;
 		private int verbosity = 2;
+        private bool flagNoIp = false;
+        private bool flagNoAs = false;
         private string fileLoadIp = null;
         private string fileSaveIp = null;
 
@@ -119,8 +121,17 @@ namespace Mercury
 				// Create a new program.
 				using (Program program = new Program(args))
 				{
-					// Run the program.
-					program.Run();
+                    try
+                    {
+					    // Run the program.
+					    program.Run();
+                    }
+                    catch (Exception exception)
+                    {
+                        Program.WriteLine(ConsoleColor.Red, "ERROR  {0}", exception.Message);
+                        return;
+                    }
+
 				}
 			}
 			catch (Exception exception)
@@ -153,23 +164,36 @@ namespace Mercury
 		/// </summary>
 		private void Run()
 		{
-            // If the traceroute file is null.
+            // The IP-level traceroute results.
+            MultipathTracerouteResultSet resultsIp;
+
+            // If not loading from file.
             if (null == this.fileLoadIp)
             {
-                // Run the live traceroute.
-                this.RunLive();
+                // Run the IP level traceroute.
+                resultsIp = this.RunIpLive();
+
+                // Save the IP results.
+                this.SaveIpResults(resultsIp);
             }
             else
             {
-                // Load the traceroute result from file.
-                this.RunFile();
+                // Load the IP results.
+                resultsIp = this.LoadIpResults();
+
+                // Run the IP level traceroute.
+                this.RunIpFile(resultsIp);
             }
+
+            // Run the AS-level traceroute.
+            //this.RunAs(resultsIp);
 		}
 
         /// <summary>
-        /// Runs the current traceroute live.
+        /// Runs the IP-level traceroute live.
         /// </summary>
-        private void RunLive()
+        /// <returns>The traceroute results.</returns>
+        private MultipathTracerouteResultSet RunIpLive()
         {
             // Show the local interfaces.
             Program.WriteLine(ConsoleColor.Gray, "Network interfaces");
@@ -194,7 +218,7 @@ namespace Mercury
             if (this.iface != null ? this.iface >= this.interfaces.Length : false)
             {
                 Program.WriteLine(ConsoleColor.Red, "ERROR  The interface index {0} is out-of-range.", this.iface);
-                return;
+                return null;
             }
 
             // Get the local address.
@@ -206,7 +230,7 @@ namespace Mercury
             if (null == localAddress)
             {
                 Program.WriteLine(ConsoleColor.Red, "ERROR  There is no {0} address.", this.flagIpv6 ? "IPv6" : "IPv4");
-                return;
+                return null;
             }
 
             // Show the local IP address.
@@ -265,14 +289,14 @@ namespace Mercury
             catch (Exception exception)
             {
                 Program.WriteLine(ConsoleColor.Red, "ERROR  Cannot resolve the name {0} using DNS server {1}. {2}", this.destination, dnsAddress, exception.Message);
-                return;
+                return null;
             }
 
             // Validate the remore addresses.
             if (0 == remoteAddresses.Count)
             {
                 Program.WriteLine(ConsoleColor.Red, "ERROR  There are no remote addresses.");
-                return;
+                return null;
             }
 
             // Show the traceroute settings.
@@ -286,11 +310,17 @@ namespace Mercury
             Program.WriteLine(ConsoleColor.Gray, "Hop timeout (ms).......................", ConsoleColor.Cyan, this.settingsIp.HopTimeout.ToString());
             Program.WriteLine(ConsoleColor.Gray, "Data length (bytes)....................", ConsoleColor.Cyan, this.settingsIp.DataLength.ToString());
 
+            // Create the result set.
+            MultipathTracerouteResultSet results = new MultipathTracerouteResultSet(localAddress, destination, this.settingsIp);
+
             // Run the traceroute for each remote address.
             foreach (IPAddress remoteAddress in remoteAddresses)
             {
-                this.RunLive(localAddress, remoteAddress);
+                results.Add(this.RunIpLive(localAddress, remoteAddress));
             }
+
+            // Return the results.
+            return results;
         }
 
 		/// <summary>
@@ -298,7 +328,8 @@ namespace Mercury
 		/// </summary>
 		/// <param name="localAddress">The local IP address.</param>
 		/// <param name="remoteAddress">The remote IP address.</param>
-		private void RunLive(IPAddress localAddress, IPAddress remoteAddress)
+        /// <returns>The traceroute result.</returns>
+		private MultipathTracerouteResult RunIpLive(IPAddress localAddress, IPAddress remoteAddress)
 		{
 			// Show the destination.
 			Console.WriteLine();
@@ -307,155 +338,146 @@ namespace Mercury
 			// Create a cancellation token source.
 			using (CancellationTokenSource cancel = new CancellationTokenSource())
 			{
-				try
-				{
-                    // The IP-level traceroute result.
-                    MultipathTracerouteResult resultIp = this.tracerouteIp.RunIpv4(localAddress, remoteAddress, cancel.Token, (MultipathTracerouteResult result, MultipathTracerouteState state) =>
+                // The IP-level traceroute result.
+                MultipathTracerouteResult resultIp = this.tracerouteIp.RunIpv4(localAddress, remoteAddress, cancel.Token, (MultipathTracerouteResult result, MultipathTracerouteState state) =>
+                {
+                    // Level 3 verbosity.
+                    if (this.verbosity >= 3)
                     {
-                        // Level 3 verbosity.
-                        if (this.verbosity >= 3)
+                        switch (state.Type)
                         {
-                            switch (state.Type)
-                            {
-                                case MultipathTracerouteState.StateType.PacketCapture:
-                                    Program.WriteLine(ConsoleColor.Yellow, "PACKET-CAPTURE ", ConsoleColor.Gray, (state.Parameters[0] as ProtoPacketIp).ToString());
+                            case MultipathTracerouteState.StateType.PacketCapture:
+                                Program.WriteLine(ConsoleColor.Yellow, "PACKET-CAPTURE ", ConsoleColor.Gray, (state.Parameters[0] as ProtoPacketIp).ToString());
+                                {
+                                    ProtoPacket payload = (state.Parameters[0] as ProtoPacketIp).Payload;
+                                    if (null != payload)
                                     {
-                                        ProtoPacket payload = (state.Parameters[0] as ProtoPacketIp).Payload;
-                                        if (null != payload)
+                                        Program.WriteLine(ConsoleColor.Gray, "               Payload: {0}", payload.ToString());
+                                        if (payload is ProtoPacketIcmpTimeExceeded)
                                         {
-                                            Program.WriteLine(ConsoleColor.Gray, "               Payload: {0}", payload.ToString());
-                                            if (payload is ProtoPacketIcmpTimeExceeded)
-                                            {
-                                                Program.WriteLine(ConsoleColor.Gray, "                        {0}", (payload as ProtoPacketIcmpTimeExceeded).IpHeader.ToString());
-                                                Program.WriteLine(ConsoleColor.Gray, "                        IPv4 PAYLOAD Data: {0}", (payload as ProtoPacketIcmpTimeExceeded).IpPayload.ToExtendedString());
-                                            }
-                                            if (payload is ProtoPacketIcmpDestinationUnreachable)
-                                            {
-                                                Program.WriteLine(ConsoleColor.Gray, "                        {0}", (payload as ProtoPacketIcmpDestinationUnreachable).IpHeader.ToString());
-                                                Program.WriteLine(ConsoleColor.Gray, "                        IPv4 PAYLOAD Data: {0}", (payload as ProtoPacketIcmpDestinationUnreachable).IpPayload.ToExtendedString());
-                                            }
+                                            Program.WriteLine(ConsoleColor.Gray, "                        {0}", (payload as ProtoPacketIcmpTimeExceeded).IpHeader.ToString());
+                                            Program.WriteLine(ConsoleColor.Gray, "                        IPv4 PAYLOAD Data: {0}", (payload as ProtoPacketIcmpTimeExceeded).IpPayload.ToExtendedString());
+                                        }
+                                        if (payload is ProtoPacketIcmpDestinationUnreachable)
+                                        {
+                                            Program.WriteLine(ConsoleColor.Gray, "                        {0}", (payload as ProtoPacketIcmpDestinationUnreachable).IpHeader.ToString());
+                                            Program.WriteLine(ConsoleColor.Gray, "                        IPv4 PAYLOAD Data: {0}", (payload as ProtoPacketIcmpDestinationUnreachable).IpPayload.ToExtendedString());
                                         }
                                     }
-                                    break;
-                                case MultipathTracerouteState.StateType.PacketError:
-                                    Program.WriteLine(ConsoleColor.Red, "PACKET-ERROR ", ConsoleColor.Gray, (state.Parameters[0] as Exception).Message);
-                                    break;
-                                case MultipathTracerouteState.StateType.BeginAlgorithm:
-                                    Program.WriteLine(ConsoleColor.Cyan, "BEGIN-ALGORITHM ", ConsoleColor.Gray, "Algorithm: {0}", (MultipathTraceroute.MultipathAlgorithm)state.Parameters[0]);
-                                    break;
-                                case MultipathTracerouteState.StateType.EndAlgorithm:
-                                    Program.WriteLine(ConsoleColor.Cyan, "END-ALGORITHM ", ConsoleColor.Gray, "Algorithm: {0}", (MultipathTraceroute.MultipathAlgorithm)state.Parameters[0]);
-                                    break;
-                                case MultipathTracerouteState.StateType.BeginFlow:
-                                    {
-                                        byte flow = (byte)state.Parameters[0];
-                                        Program.WriteLine(ConsoleColor.Cyan, "BEGIN-FLOW ", ConsoleColor.Gray, "Index: {0} ID: {1}", flow, result.Flows[flow].Id);
-                                        Program.WriteLine(ConsoleColor.Gray, "           ICMP identifier: 0x{0:X4} ICMP checksum: 0x{1:X4}", result.Flows[flow].IcmpId, result.Flows[flow].IcmpChecksum);
-                                    }
-                                    break;
-                                case MultipathTracerouteState.StateType.EndFlow:
-                                    {
-                                        byte flow = (byte)state.Parameters[0];
-                                        Program.WriteLine(ConsoleColor.Cyan, "END-FLOW ", ConsoleColor.Gray, "Index: {0}", flow);
-                                    }
-                                    break;
-                                case MultipathTracerouteState.StateType.BeginTtl:
-                                    Program.WriteLine(ConsoleColor.Cyan, "BEGIN-TTL ", ConsoleColor.Gray, "TTL: {0}", (byte)state.Parameters[0]);
-                                    break;
-                                case MultipathTracerouteState.StateType.EndTtl:
-                                    Program.WriteLine(ConsoleColor.Cyan, "END-TTL ", ConsoleColor.Gray, "TTL: {0}", (byte)state.Parameters[0]);
-                                    break;
-                                case MultipathTracerouteState.StateType.RequestExpired:
-                                    {
-                                        MultipathTracerouteResult.RequestState requestState = (MultipathTracerouteResult.RequestState)state.Parameters[0];
-                                        Program.WriteLine(ConsoleColor.Magenta, "REQUEST-EXPIRED ", ConsoleColor.Gray, "Type: {0} Timestamp: {1} Timeout: {2} Flow: {3} Attempt: {4} TTL: {5}",
-                                            requestState.Flow, requestState.Timestamp, requestState.Timeout, requestState.Flow, requestState.Attempt, requestState.TimeToLive);
-                                    }
-                                    break;
-                            }
-                        }
-
-                        if (state.Type == MultipathTracerouteState.StateType.EndAlgorithm)
-                        {
-                            this.DisplayIpTracerouteResult(result, (MultipathTraceroute.MultipathAlgorithm)state.Parameters[0]);
-                        }
-                    });
-
-                    // Save the result if requested.
-                    if (null != this.fileSaveIp)
-                    {
-                        using (FileStream file = File.Create(this.fileSaveIp))
-                        {
-                            BinaryFormatter formatter = new BinaryFormatter();
-                            formatter.Serialize(file, resultIp);
+                                }
+                                break;
+                            case MultipathTracerouteState.StateType.PacketError:
+                                Program.WriteLine(ConsoleColor.Red, "PACKET-ERROR ", ConsoleColor.Gray, (state.Parameters[0] as Exception).Message);
+                                break;
+                            case MultipathTracerouteState.StateType.BeginAlgorithm:
+                                Program.WriteLine(ConsoleColor.Cyan, "BEGIN-ALGORITHM ", ConsoleColor.Gray, "Algorithm: {0}", (MultipathTraceroute.MultipathAlgorithm)state.Parameters[0]);
+                                break;
+                            case MultipathTracerouteState.StateType.EndAlgorithm:
+                                Program.WriteLine(ConsoleColor.Cyan, "END-ALGORITHM ", ConsoleColor.Gray, "Algorithm: {0}", (MultipathTraceroute.MultipathAlgorithm)state.Parameters[0]);
+                                break;
+                            case MultipathTracerouteState.StateType.BeginFlow:
+                                {
+                                    byte flow = (byte)state.Parameters[0];
+                                    Program.WriteLine(ConsoleColor.Cyan, "BEGIN-FLOW ", ConsoleColor.Gray, "Index: {0} ID: {1}", flow, result.Flows[flow].Id);
+                                    Program.WriteLine(ConsoleColor.Gray, "           ICMP identifier: 0x{0:X4} ICMP checksum: 0x{1:X4}", result.Flows[flow].IcmpId, result.Flows[flow].IcmpChecksum);
+                                }
+                                break;
+                            case MultipathTracerouteState.StateType.EndFlow:
+                                {
+                                    byte flow = (byte)state.Parameters[0];
+                                    Program.WriteLine(ConsoleColor.Cyan, "END-FLOW ", ConsoleColor.Gray, "Index: {0}", flow);
+                                }
+                                break;
+                            case MultipathTracerouteState.StateType.BeginTtl:
+                                Program.WriteLine(ConsoleColor.Cyan, "BEGIN-TTL ", ConsoleColor.Gray, "TTL: {0}", (byte)state.Parameters[0]);
+                                break;
+                            case MultipathTracerouteState.StateType.EndTtl:
+                                Program.WriteLine(ConsoleColor.Cyan, "END-TTL ", ConsoleColor.Gray, "TTL: {0}", (byte)state.Parameters[0]);
+                                break;
+                            case MultipathTracerouteState.StateType.RequestExpired:
+                                {
+                                    MultipathTracerouteResult.RequestState requestState = (MultipathTracerouteResult.RequestState)state.Parameters[0];
+                                    Program.WriteLine(ConsoleColor.Magenta, "REQUEST-EXPIRED ", ConsoleColor.Gray, "Type: {0} Timestamp: {1} Timeout: {2} Flow: {3} Attempt: {4} TTL: {5}",
+                                        requestState.Flow, requestState.Timestamp, requestState.Timeout, requestState.Flow, requestState.Attempt, requestState.TimeToLive);
+                                }
+                                break;
                         }
                     }
-                    // Run the AS-level traceroute.
-					ASTracerouteResult resultAs = this.tracerouteAs.Run(resultIp, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
-						{
-						});
-				}
-				catch (Exception exception)
-				{
-					Program.WriteLine(ConsoleColor.Red, "ERROR  {0}", exception.Message);
-					return;
-				}
+
+                    // When finishing the algorithm.
+                    if ((state.Type == MultipathTracerouteState.StateType.EndAlgorithm) && !this.flagNoIp)
+                    {
+                        // Display the results.
+                        this.DisplayIpTracerouteResult(result, (MultipathTraceroute.MultipathAlgorithm)state.Parameters[0]);
+                    }
+                });
+
+                // Return the result.
+                return resultIp;
 			}
 		}
 
         /// <summary>
-        /// Load the IP-level traceroute from a file.
+        /// Runs the IP-level traceroute from a file.
         /// </summary>
-        private void RunFile()
+        /// <param name="results">The IP-level traceroute results.</param>
+        private void RunIpFile(MultipathTracerouteResultSet results)
         {
-            MultipathTracerouteResult resultIp;
-
-            // Load the traceroute result from file.
-            using (FileStream file = File.OpenRead(this.fileLoadIp))
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                resultIp = formatter.Deserialize(file) as MultipathTracerouteResult;
-            }
-            
             // Show the local IP address.
-            Program.WriteLine(ConsoleColor.Gray, "Local address..........................", ConsoleColor.Cyan, resultIp.LocalAddress.ToString());
-
-            // Show the remote IP address.f
-            Program.WriteLine(ConsoleColor.Gray, "Remote address.........................", ConsoleColor.Cyan, resultIp.RemoteAddress.ToString());
+            Program.WriteLine(ConsoleColor.Gray, "Local address..........................", ConsoleColor.Cyan, results.Source.ToString());
+            // Show the destination.
+            Program.WriteLine(ConsoleColor.Gray, "Destination............................", ConsoleColor.Cyan, results.Destination);
+            // Show the remote IP addresses.
+            foreach (MultipathTracerouteResult result in results)
+            {
+                Program.WriteLine(ConsoleColor.Gray, "Remote address.........................", ConsoleColor.Cyan, result.RemoteAddress.ToString());
+            }
 
             // Show the traceroute settings.
             Console.WriteLine();
-            Program.WriteLine(ConsoleColor.Gray, "Attempts per flow......................", ConsoleColor.Cyan, resultIp.Settings.AttemptsPerFlow.ToString());
-            Program.WriteLine(ConsoleColor.Gray, "Flow count.............................", ConsoleColor.Cyan, resultIp.Settings.FlowCount.ToString());
-            Program.WriteLine(ConsoleColor.Gray, "Minimum hops...........................", ConsoleColor.Cyan, resultIp.Settings.MinimumHops.ToString());
-            Program.WriteLine(ConsoleColor.Gray, "Maximum hops...........................", ConsoleColor.Cyan, resultIp.Settings.MaximumHops.ToString());
-            Program.WriteLine(ConsoleColor.Gray, "Maximum unknown hops...................", ConsoleColor.Cyan, resultIp.Settings.MaximumUnknownHops.ToString());
-            Program.WriteLine(ConsoleColor.Gray, "Attempt delay (ms).....................", ConsoleColor.Cyan, resultIp.Settings.AttemptDelay.ToString());
-            Program.WriteLine(ConsoleColor.Gray, "Hop timeout (ms).......................", ConsoleColor.Cyan, resultIp.Settings.HopTimeout.ToString());
-            Program.WriteLine(ConsoleColor.Gray, "Data length (bytes)....................", ConsoleColor.Cyan, resultIp.Settings.DataLength.ToString());
+            Program.WriteLine(ConsoleColor.Gray, "Attempts per flow......................", ConsoleColor.Cyan, results.Settings.AttemptsPerFlow.ToString());
+            Program.WriteLine(ConsoleColor.Gray, "Flow count.............................", ConsoleColor.Cyan, results.Settings.FlowCount.ToString());
+            Program.WriteLine(ConsoleColor.Gray, "Minimum hops...........................", ConsoleColor.Cyan, results.Settings.MinimumHops.ToString());
+            Program.WriteLine(ConsoleColor.Gray, "Maximum hops...........................", ConsoleColor.Cyan, results.Settings.MaximumHops.ToString());
+            Program.WriteLine(ConsoleColor.Gray, "Maximum unknown hops...................", ConsoleColor.Cyan, results.Settings.MaximumUnknownHops.ToString());
+            Program.WriteLine(ConsoleColor.Gray, "Attempt delay (ms).....................", ConsoleColor.Cyan, results.Settings.AttemptDelay.ToString());
+            Program.WriteLine(ConsoleColor.Gray, "Hop timeout (ms).......................", ConsoleColor.Cyan, results.Settings.HopTimeout.ToString());
+            Program.WriteLine(ConsoleColor.Gray, "Data length (bytes)....................", ConsoleColor.Cyan, results.Settings.DataLength.ToString());
+
+            // Run the IP-level traceroute.
+            foreach (MultipathTracerouteResult result in results)
+            {
+                this.RunIpFile(result);
+            }
+        }
+
+        /// <summary>
+        /// Runs the IP-level traceroute from a file.
+        /// </summary>
+        /// <param name="resultIp">The IP-level traceroute result.</param>
+        private void RunIpFile(MultipathTracerouteResult resultIp)
+        {
+            // Show the destination.
+            Console.WriteLine();
+            Program.WriteLine(ConsoleColor.Gray, "Traceroute ", ConsoleColor.Green, "{0} <--> {1}", resultIp.LocalAddress, resultIp.RemoteAddress);
 
 			// Show the traceroute result.
-			if ((resultIp.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.Icmp) != 0)
-			{
-				this.DisplayIpTracerouteResult(resultIp, MultipathTraceroute.MultipathAlgorithm.Icmp);
-			}
-			if ((resultIp.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.Udp) != 0)
-			{
-				this.DisplayIpTracerouteResult(resultIp, MultipathTraceroute.MultipathAlgorithm.Udp);
-			}
-			if ((resultIp.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.UdpTest) != 0)
-			{
-				this.DisplayIpTracerouteResult(resultIp, MultipathTraceroute.MultipathAlgorithm.UdpTest);
-			}
-
-			// Create a cancellation token source.
-            using (CancellationTokenSource cancel = new CancellationTokenSource())
+            if (!this.flagNoIp)
             {
-                // Run the AS-level traceroute.
-                ASTracerouteResult resultAs = this.tracerouteAs.Run(resultIp, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
+                if ((resultIp.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.Icmp) != 0)
                 {
-                });
+                    this.DisplayIpTracerouteResult(resultIp, MultipathTraceroute.MultipathAlgorithm.Icmp);
+                }
+                if ((resultIp.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.Udp) != 0)
+                {
+                    this.DisplayIpTracerouteResult(resultIp, MultipathTraceroute.MultipathAlgorithm.Udp);
+                }
+                if ((resultIp.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.UdpTest) != 0)
+                {
+                    this.DisplayIpTracerouteResult(resultIp, MultipathTraceroute.MultipathAlgorithm.UdpTest);
+                }
             }
+
 		}
 
         /// <summary>
@@ -743,12 +765,53 @@ namespace Mercury
 						Console.WriteLine();
 					}
 					break;
-					// Run the AS-level traceroute.
-					//ASTracerouteResult resultAs = this.tracerouteAs.Run(resultIp, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
-					//	{
-					//	});
 			}
 		}
+
+        /// <summary>
+        /// Saves the IP-level traceroute results to a file.
+        /// </summary>
+        /// <param name="results">The results.</param>
+        private void SaveIpResults(MultipathTracerouteResultSet results)
+        {
+            // Save the result if requested.
+            if ((null != this.fileSaveIp) && (null != results))
+            {
+                Program.WriteLine(ConsoleColor.White, "Saving the IP-level traceroute to file: ", ConsoleColor.Magenta, "{0}", this.fileSaveIp);
+
+                using (FileStream file = File.Create(this.fileSaveIp))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(file, results);
+                }
+
+                Program.WriteLine(ConsoleColor.White, "Done.");
+                Console.WriteLine();
+            }
+        }
+
+        /// <summary>
+        /// Loads the IP-level traceroute results from a file.
+        /// </summary>
+        /// <returns>The results.</returns>
+        private MultipathTracerouteResultSet LoadIpResults()
+        {
+            MultipathTracerouteResultSet results;
+
+            // Load the traceroute result from file.
+            Program.WriteLine(ConsoleColor.White, "Loading the IP-level traceroute from file: ", ConsoleColor.Magenta, "{0}", this.fileLoadIp);
+
+            using (FileStream file = File.OpenRead(this.fileLoadIp))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                results = formatter.Deserialize(file) as MultipathTracerouteResultSet;
+            }
+
+            Program.WriteLine(ConsoleColor.White, "Done.");
+            Console.WriteLine();
+
+            return results;
+        }
 
 		/// <summary>
 		/// Indicates whether the argument at the specified index is an option.
@@ -788,6 +851,8 @@ namespace Mercury
 				case "-v": this.verbosity = int.Parse(args[++argumentIndex]); break;
                 case "--ip-in": this.fileLoadIp = args[++argumentIndex]; break;
                 case "--ip-out": this.fileSaveIp = args[++argumentIndex]; break;
+                case "--no-ip": this.flagNoIp = true; break;
+                case "--no-as": this.flagNoAs = true; break;
 				default: throw new ArgumentException("Option {0} unknown.".FormatWith(args[argumentIndex]));
 			}
 		}

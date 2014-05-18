@@ -30,7 +30,11 @@ namespace InetApi.Net.Core
 		/// </summary>
 		public enum StateType
 		{
-			Unknown = -1
+			Unknown = -1,
+            Step1 = 0,
+            Step2 = 1,
+            Step3 = 2,
+            Step4 = 3
 		}
 
 		/// <summary>

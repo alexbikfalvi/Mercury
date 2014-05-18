@@ -27,13 +27,21 @@ namespace Mercury.Topology
 	public sealed class ASTracerouteResult
 	{
         private readonly MultipathTracerouteResult traceroute;
+        private readonly ASTracerouteCallback callback;
+
+        private readonly ASTracerouteState state = new ASTracerouteState();
 
         /// <summary>
         /// Creates a new AS traceroute result.
         /// </summary>
         /// <param name="traceroute">The IP-level traceroute.</param>
-        public ASTracerouteResult(MultipathTracerouteResult traceroute)
+        /// <param name="callback">The callback method.</param>
+        public ASTracerouteResult(MultipathTracerouteResult traceroute, ASTracerouteCallback callback)
         {
+            // Set the callback.
+            this.callback = callback;
+
+            // Create the paths.
             this.PathsStep1 = new ASTraceroutePath[MultipathTracerouteResult.AlgorithmsCount, traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow];
             this.PathsStep2 = new ASTraceroutePath[MultipathTracerouteResult.AlgorithmsCount, traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow];
             this.PathsStep3 = new ASTraceroutePath[MultipathTracerouteResult.AlgorithmsCount, traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow];
@@ -58,6 +66,24 @@ namespace Mercury.Topology
         /// The step 1 AS paths.
         /// </summary>
         public ASTraceroutePath[, ,] PathsStep4 { get; private set; }
+
+        #endregion
+
+        #region Internal methods
+
+        /// <summary>
+        /// Calls the callback method with the specified state and list of parameters.
+        /// </summary>
+        /// <param name="state">The state.</param>
+        /// <param name="parameters">The parameters.</param>
+        internal void Callback(ASTracerouteState.StateType state, params object[] parameters)
+        {
+            // Set the state.
+            this.state.Type = state;
+            this.state.Parameters = parameters;
+            // Call the callback method.
+            if (null != this.callback) this.callback(this, this.state);
+        }
 
         #endregion
     }

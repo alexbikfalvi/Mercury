@@ -92,7 +92,7 @@ namespace Mercury.Topology
             addresses.Add(traceroute.RemoteAddress);
 
             // Create the AS traceroute result.
-            ASTracerouteResult result = new ASTracerouteResult(traceroute);
+            ASTracerouteResult result = new ASTracerouteResult(traceroute, callback);
 
             // Solve the list of IP addresses to AS information and we stored it in cache.
             //List<List<MercuryIpToAsMapping>> mappings = this.cache.Get(addresses);
@@ -166,6 +166,9 @@ namespace Mercury.Topology
                     }
                 }
             }
+
+            // Call the callback method.
+            result.Callback(ASTracerouteState.StateType.Step1);
 
             /*
              * STEP 2: Aggregate hops for the same path.
