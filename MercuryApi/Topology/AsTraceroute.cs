@@ -142,12 +142,12 @@ namespace Mercury.Topology
                                 List<ASInformation> ases = this.cache.Get(traceroute.Data[(byte)algorithm, flow, attempt, ttl].Address);
 
                                 // Add a new hop for the list of ASes.
-                                result.PathsStep1[(byte)algorithm, flow, attempt].AddHop(ases);
+                                result.PathsStep1[(byte)algorithm, flow, attempt].AddHop(ases).IpData = traceroute.Data[(byte)algorithm, flow, attempt, ttl];
                             }
                             else
                             {
                                 // Add a new hop for a missing AS.
-                                result.PathsStep1[(byte)algorithm, flow, attempt].AddHop();
+                                result.PathsStep1[(byte)algorithm, flow, attempt].AddHop().IpData = traceroute.Data[(byte)algorithm, flow, attempt, ttl];
                             }
                         }
 

@@ -71,6 +71,10 @@ namespace Mercury.Topology
         /// </summary>
         public ASTraceroutePath[, ,] PathsStep4 { get; private set; }
         /// <summary>
+        /// Gets the list of flows.
+        /// </summary>
+        public MultipathTracerouteFlow[] Flows { get { return this.traceroute.Flows; } }
+        /// <summary>
         /// The flow count.
         /// </summary>
         public byte FlowCount { get { return this.traceroute.Settings.FlowCount; } }

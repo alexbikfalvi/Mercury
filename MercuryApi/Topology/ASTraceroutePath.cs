@@ -60,7 +60,7 @@ namespace Mercury.Topology
         /// <summary>
         /// Gets the list of hops for the path.
         /// </summary>
-        public IEnumerable<ASTracerouteHop> Hops { get { return this.hops; } }
+        public List<ASTracerouteHop> Hops { get { return this.hops; } }
 
 
         #endregion
@@ -106,18 +106,23 @@ namespace Mercury.Topology
         /// <summary>
         /// Adds a new hop at the end of the path for a missing AS.
         /// </summary>
-        public void AddHop()
+        /// <returns>The hop.</returns>
+        public ASTracerouteHop AddHop()
         {
-            this.hops.Add(new ASTracerouteHop());
+            ASTracerouteHop hop = new ASTracerouteHop();
+            this.hops.Add(hop);
+            return hop;
         }
 
         /// <summary>
         /// Adds a new hop at the end of the path for the list of specified ASes.
         /// </summary>
         /// <param name="list">The list of ASes.</param>
-        public void AddHop(List<ASInformation> list)
+        public ASTracerouteHop AddHop(List<ASInformation> list)
         {
-            this.hops.Add(new ASTracerouteHop(list));
+            ASTracerouteHop hop = new ASTracerouteHop(list);
+            this.hops.Add(hop);
+            return hop;
         }
 
         /*

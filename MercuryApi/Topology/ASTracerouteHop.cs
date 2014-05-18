@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using InetApi.Net.Core;
 using Mercury.Api;
 
 namespace Mercury.Topology
@@ -99,6 +100,10 @@ namespace Mercury.Topology
         /// Gets the set of AS information for this hop.
         /// </summary>
         public IEnumerable<ASInformation> AsSet { get { return this.asSet; } }
+        /// <summary>
+        /// Gets the corresponding IP data.
+        /// </summary>
+        public MultipathTracerouteData IpData { get; internal set; }
 
         #endregion
 

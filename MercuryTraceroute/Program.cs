@@ -843,6 +843,7 @@ namespace Mercury
                         switch (state.Type)
                         {
                             case ASTracerouteState.StateType.Step1:
+                                this.DisplayAsTracerouteStep1(result);
                                 break;
                             case ASTracerouteState.StateType.Step2:
                                 break;
@@ -865,11 +866,94 @@ namespace Mercury
             foreach (MultipathTracerouteResult.ResultAlgorithm algorithm in result.Algorithms)
             {
                 Console.WriteLine();
-                Program.WriteLine(ConsoleColor.Gray, "Protocol...............................", ConsoleColor.Yellow, algorithm.ToString());
+                Program.WriteLine(ConsoleColor.Gray, "Protocol...............................", ConsoleColor.Yellow, algorithm.GetDescription());
                 //Console.WriteLine();
                 //Program.WriteLine(ConsoleColor.Gray, "Flow index.............................", ConsoleColor.Cyan, flow.ToString());
                 //Program.WriteLine(ConsoleColor.Gray, "Flow identifier........................", ConsoleColor.Cyan, result.Flows[flow].Id.ToString());
                 //Program.WriteLine(ConsoleColor.Gray, "Flow short identifier..................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].ShortId);
+
+                // For each flow.
+                for (byte flow = 0; flow < result.FlowCount; flow++)
+                {
+                    Console.WriteLine();
+                    Program.WriteLine(ConsoleColor.Gray, "Flow index.............................", ConsoleColor.Cyan, flow.ToString());
+                    Program.WriteLine(ConsoleColor.Gray, "Flow identifier........................", ConsoleColor.Cyan, result.Flows[flow].Id.ToString());
+                    Program.WriteLine(ConsoleColor.Gray, "Flow short identifier..................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].ShortId);
+                    Console.WriteLine();
+
+                    // Display the results header.
+                    Program.Write(ConsoleColor.White, " TTL ");
+                    for (byte attempt = 0; attempt < result.AttemptCount; attempt++)
+                    {
+                        Program.Write(ConsoleColor.White, "| Attempt {0}AS    ", attempt.ToString().PadRight(8));
+                    }
+                    Console.WriteLine();
+
+                    // Compute the maximum time-to-live.
+                    byte maximumTtl = byte.MinValue;
+                    for (byte attempt = 0; attempt < result.AttemptCount; attempt++)
+                    {
+                        maximumTtl = maximumTtl < (byte)result.PathsStep1[(byte)algorithm, flow, attempt].Hops.Count ?
+                            (byte)result.PathsStep1[(byte)algorithm, flow, attempt].Hops.Count : maximumTtl;
+                    }
+
+                    // Display the hops data.
+                    for (byte ttl = 0; ttl < maximumTtl; ttl++)
+                    {
+                        Program.Write(ConsoleColor.Gray, (this.settingsIp.MinimumHops + ttl).ToString().PadLeft(5));
+                        for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
+                        {
+                            ASTracerouteHop hop = result.PathsStep1[(byte)algorithm, flow, attempt].Hops[ttl];
+                            //Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, ipData.Address.ToString().PadRight(22));
+                            
+                            switch (hop.IpData.State)
+                            {
+                                case MultipathTracerouteData.DataState.NotSet:
+                                    Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkGray, "Not set".PadRight(22));
+                                    break;
+                                case MultipathTracerouteData.DataState.RequestSent:
+                                    Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkGray, "Timeout".PadRight(22));
+                                    break;
+                                case MultipathTracerouteData.DataState.ResponseReceived:
+                                    {
+                                        Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, hop.IpData.Address.ToString().PadRight(16));
+                                        Program.Write(ConsoleColor.Gray, "{0}".FormatWith(hop.AsNumber).PadRight(6));
+                                    }
+                                    break;
+                            }
+                        }
+                        Console.WriteLine();
+                    }
+
+                    // Display the results footer.
+                    Program.Write(ConsoleColor.White, "=====");
+                    for (byte attempt = 0; attempt < result.AttemptCount; attempt++)
+                    {
+                        Program.Write(ConsoleColor.White, "|=======================", attempt.ToString().PadRight(8));
+                    }
+                    Console.WriteLine();
+
+                    /*
+                    // Display the results statistics.
+                    Program.Write(ConsoleColor.White, "     ");
+                    for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
+                    {
+                        switch (result.Statistics[(byte)MultipathTracerouteResult.ResultAlgorithm.Icmp, flow, attempt].State)
+                        {
+                            case MultipathTracerouteStatistics.StatisticsState.Completed:
+                                Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, "Completed".PadRight(22));
+                                break;
+                            case MultipathTracerouteStatistics.StatisticsState.Unreachable:
+                                Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Unreachable".PadRight(22));
+                                break;
+                            default:
+                                Program.Write(ConsoleColor.White, "| ", ConsoleColor.Yellow, "Unknown".PadRight(22));
+                                break;
+                        }
+                    }
+                    Console.WriteLine();
+                     */
+                }
 
             }
         }
