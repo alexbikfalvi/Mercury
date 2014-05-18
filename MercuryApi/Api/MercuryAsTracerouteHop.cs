@@ -59,7 +59,7 @@ namespace Mercury.Api
         /// The AS number.
         /// </summary>
         [JsonProperty("as")]
-        public uint AsNumber { get; private set; }
+        public int AsNumber { get; private set; }
         /// <summary>
         /// The AS name.
         /// </summary>

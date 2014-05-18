@@ -28,7 +28,7 @@ namespace Mercury.Topology
     /// </summary>
     public class ASTracerouteHop
     {
-        private readonly HashSet<uint> ases = new HashSet<uint>();
+        private readonly HashSet<int> ases = new HashSet<int>();
 
         /// <summary>
         /// Creates a new AS traceroute hop for a missing AS.
@@ -75,7 +75,7 @@ namespace Mercury.Topology
         /// <summary>
         /// Returns the final AS number for this hop.
         /// </summary>
-        public uint? AsNumber { get; private set; }
+        public int? AsNumber { get; private set; }
         /// <summary>
         /// Returns the flags for this AS hop.
         /// </summary>

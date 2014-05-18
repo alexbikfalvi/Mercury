@@ -59,7 +59,7 @@ namespace Mercury.Api
         /// <summary>
         /// The AS number.
         /// </summary>
-        public uint AsNumber { get; private set; }
+        public int AsNumber { get; private set; }
         /// <summary>
         /// The AS name.
         /// </summary>

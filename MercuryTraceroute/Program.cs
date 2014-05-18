@@ -186,7 +186,7 @@ namespace Mercury
             }
 
             // Run the AS-level traceroute.
-            //this.RunAs(resultsIp);
+            this.RunAs(resultsIp);
 		}
 
         /// <summary>
@@ -333,7 +333,7 @@ namespace Mercury
 		{
 			// Show the destination.
 			Console.WriteLine();
-			Program.WriteLine(ConsoleColor.Gray, "Traceroute ", ConsoleColor.Green, "{0} <--> {1}", localAddress, remoteAddress);
+			Program.WriteLine(ConsoleColor.Gray, "IP Traceroute ", ConsoleColor.Magenta, "{0} <--> {1}", localAddress, remoteAddress);
 
 			// Create a cancellation token source.
 			using (CancellationTokenSource cancel = new CancellationTokenSource())
@@ -459,7 +459,7 @@ namespace Mercury
         {
             // Show the destination.
             Console.WriteLine();
-            Program.WriteLine(ConsoleColor.Gray, "Traceroute ", ConsoleColor.Green, "{0} <--> {1}", resultIp.LocalAddress, resultIp.RemoteAddress);
+            Program.WriteLine(ConsoleColor.Gray, "IP Traceroute ", ConsoleColor.Magenta, "{0} <--> {1}", resultIp.LocalAddress, resultIp.RemoteAddress);
 
 			// Show the traceroute result.
             if (!this.flagNoIp)
@@ -811,6 +811,67 @@ namespace Mercury
             Console.WriteLine();
 
             return results;
+        }
+
+        /// <summary>
+        /// Runs the AS-level traceroute.
+        /// </summary>
+        /// <param name="resultsIp">The IP-level traceroute results.</param>
+        private void RunAs(MultipathTracerouteResultSet resultsIp)
+        {
+            foreach (MultipathTracerouteResult result in resultsIp)
+            {
+                this.RunAs(result);
+            }
+        }
+
+        /// <summary>
+        /// Runs the AS-level traceroute.
+        /// </summary>
+        /// <param name="resultIp">The IP-level traceroute result.</param>
+        private void RunAs(MultipathTracerouteResult resultIp)
+        {
+            // Show the destination.
+            Console.WriteLine();
+            Program.WriteLine(ConsoleColor.Gray, "AS Traceroute ", ConsoleColor.Magenta, "{0} <--> {1}", resultIp.LocalAddress, resultIp.RemoteAddress);
+
+            using (CancellationTokenSource cancel = new CancellationTokenSource())
+            {
+                // Run an AS-level traceroute.
+                ASTracerouteResult resultAs = this.tracerouteAs.Run(resultIp, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
+                    {
+                        switch (state.Type)
+                        {
+                            case ASTracerouteState.StateType.Step1:
+                                break;
+                            case ASTracerouteState.StateType.Step2:
+                                break;
+                            case ASTracerouteState.StateType.Step3:
+                                break;
+                            case ASTracerouteState.StateType.Step4:
+                                break;
+                        }
+                    });
+            }
+        }
+
+        /// <summary>
+        /// Displays the step 1 for the AS level traceroute.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        private void DisplayAsTracerouteStep1(ASTracerouteResult result)
+        {
+            // For each algorithm.
+            foreach (MultipathTracerouteResult.ResultAlgorithm algorithm in result.Algorithms)
+            {
+                Console.WriteLine();
+                Program.WriteLine(ConsoleColor.Gray, "Protocol...............................", ConsoleColor.Yellow, algorithm.ToString());
+                //Console.WriteLine();
+                //Program.WriteLine(ConsoleColor.Gray, "Flow index.............................", ConsoleColor.Cyan, flow.ToString());
+                //Program.WriteLine(ConsoleColor.Gray, "Flow identifier........................", ConsoleColor.Cyan, result.Flows[flow].Id.ToString());
+                //Program.WriteLine(ConsoleColor.Gray, "Flow short identifier..................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].ShortId);
+
+            }
         }
 
 		/// <summary>

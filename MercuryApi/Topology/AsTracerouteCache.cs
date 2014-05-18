@@ -35,8 +35,8 @@ namespace Mercury.Topology
 
         private readonly Dictionary<IPAddress, List<MercuryAsInformation>> ipMapping =
             new Dictionary<IPAddress, List<MercuryAsInformation>>();
-        private readonly Dictionary<uint, MercuryAsInformation> asMapping =
-            new Dictionary<uint, MercuryAsInformation>();
+        private readonly Dictionary<int, MercuryAsInformation> asMapping =
+            new Dictionary<int, MercuryAsInformation>();
 
 		/// <summary>
 		/// Creates a new AS traceroute cache.

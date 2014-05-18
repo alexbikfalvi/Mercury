@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using InetApi.Net.Core;
 
 namespace Mercury.Topology
@@ -38,6 +39,9 @@ namespace Mercury.Topology
         /// <param name="callback">The callback method.</param>
         public ASTracerouteResult(MultipathTracerouteResult traceroute, ASTracerouteCallback callback)
         {
+            // Set the traceroute.
+            this.traceroute = traceroute;
+
             // Set the callback.
             this.callback = callback;
 
@@ -66,6 +70,18 @@ namespace Mercury.Topology
         /// The step 1 AS paths.
         /// </summary>
         public ASTraceroutePath[, ,] PathsStep4 { get; private set; }
+        /// <summary>
+        /// The flow count.
+        /// </summary>
+        public byte FlowCount { get { return this.traceroute.Settings.FlowCount; } }
+        /// <summary>
+        /// The attempt count.
+        /// </summary>
+        public byte AttemptCount { get { return this.traceroute.Settings.AttemptsPerFlow; } }
+        /// <summary>
+        /// The multipath algorithms.
+        /// </summary>
+        public IEnumerable<MultipathTracerouteResult.ResultAlgorithm> Algorithms { get { return this.traceroute.Algorithms; } }
 
         #endregion
 
