@@ -172,7 +172,7 @@ namespace Mercury.Services
         }
 
 
-
+        /*
         public static MercuryAsTraceroute generateTracerouteAS()
         {
 
@@ -208,6 +208,7 @@ namespace Mercury.Services
             return tas;
 
         }
+         */
 
         public static String addTracerouteAS(MercuryAsTraceroute tracerouteAS)
         {

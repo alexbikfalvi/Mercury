@@ -28,17 +28,6 @@ namespace Mercury.Api
     public class MercuryAsTracerouteHop
     {
         /// <summary>
-        /// The hop type.
-        /// </summary>
-        public enum HopType
-        {
-            [JsonEnum("AS")]
-            As,
-            [JsonEnum("IXP")]
-            Ixp
-        };
-
-        /// <summary>
         /// Private constructor.
         /// </summary>
         public MercuryAsTracerouteHop() { }
@@ -47,18 +36,15 @@ namespace Mercury.Api
         /// Creates a new traceroute hop instance.
         /// </summary>
         /// <param name="hop">The hop index.</param>
-        /// <param name="asNumber">The AS number.</param>
-        /// <param name="asName">The AS name.</param>
-        /// <param name="ixpName">The IXP name.</param>
-        /// <param name="type">The hop type.</param>
+        /// <param name="infos">The AS information.</param>
         /// <param name="isInferred">Indicates whether the hop AS is inferred.</param>
-        public MercuryAsTracerouteHop(byte hop, int asNumber, string asName, string ixpName, HopType type, bool isInferred)
+        public MercuryAsTracerouteHop(byte hop, MercuryAsInformation info, bool isInferred)
         {
             this.Hop = hop;
-            this.AsNumber = asNumber;
-            this.AsName = asName;
-            this.IxpName = ixpName;
-            this.Type = type;
+            this.AsNumber = info.AsNumber;
+            this.AsName = info.AsName;
+            this.IxpName = info.IxpName;
+            this.Type = info.Type;
             this.IsInferred = isInferred;
         }
 
@@ -73,7 +59,7 @@ namespace Mercury.Api
         /// The AS number.
         /// </summary>
         [JsonProperty("as")]
-        public int AsNumber { get; private set; }
+        public uint AsNumber { get; private set; }
         /// <summary>
         /// The AS name.
         /// </summary>
@@ -89,7 +75,7 @@ namespace Mercury.Api
         /// </summary>
         [JsonConverter(typeof(JsonEnumConverter))]
         [JsonProperty("type")]
-        public HopType Type { get; private set; }
+        public MercuryAsInformation.AsType Type { get; private set; }
         /// <summary>
         /// Indicates if we use an heuristic to determine what is the most suitable AS.
         /// </summary>

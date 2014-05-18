@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Mercury.Api;
 
 namespace Mercury.Topology
@@ -27,15 +28,54 @@ namespace Mercury.Topology
     /// </summary>
     public class ASTracerouteHop
     {
-        //key=ASnumber, value=MercuryAsTracerouteHop
-        public Dictionary<int, MercuryAsTracerouteHop> candidates = new Dictionary<int, MercuryAsTracerouteHop>();
+        private readonly HashSet<uint> ases = new HashSet<uint>();
+
+        /// <summary>
+        /// Creates a new AS traceroute hop for a missing AS.
+        /// </summary>
+        public ASTracerouteHop()
+        {
+            this.AsNumber = null;
+            this.Flags = ASTracerouteFlags.MissingAs;
+        }
+
+        /// <summary>
+        /// Creates a new AS traceroute hop from the list of specified AS information.
+        /// </summary>
+        /// <param name="list">A list of AS information.</param>
+        public ASTracerouteHop(IEnumerable<MercuryAsInformation> list)
+        {
+            // Set the list of ASes.
+            foreach (MercuryAsInformation info in list)
+            {
+                this.ases.Add(info.AsNumber);
+            }
+            if (0 == this.ases.Count)
+            {
+                // If the hop has no ASes.
+                this.AsNumber = null;
+                this.Flags = ASTracerouteFlags.MissingAs;
+            }
+            else if (1 == this.ases.Count)
+            {
+                // If the hop as one AS.
+                this.AsNumber = this.ases.First();
+                this.Flags = ASTracerouteFlags.None;
+            }
+            else
+            {
+                // If the hop has multiple ASes.
+                this.AsNumber = null;
+                this.Flags = ASTracerouteFlags.MultipleAs;
+            }
+        }
 
         #region Public properties
 
         /// <summary>
         /// Returns the final AS number for this hop.
         /// </summary>
-        public int AsNumber { get; private set; }
+        public uint? AsNumber { get; private set; }
         /// <summary>
         /// Returns the flags for this AS hop.
         /// </summary>
@@ -97,6 +137,7 @@ namespace Mercury.Topology
             return this.AsNumber.GetHashCode() ^ this.IsSuccessful.GetHashCode();
         }
 
+        /*
         public bool isMissing(ASTracerouteHop hop2)
         {
             if (candidates.Count == 0 && hop2.candidates.Count == 0)
@@ -265,6 +306,7 @@ namespace Mercury.Topology
             }
             return null;
         }
+         */
 
         #endregion
     }

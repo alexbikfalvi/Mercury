@@ -38,6 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\MercuryAsInformation.cs" />
     <Compile Include="Api\MercuryAsTracerouteStats.cs" />
     <Compile Include="Api\MercuryIpToAsMapping.cs" />
     <Compile Include="Api\MercuryIpToGeoMapping.cs" />

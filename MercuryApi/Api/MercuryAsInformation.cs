@@ -17,74 +17,81 @@
  */
 
 using System;
-using System.Net;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Mercury.Json;
 
 namespace Mercury.Api
 {
     /// <summary>
-    /// A class for an IP to AS mapping.
+    /// A class that stores AS information.
     /// </summary>
-    public class MercuryIpToAsMapping
+    public class MercuryAsInformation
     {
-        [JsonProperty("ip")]
-        private string address = IPAddress.Any.ToString();
+        /// <summary>
+        /// The AS type.
+        /// </summary>
+        public enum AsType
+        {
+            [JsonEnum("AS")]
+            As,
+            [JsonEnum("IXP")]
+            Ixp
+        };
+
+        /// <summary>
+        /// Creates a new AS information from the specified IP to AS mapping.
+        /// </summary>
+        /// <param name="mapping">The IP to AS mapping.</param>
+        public MercuryAsInformation(MercuryIpToAsMapping mapping)
+        {
+            this.AsNumber = mapping.AsNumber;
+            this.AsName = mapping.AsName;
+            this.RangeLow = mapping.RangeLow;
+            this.RangeHigh = mapping.RangeHigh;
+            this.Count = mapping.Count;
+            this.Prefix = mapping.Prefix;
+            this.IxpName = mapping.IxpName;
+            this.Timestamp = mapping.Timestamp;
+            this.Type = mapping.Type;
+        }
 
         #region Public properties
 
         /// <summary>
         /// The AS number.
         /// </summary>
-        [JsonProperty("as")]
         public uint AsNumber { get; private set; }
         /// <summary>
         /// The AS name.
         /// </summary>
-        [JsonProperty("asName")]
-	    public string AsName { get; private set; }
+        public string AsName { get; private set; }
         /// <summary>
         /// The lower boundary of the IPv4 address range.
         /// </summary>
-	    [JsonProperty("rangeLow")]
         public uint RangeLow { get; private set; }
         /// <summary>
         /// The upper boundary of the IPv4 address range.
         /// </summary>
-        [JsonProperty("rangeHigh")]
-	    public uint RangeHigh { get; private set; }
+        public uint RangeHigh { get; private set; }
         /// <summary>
         /// The number of IP addresses.
         /// </summary>
-        [JsonProperty("numIps")]
-	    public uint Count { get; private set; }
+        public uint Count { get; private set; }
         /// <summary>
         /// The subnetwork prefix.
         /// </summary>
-        [JsonProperty("prefix")]
-	    public string Prefix { get; private set; }
+        public string Prefix { get; private set; }
         /// <summary>
         /// The IXP name.
         /// </summary>
-        [JsonProperty("ixpName")]
-	    public string IxpName { get; private set; }
+        public string IxpName { get; private set; }
         /// <summary>
         /// The information timestamp.
         /// </summary>
-        [JsonProperty("timeStamp")]
-        [JsonConverter(typeof(IsoDateTimeConverter))]
         public DateTime Timestamp { get; private set; }
         /// <summary>
-        /// The mapping type.
+        /// The AS type.
         /// </summary>
-        [JsonProperty("type")]
-        [JsonConverter(typeof(JsonEnumConverter))]
-        public MercuryAsInformation.AsType Type { get; private set; }
-        /// <summary>
-        /// The mapping request address.
-        /// </summary>
-        public IPAddress Address { get { return IPAddress.Parse(this.address); } }
+        public AsType Type { get; private set; }
 
         #endregion
     }

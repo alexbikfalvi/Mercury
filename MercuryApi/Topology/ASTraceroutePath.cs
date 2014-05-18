@@ -27,7 +27,7 @@ namespace Mercury.Topology
     /// </summary>
     public class ASTraceroutePath
     {
-        public readonly List<ASTracerouteHop> hops = new List<ASTracerouteHop>();
+        private readonly List<ASTracerouteHop> hops = new List<ASTracerouteHop>();
 
         /// <summary>
         /// Creates an empty AS traceroute path.
@@ -96,6 +96,24 @@ namespace Mercury.Topology
 
         #region Public methods
 
+        /// <summary>
+        /// Adds a new hop at the end of the path for a missing AS.
+        /// </summary>
+        public void AddHop()
+        {
+            this.hops.Add(new ASTracerouteHop());
+        }
+
+        /// <summary>
+        /// Adds a new hop at the end of the path for the list of specified ASes.
+        /// </summary>
+        /// <param name="list">The list of ASes.</param>
+        public void AddHop(List<MercuryAsInformation> list)
+        {
+            this.hops.Add(new ASTracerouteHop(list));
+        }
+
+        /*
         public void addHopsAtBegining(List<MercuryAsTracerouteHop> asHops)
         {
             Dictionary<int, MercuryAsTracerouteHop> dictionary = new Dictionary<int, MercuryAsTracerouteHop>();
@@ -121,6 +139,7 @@ namespace Mercury.Topology
             h.candidates = dictionary;
             this.hops.Add(h);
         }
+         */
 
         /// <summary>
         /// Compares this AS traceroute path for equality.

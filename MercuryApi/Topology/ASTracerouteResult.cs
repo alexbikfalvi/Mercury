@@ -17,6 +17,7 @@
  */
 
 using System;
+using InetApi.Net.Core;
 
 namespace Mercury.Topology
 {
@@ -25,5 +26,39 @@ namespace Mercury.Topology
 	/// </summary>
 	public sealed class ASTracerouteResult
 	{
-	}
+        private readonly MultipathTracerouteResult traceroute;
+
+        /// <summary>
+        /// Creates a new AS traceroute result.
+        /// </summary>
+        /// <param name="traceroute">The IP-level traceroute.</param>
+        public ASTracerouteResult(MultipathTracerouteResult traceroute)
+        {
+            this.PathsStep1 = new ASTraceroutePath[MultipathTracerouteResult.AlgorithmsCount, traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow];
+            this.PathsStep2 = new ASTraceroutePath[MultipathTracerouteResult.AlgorithmsCount, traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow];
+            this.PathsStep3 = new ASTraceroutePath[MultipathTracerouteResult.AlgorithmsCount, traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow];
+            this.PathsStep4 = new ASTraceroutePath[MultipathTracerouteResult.AlgorithmsCount, traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow];
+        }
+
+        #region Public properties
+
+        /// <summary>
+        /// The step 1 AS paths.
+        /// </summary>
+        public ASTraceroutePath[, ,] PathsStep1 { get; private set; }
+        /// <summary>
+        /// The step 1 AS paths.
+        /// </summary>
+        public ASTraceroutePath[, ,] PathsStep2 { get; private set; }
+        /// <summary>
+        /// The step 1 AS paths.
+        /// </summary>
+        public ASTraceroutePath[, ,] PathsStep3 { get; private set; }
+        /// <summary>
+        /// The step 1 AS paths.
+        /// </summary>
+        public ASTraceroutePath[, ,] PathsStep4 { get; private set; }
+
+        #endregion
+    }
 }

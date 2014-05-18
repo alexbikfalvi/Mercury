@@ -493,7 +493,8 @@ namespace Mercury
 						byte maximumTtl = byte.MinValue;
 						for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 						{
-							maximumTtl = maximumTtl < result.IcmpStatistics[flow, attempt].MaximumTimeToLive ? result.IcmpStatistics[flow, attempt].MaximumTimeToLive : maximumTtl;
+							maximumTtl = maximumTtl < result.Statistics[(byte)MultipathTracerouteResult.ResultAlgorithm.Icmp, flow, attempt].MaximumTimeToLive ?
+                                result.Statistics[(byte)MultipathTracerouteResult.ResultAlgorithm.Icmp, flow, attempt].MaximumTimeToLive : maximumTtl;
 						}
 
 						// Display the hops data.
@@ -502,7 +503,7 @@ namespace Mercury
 							Program.Write(ConsoleColor.Gray, (this.settingsIp.MinimumHops + ttl).ToString().PadLeft(5));
 							for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 							{
-								switch (result.IcmpData[flow, ttl, attempt].State)
+								switch (result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Icmp, flow, attempt, ttl].State)
 								{
 									case MultipathTracerouteData.DataState.NotSet:
 										Program.Write(ConsoleColor.White, "| ", ConsoleColor.Yellow, "Not set".PadRight(22));
@@ -512,8 +513,8 @@ namespace Mercury
 										break;
 									case MultipathTracerouteData.DataState.ResponseReceived:
 										{
-											int rtt = (int)(result.IcmpData[flow, ttl, attempt].ResponseTimestamp - result.IcmpData[flow, ttl, attempt].RequestTimestamp).TotalMilliseconds;
-											Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, result.IcmpData[flow, ttl, attempt].Address.ToString().PadRight(16));
+											int rtt = (int)(result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Icmp, flow, attempt, ttl].ResponseTimestamp - result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Icmp, flow, attempt, ttl].RequestTimestamp).TotalMilliseconds;
+											Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Icmp, flow, attempt, ttl].Address.ToString().PadRight(16));
 											Program.Write(ConsoleColor.Gray, "({0})".FormatWith(rtt).PadRight(6));
 										}
 										break;
@@ -534,7 +535,7 @@ namespace Mercury
 						Program.Write(ConsoleColor.White, "     ");
 						for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 						{
-							switch (result.IcmpStatistics[flow, attempt].State)
+							switch (result.Statistics[(byte)MultipathTracerouteResult.ResultAlgorithm.Icmp, flow, attempt].State)
 							{
 								case MultipathTracerouteStatistics.StatisticsState.Completed:
 									Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, "Completed".PadRight(22));
@@ -577,7 +578,8 @@ namespace Mercury
 						byte maximumTtl = byte.MinValue;
 						for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 						{
-							maximumTtl = maximumTtl < result.UdpStatistics[flow, attempt].MaximumTimeToLive ? result.UdpStatistics[flow, attempt].MaximumTimeToLive : maximumTtl;
+							maximumTtl = maximumTtl < result.Statistics[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt].MaximumTimeToLive ?
+                                result.Statistics[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt].MaximumTimeToLive : maximumTtl;
 						}
 
 						// Display the hops data.
@@ -586,7 +588,7 @@ namespace Mercury
 							Program.Write(ConsoleColor.Gray, (this.settingsIp.MinimumHops + ttl).ToString().PadLeft(5));
 							for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 							{
-								switch (result.UdpData[flow, ttl, attempt].State)
+								switch (result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt, ttl].State)
 								{
 									case MultipathTracerouteData.DataState.NotSet:
 										Program.Write(ConsoleColor.White, "| ", ConsoleColor.Yellow, "Not set".PadRight(22));
@@ -596,8 +598,8 @@ namespace Mercury
 										break;
 									case MultipathTracerouteData.DataState.ResponseReceived:
 										{
-											int rtt = (int)(result.UdpData[flow, ttl, attempt].ResponseTimestamp - result.UdpData[flow, ttl, attempt].RequestTimestamp).TotalMilliseconds;
-											Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, result.UdpData[flow, ttl, attempt].Address.ToString().PadRight(16));
+											int rtt = (int)(result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt, ttl].ResponseTimestamp - result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt, ttl].RequestTimestamp).TotalMilliseconds;
+											Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt, ttl].Address.ToString().PadRight(16));
 											Program.Write(ConsoleColor.Gray, "({0})".FormatWith(rtt).PadRight(6));
 										}
 										break;
@@ -618,7 +620,7 @@ namespace Mercury
 						Program.Write(ConsoleColor.White, "     ");
 						for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 						{
-							switch (result.UdpStatistics[flow, attempt].State)
+							switch (result.Statistics[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt].State)
 							{
 								case MultipathTracerouteStatistics.StatisticsState.Completed:
 									Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, "Completed".PadRight(22));
@@ -661,7 +663,8 @@ namespace Mercury
 						byte maximumTtl = byte.MinValue;
 						for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 						{
-							maximumTtl = maximumTtl < result.UdpStatistics[flow, attempt].MaximumTimeToLive ? result.UdpStatistics[flow, attempt].MaximumTimeToLive : maximumTtl;
+							maximumTtl = maximumTtl < result.Statistics[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt].MaximumTimeToLive ?
+                                result.Statistics[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt].MaximumTimeToLive : maximumTtl;
 						}
 
 						// Display the hops data.
@@ -670,7 +673,7 @@ namespace Mercury
 							Program.Write(ConsoleColor.Gray, (this.settingsIp.MinimumHops + ttl).ToString().PadLeft(5));
 							for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 							{
-								switch (result.UdpData[flow, ttl, attempt].State)
+								switch (result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt, ttl].State)
 								{
 									case MultipathTracerouteData.DataState.NotSet:
 										Program.Write(ConsoleColor.White, "| ", ConsoleColor.Yellow, "Not set".PadRight(22));
@@ -680,11 +683,11 @@ namespace Mercury
 										break;
 									case MultipathTracerouteData.DataState.ResponseReceived:
 										{
-											int rtt = (int)(result.UdpData[flow, ttl, attempt].ResponseTimestamp - result.UdpData[flow, ttl, attempt].RequestTimestamp).TotalMilliseconds;
+											int rtt = (int)(result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt, ttl].ResponseTimestamp - result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt, ttl].RequestTimestamp).TotalMilliseconds;
 
-											if (result.UdpData[flow, ttl, attempt].Response.Payload is ProtoPacketIcmpTimeExceeded)
+											if (result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt, ttl].Response.Payload is ProtoPacketIcmpTimeExceeded)
 											{
-												ProtoPacketIcmpTimeExceeded icmpTimeExceeded = result.UdpData[flow, ttl, attempt].Response.Payload as ProtoPacketIcmpTimeExceeded;
+												ProtoPacketIcmpTimeExceeded icmpTimeExceeded = result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt, ttl].Response.Payload as ProtoPacketIcmpTimeExceeded;
 												ushort identification = icmpTimeExceeded.IpHeader.Identification;
 												ushort checksum = (ushort)((icmpTimeExceeded.IpPayload[6] << 8) | icmpTimeExceeded.IpPayload[7]);
 
@@ -693,9 +696,9 @@ namespace Mercury
 													identification == checksum ? "==" : "!=",
 													checksum.ToString("X4").PadRight(4));
 											}
-											else if (result.UdpData[flow, ttl, attempt].Response.Payload is ProtoPacketIcmpDestinationUnreachable)
+											else if (result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt, ttl].Response.Payload is ProtoPacketIcmpDestinationUnreachable)
 											{
-												ProtoPacketIcmpDestinationUnreachable icmpTimeExceeded = result.UdpData[flow, ttl, attempt].Response.Payload as ProtoPacketIcmpDestinationUnreachable;
+												ProtoPacketIcmpDestinationUnreachable icmpTimeExceeded = result.Data[(byte)MultipathTracerouteResult.ResultAlgorithm.Udp, flow, attempt, ttl].Response.Payload as ProtoPacketIcmpDestinationUnreachable;
 												ushort identification = icmpTimeExceeded.IpHeader.Identification;
 												ushort checksum = (ushort)((icmpTimeExceeded.IpPayload[6] << 8) | icmpTimeExceeded.IpPayload[7]);
 
@@ -727,7 +730,7 @@ namespace Mercury
 						Program.Write(ConsoleColor.White, "     ");
 						for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
 						{
-							switch (result.IcmpStatistics[flow, attempt].State)
+							switch (result.Statistics[(byte)MultipathTracerouteResult.ResultAlgorithm.Icmp, flow, attempt].State)
 							{
 								case MultipathTracerouteStatistics.StatisticsState.Completed:
 									Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, "Completed".PadRight(22));
