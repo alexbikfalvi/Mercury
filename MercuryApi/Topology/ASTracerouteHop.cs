@@ -169,6 +169,7 @@ namespace Mercury.Topology
             return this.asSet.First() == hop.asSet.First();
         }
 
+        /*
         /// <summary>
         /// Verifies if the current hop is equally unique to multiple to the specified hop.
         /// </summary>
@@ -194,7 +195,7 @@ namespace Mercury.Topology
             return set.Contains(info, new IEqualityComparer<ASInformation>());
         }
 
-        /*
+        
         public bool isMissing(ASTracerouteHop hop2)
         {
             if (candidates.Count == 0 && hop2.candidates.Count == 0)

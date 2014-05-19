@@ -132,14 +132,14 @@ namespace Mercury.Topology
         /// <param name="list">The AS list.</param>
         public void AddSource(List<ASInformation> list)
         {
-            this.hops.Insert(0, new ASTracerouteHop(list))
+            this.hops.Insert(0, new ASTracerouteHop(list));
         }
 
         /// <summary>
         /// Adds a destination hop.
         /// </summary>
         /// <param name="list">The AS list.</param>
-        public void AddDestionation(List<ASInformation> list)
+        public void AddDestination(List<ASInformation> list)
         {
             this.hops.Add(new ASTracerouteHop(list));
         }
