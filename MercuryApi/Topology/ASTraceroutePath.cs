@@ -36,6 +36,7 @@ namespace Mercury.Topology
         /// </summary>
         public ASTraceroutePath()
         {
+            this.Flags = ASTracerouteFlags.None;
         }
 
         /// <summary>
@@ -125,33 +126,23 @@ namespace Mercury.Topology
             return hop;
         }
 
-        /*
-        public void addHopsAtBegining(List<MercuryAsTracerouteHop> asHops)
+        /// <summary>
+        /// Adds a source hop.
+        /// </summary>
+        /// <param name="list">The AS list.</param>
+        public void AddSource(List<ASInformation> list)
         {
-            Dictionary<int, MercuryAsTracerouteHop> dictionary = new Dictionary<int, MercuryAsTracerouteHop>();
-            //First we remove duplicate multiple ases
-            foreach (MercuryAsTracerouteHop hop in asHops)
-            {
-                dictionary[hop.AsNumber] = hop;
-            }
-            ASTracerouteHop h = new ASTracerouteHop();
-            h.candidates = dictionary;
-            this.hops.Insert(0, h);
+            this.hops.Insert(0, new ASTracerouteHop(list))
         }
 
-        public void addHopsAtEnd(List<MercuryAsTracerouteHop> asHops)
+        /// <summary>
+        /// Adds a destination hop.
+        /// </summary>
+        /// <param name="list">The AS list.</param>
+        public void AddDestionation(List<ASInformation> list)
         {
-            Dictionary<int, MercuryAsTracerouteHop> dictionary = new Dictionary<int, MercuryAsTracerouteHop>();
-            //First we remove duplicate multiple ases
-            foreach (MercuryAsTracerouteHop hop in asHops)
-            {
-                dictionary[hop.AsNumber] = hop;
-            }
-            ASTracerouteHop h = new ASTracerouteHop();
-            h.candidates = dictionary;
-            this.hops.Add(h);
+            this.hops.Add(new ASTracerouteHop(list));
         }
-         */
 
         /// <summary>
         /// Compares this AS traceroute path for equality.

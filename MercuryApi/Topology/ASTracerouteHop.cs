@@ -99,7 +99,7 @@ namespace Mercury.Topology
         /// <summary>
         /// Gets the set of AS information for this hop.
         /// </summary>
-        public IEnumerable<ASInformation> AsSet { get { return this.asSet; } }
+        public HashSet<ASInformation> AsSet { get { return this.asSet; } }
         /// <summary>
         /// Gets the corresponding IP data.
         /// </summary>
@@ -155,6 +155,43 @@ namespace Mercury.Topology
         public override int GetHashCode()
         {
             return this.AsNumber.GetHashCode() ^ this.IsSuccessful.GetHashCode();
+        }
+
+        /// <summary>
+        /// Verifies if the current hop is equally unique to the specified hop.
+        /// </summary>
+        /// <param name="hop">The other hop.</param>
+        /// <returns><b>True</b> if the hops are equally unique, <b>false</b> otherwise.</returns>
+        public bool IsEqualUnique(ASTracerouteHop hop)
+        {
+            if (this.asSet.Count != 1) return false;
+            if (hop.asSet.Count != 1) return false;
+            return this.asSet.First() == hop.asSet.First();
+        }
+
+        /// <summary>
+        /// Verifies if the current hop is equally unique to multiple to the specified hop.
+        /// </summary>
+        /// <param name="hop">The hop.</param>
+        /// <param name="info">The equal AS information.</param>
+        /// <returns><b>True</b> if the hops are equal, <b>false</b> otherwise.</returns>
+        public bool IsEqualUniqueToMultiple(ASTracerouteHop hop, out ASInformation info)
+        {
+            HashSet<ASInformation> set;
+            info = null;
+            if (this.asSet.Count == 1)
+            {
+                info = this.asSet.First();
+                set = hop.asSet;
+            }
+            else if (hop.asSet.Count == 1)
+            {
+                info = hop.asSet.First();
+                set = this.asSet;
+            }
+            else return false;
+
+            return set.Contains(info, new IEqualityComparer<ASInformation>());
         }
 
         /*

@@ -60,11 +60,6 @@ namespace Mercury.Topology
 		/// <returns>The AS-level traceroute.</returns>
 		public ASTracerouteResult Run(MultipathTracerouteResult traceroute, CancellationToken cancel, ASTracerouteCallback callback)
 		{
-            // Create the list of algorithms.
-            List<byte> algorithms = new List<byte>();
-            if ((traceroute.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.Icmp) != 0) algorithms.Add(0);
-            if ((traceroute.Settings.Algorithm & MultipathTraceroute.MultipathAlgorithm.Udp) != 0) algorithms.Add(1);
-
             // Create a list of IP addresses.
             HashSet<IPAddress> addresses = new HashSet<IPAddress>();
 
@@ -93,6 +88,11 @@ namespace Mercury.Topology
 
             // Create the AS traceroute result.
             ASTracerouteResult result = new ASTracerouteResult(traceroute, callback);
+
+            // Get the local AS information.
+            List<ASInformation> sourceAsList = this.cache.Get(localInformation.Address);
+            // Get the remote AS information.
+            List<ASInformation> destinationAsList = this.cache.Get(traceroute.RemoteAddress);
 
             // Solve the list of IP addresses to AS information and we stored it in cache.
             //List<List<MercuryIpToAsMapping>> mappings = this.cache.Get(addresses);
@@ -150,19 +150,6 @@ namespace Mercury.Topology
                                 result.PathsStep1[(byte)algorithm, flow, attempt].AddHop().IpData = traceroute.Data[(byte)algorithm, flow, attempt, ttl];
                             }
                         }
-
-                        /*
-                        //Here we add the publicAddress
-                        pathsStep1[flow, attempt, 0].addHopsAtBegining(publicHops); //ICMP
-                        pathsStep1[flow, attempt, 1].addHopsAtBegining(publicHops); //UDP
-                        //Here we add the remoteAddress
-                        foreach (MercuryIpToAsMapping map in remoteMaps)
-                        {
-                            remoteHops.Add(new MercuryAsTracerouteHop(traceroute.UdpStatistics[flow, attempt].MaximumTimeToLive, map.AsNumber, map.AsName, map.IxpName, map.Type, false));
-                        }
-                        pathsStep1[flow, attempt, 0].addHopsAtEnd(remoteHops); //ICMP
-                        pathsStep1[flow, attempt, 1].addHopsAtEnd(remoteHops); //UDP
-                        */
                     }
                 }
             }
@@ -174,24 +161,24 @@ namespace Mercury.Topology
              * STEP 2: Aggregate hops for the same path.
              */
 
-            /*
-            int flows = pathsStep1.GetLength(0);
-            int attemptsPerFlow = pathsStep1.GetLength(1);
-            ASTraceroutePath[, ,] pathsStep2 = new ASTraceroutePath[flows, attemptsPerFlow, 2];
-            //ASTraceroutePath[, ,] pathsAggrAS2 = new ASTraceroutePath[flows, attemptsPerFlow, algorithms];
-
-            //List<MercuryAsTraceroute> tracerouteASes = new List<MercuryAsTraceroute>();
-            foreach (byte algorithm in algorithms)
+            // For each algorithm.
+            foreach (MultipathTracerouteResult.ResultAlgorithm algorithm in traceroute.Algorithms)
             {
-                for (int flow = 0; flow < flows; flow++)
+                // For each flow.
+                for (byte flow = 0; flow < traceroute.Settings.FlowCount; flow++)
                 {
-                    for (int attempt = 0; attempt < attemptsPerFlow; attempt++)
+                    // For each attempt.
+                    for (byte attempt = 0; attempt < traceroute.Settings.AttemptsPerFlow; attempt++)
                     {
-                        pathsStep2[flow, attempt, algorithm] = aggregateHops(pathsStep1[flow, attempt, algorithm]);
+                        // Add the source AS.
+                        result.PathsStep1[(byte)algorithm, flow, attempt].AddSource(sourceAsList);
+                        // Add the destination AS.
+                        result.PathsStep1[(byte)algorithm, flow, attempt].AddDestination(destinationAsList);
+                        // Aggregate the hops.
+                        result.PathsStep2[(byte)algorithm, flow, attempt] = this.AggregateHops(result.PathsStep1[(byte)algorithm, flow, attempt]);
                     }
                 }
             }
-             */
 
             /*
              * STEP 3: Aggregate attempt paths for the same flow.
@@ -309,130 +296,199 @@ namespace Mercury.Topology
                 return null;
 		}
 
-
-
-        /*
-         *AQUIIIIIIIIIIIIIIIIIIIII 
-         * 
-         */
-        //I am here, preparing the algorithm
-
-        /*
-        private ASTraceroutePath aggregateHops(ASTraceroutePath asTraceroutePath)
+        /// <summary>
+        /// Aggregates equals AS hops for the specified AS path.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns>The aggregated AS path.</returns>
+        private ASTraceroutePath AggregateHops(ASTraceroutePath path)
         {
-            ASTraceroutePath asTraceroutePathAux = new ASTraceroutePath();
-            for (int i = 1; i < asTraceroutePath.hops.Count-1; i++)
+            // Create the resulting path.
+            ASTraceroutePath result = new ASTraceroutePath();
+
+            /*
+             * STEP 1: Aggregate the hops that have the same AS number.
+             */
+
+            // Find the index of the first hop with an AS number.
+            int anchor = path.Hops.FindIndex(hop => hop.AsNumber.HasValue);
+
+            // TODO: If the anchor not found, return the path with an error flag.
+
+            // Add the anchor to the result.
+            result.Hops.Add(path.Hops[anchor]);
+
+            /*
+            // Start from the anchor towards the beginning.
+            for (int index = anchor - 1; index >= 0; index--)
             {
+                ASTracerouteHop hopOld = path.Hops[index + 1];
+                ASTracerouteHop hopNew = path.Hops[index];
+                ASInformation info = null;
 
-                if (asTraceroutePathAux.hops.Count > 0)
+                if (hopNew.IsEqualUniqueToMultiple(hopOld, out info))
                 {
-                    if (! asTraceroutePath.hops[i].isMissing(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1])) //We compare with the last index of the aux list
-                    {
-                        if ( asTraceroutePath.hops[i].getEqualUnique(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1]) == null)
-                        {
-                            if (asTraceroutePath.hops[i].getEqualUniqueToMultiple(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1]) != null)
-                            {
-                                MercuryAsTracerouteHop h = asTraceroutePath.hops[i].getEqualUniqueToMultiple(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1]);
 
-                                //asTraceroutePath.hops[i].candidates.Clear(); //First we clear the list
-                                //asTraceroutePath.hops[i].candidates.Add( h.AsNumber, h); //then we add the hop
-                                //asTraceroutePath.hops.RemoveAt(i - 1); //We remove the previous hop
+                }
+                else if (hopNew.IsEqualMultipleToMultiple(hopOld, out info))
+                {
 
-                                asTraceroutePathAux.hops.RemoveAt(asTraceroutePathAux.hops.Count - 1);
-                                ASTracerouteHop hop = new ASTracerouteHop();
-                                hop.candidates.Add(h.AsNumber, h);
-                                asTraceroutePathAux.hops.Add(hop);
-
-                            }
-                            else
-                            {
-                                if (asTraceroutePath.hops[i].getEqualMultipleToMultiple(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1]) != null)
-                                {
-                                    MercuryAsTracerouteHop h = asTraceroutePath.hops[i].getEqualMultipleToMultiple(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1]);
-                                    ASTracerouteHop hop = new ASTracerouteHop();
-                                    hop.candidates.Add(h.AsNumber, h);
-                                    asTraceroutePathAux.hops.Add(hop);
-                                    
-                                }
-                                else //is differentes ases (AS0-AS1), different multiple ases (AS0/AS1 - AS2/AS3) or missing-AS
-                                {
-                                    //We check for missings in the middle of same AS
-                                    int j = 0;
-                                    for (j = i; j < asTraceroutePath.hops.Count; j++)
-                                    {
-                                        if (asTraceroutePath.hops[j].candidates.Count > 0)
-                                        {
-                                            //z = j - i; //j is position of next hop with at least 1 AS.
-                                            break;
-                                        }
-                                    }
-                                    if (asTraceroutePath.hops[i].isMissingInMiddleSameAS(asTraceroutePathAux.hops[asTraceroutePathAux.hops.Count - 1], asTraceroutePath.hops[j]))
-                                    {
-                                        i = j;
-                                    }
-                                    else //No missing in the middle of same AS
-                                    {
-                                        asTraceroutePathAux.hops.Add(asTraceroutePath.hops[i]);
-                                    }
-
-                                }
-                            }
-                        }
-                    }
+                }
+                else if (hopNew.IsEqualToMissing(hopNew))
+                {
 
                 }
                 else
                 {
-                    if (asTraceroutePath.hops[i].isMissing(asTraceroutePath.hops[i - 1])) 
+                    // Add the hop AS IS to the beggining of the path.
+                    result.Hops.Insert(0, hopNew);
+                }
+            }
+
+            // Start from the anchor towards the end.
+            for (int index = anchor + 1; index < path.Hops.Count; index++)
+            {
+                ASTracerouteHop hopOld = path.Hops[index - 1];
+                ASTracerouteHop hopNew = path.Hops[index];
+                ASInformation info = null;
+
+                if (hopNew.IsEqualUniqueToMultiple(hopOld, out info))
+                {
+                    // Do not add the hop, but set the multiple flag.
+                    hopOld.Flags |= ASTracerouteFlags.MultipleEqualNeighborPair
+                }
+                else if (hopNew.IsEqualMultipleToMultiple(hopOld, out info))
+                {
+                    // Do not add the hop, but set the multiple flag.
+                }
+                else if (hopNew.IsEqualToMissing(hopNew))
+                {
+
+                }
+                else
+                {
+                    // Add the hop AS IS to the end of the path.
+                }
+            }
+
+            /*
+             * STEP 2: Aggregate missing hops.
+             */
+            
+
+                /*
+                // For each hop
+                for (int hop = 1; hop < path.Hops.Count - 1; hop++)
+                {
+                    if (result.Hops.Count > 0)
                     {
-                        //asTraceroutePath.hops.RemoveAt(i-1);
-                        asTraceroutePathAux.hops.Add(new ASTracerouteHop());
+                        if (!path.Hops[hop].isMissing(result.Hops[result.Hops.Count - 1])) //We compare with the last index of the aux list
+                        {
+                            if (path.Hops[hop].getEqualUnique(result.Hops[result.Hops.Count - 1]) == null)
+                            {
+                                if (path.Hops[hop].getEqualUniqueToMultiple(result.Hops[result.Hops.Count - 1]) != null)
+                                {
+                                    MercuryAsTracerouteHop h = path.Hops[hop].getEqualUniqueToMultiple(result.Hops[result.Hops.Count - 1]);
+
+                                    //asTraceroutePath.Hops[i].candidates.Clear(); //First we clear the list
+                                    //asTraceroutePath.Hops[i].candidates.Add( h.AsNumber, h); //then we add the hop
+                                    //asTraceroutePath.Hops.RemoveAt(i - 1); //We remove the previous hop
+
+                                    result.Hops.RemoveAt(result.Hops.Count - 1);
+                                    ASTracerouteHop hop = new ASTracerouteHop();
+                                    hop.candidates.Add(h.AsNumber, h);
+                                    result.Hops.Add(hop);
+
+                                }
+                                else
+                                {
+                                    if (path.Hops[hop].getEqualMultipleToMultiple(result.Hops[result.Hops.Count - 1]) != null)
+                                    {
+                                        MercuryAsTracerouteHop h = path.Hops[hop].getEqualMultipleToMultiple(result.Hops[result.Hops.Count - 1]);
+                                        ASTracerouteHop hop = new ASTracerouteHop();
+                                        hop.candidates.Add(h.AsNumber, h);
+                                        result.Hops.Add(hop);
+
+                                    }
+                                    else //is differentes ases (AS0-AS1), different multiple ases (AS0/AS1 - AS2/AS3) or missing-AS
+                                    {
+                                        //We check for missings in the middle of same AS
+                                        int j = 0;
+                                        for (j = hop; j < path.Hops.Count; j++)
+                                        {
+                                            if (path.Hops[j].candidates.Count > 0)
+                                            {
+                                                //z = j - i; //j is position of next hop with at least 1 AS.
+                                                break;
+                                            }
+                                        }
+                                        if (path.Hops[hop].isMissingInMiddleSameAS(result.Hops[result.Hops.Count - 1], path.Hops[j]))
+                                        {
+                                            hop = j;
+                                        }
+                                        else //No missing in the middle of same AS
+                                        {
+                                            result.Hops.Add(path.Hops[hop]);
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+
                     }
                     else
                     {
-                        if (asTraceroutePath.hops[i].getEqualUnique(asTraceroutePath.hops[i - 1]) != null)
+                        if (path.Hops[hop].isMissing(path.Hops[hop - 1]))
                         {
-                            //asTraceroutePath.hops.RemoveAt(i - 1);
-                            asTraceroutePathAux.hops.Add(asTraceroutePath.hops[i]);
+                            //asTraceroutePath.Hops.RemoveAt(i-1);
+                            result.Hops.Add(new ASTracerouteHop());
                         }
                         else
                         {
-                            if (asTraceroutePath.hops[i].getEqualUniqueToMultiple(asTraceroutePath.hops[i - 1]) != null)
+                            if (path.Hops[hop].getEqualUnique(path.Hops[hop - 1]) != null)
                             {
-                                MercuryAsTracerouteHop h = asTraceroutePath.hops[i].getEqualUniqueToMultiple(asTraceroutePath.hops[i - 1]);
-
-                                //asTraceroutePath.hops[i].candidates.Clear(); //First we clear the list
-                                //asTraceroutePath.hops[i].candidates.Add( h.AsNumber, h); //then we add the hop
-                                //asTraceroutePath.hops.RemoveAt(i - 1); //We remove the previous hop
-
-                                ASTracerouteHop hop = new ASTracerouteHop();
-                                hop.candidates.Add(h.AsNumber, h);
-                                asTraceroutePathAux.hops.Add(hop);
-
+                                //asTraceroutePath.Hops.RemoveAt(i - 1);
+                                result.Hops.Add(path.Hops[hop]);
                             }
                             else
                             {
-                                if (asTraceroutePath.hops[i].getEqualMultipleToMultiple(asTraceroutePath.hops[i - 1]) != null)
+                                if (path.Hops[hop].getEqualUniqueToMultiple(path.Hops[hop - 1]) != null)
                                 {
-                                    MercuryAsTracerouteHop h = asTraceroutePath.hops[i].getEqualMultipleToMultiple(asTraceroutePath.hops[i - 1]);
+                                    MercuryAsTracerouteHop h = path.Hops[hop].getEqualUniqueToMultiple(path.Hops[hop - 1]);
+
+                                    //asTraceroutePath.Hops[i].candidates.Clear(); //First we clear the list
+                                    //asTraceroutePath.Hops[i].candidates.Add( h.AsNumber, h); //then we add the hop
+                                    //asTraceroutePath.Hops.RemoveAt(i - 1); //We remove the previous hop
+
                                     ASTracerouteHop hop = new ASTracerouteHop();
                                     hop.candidates.Add(h.AsNumber, h);
-                                    asTraceroutePathAux.hops.Add(hop);
+                                    result.Hops.Add(hop);
+
                                 }
-                                else //is differentes ases (AS0-AS1) or missing-AS
+                                else
                                 {
-                                    asTraceroutePathAux.hops.Add(asTraceroutePath.hops[i]);
+                                    if (path.Hops[hop].getEqualMultipleToMultiple(path.Hops[hop - 1]) != null)
+                                    {
+                                        MercuryAsTracerouteHop h = path.Hops[hop].getEqualMultipleToMultiple(path.Hops[hop - 1]);
+                                        ASTracerouteHop hop = new ASTracerouteHop();
+                                        hop.candidates.Add(h.AsNumber, h);
+                                        result.Hops.Add(hop);
+                                    }
+                                    else //is differentes ases (AS0-AS1) or missing-AS
+                                    {
+                                        result.Hops.Add(path.Hops[hop]);
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                
-            }
 
-            return asTraceroutePathAux;
+                }
+                 * */
+
+            return result;
         }
-        */
 
 
         /*

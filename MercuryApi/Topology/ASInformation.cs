@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.ComponentModel;
 using Mercury.Api;
 using Mercury.Json;
 
@@ -33,8 +34,10 @@ namespace Mercury.Topology
         public enum AsType
         {
             [JsonEnum("AS")]
+            [Description("AS")]
             As,
             [JsonEnum("IXP")]
+            [Description("IXP")]
             Ixp
         };
 

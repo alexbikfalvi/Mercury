@@ -24,6 +24,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using DotNetApi;
+using InetApi.Net;
 using InetApi.Net.Core;
 using InetApi.Net.Core.Dns;
 using InetApi.Net.Core.Protocols;
@@ -885,7 +886,7 @@ namespace Mercury
                     Program.Write(ConsoleColor.White, " TTL ");
                     for (byte attempt = 0; attempt < result.AttemptCount; attempt++)
                     {
-                        Program.Write(ConsoleColor.White, "| Attempt {0}AS    ", attempt.ToString().PadRight(8));
+                        Program.Write(ConsoleColor.White, "| Attempt {0}AS    Flags", attempt.ToString().PadRight(8));
                     }
                     Console.WriteLine();
 
@@ -900,36 +901,76 @@ namespace Mercury
                     // Display the hops data.
                     for (byte ttl = 0; ttl < maximumTtl; ttl++)
                     {
-                        Program.Write(ConsoleColor.Gray, (this.settingsIp.MinimumHops + ttl).ToString().PadLeft(5));
-                        for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
+                        byte maximumAs = 1;
+                        for (byte attempt = 0; attempt < result.AttemptCount; attempt++)
                         {
                             ASTracerouteHop hop = result.PathsStep1[(byte)algorithm, flow, attempt].Hops[ttl];
-                            //Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, ipData.Address.ToString().PadRight(22));
-                            
-                            switch (hop.IpData.State)
-                            {
-                                case MultipathTracerouteData.DataState.NotSet:
-                                    Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkGray, "Not set".PadRight(22));
-                                    break;
-                                case MultipathTracerouteData.DataState.RequestSent:
-                                    Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkGray, "Timeout".PadRight(22));
-                                    break;
-                                case MultipathTracerouteData.DataState.ResponseReceived:
-                                    {
-                                        Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, hop.IpData.Address.ToString().PadRight(16));
-                                        Program.Write(ConsoleColor.Gray, "{0}".FormatWith(hop.AsNumber).PadRight(6));
-                                    }
-                                    break;
-                            }
+
+                            maximumAs = maximumAs < (byte)hop.AsSet.Count ? (byte)hop.AsSet.Count : maximumAs;
                         }
-                        Console.WriteLine();
+
+                        for (byte asIndex = 0; asIndex < maximumAs; asIndex++)
+                        {
+                            if (0 == asIndex)
+                                Program.Write(ConsoleColor.Gray, (result.MinimumHops + ttl).ToString().PadLeft(5));
+                            else
+                                Console.Write(string.Empty.PadLeft(5));
+                            for (byte attempt = 0; attempt < result.AttemptCount; attempt++)
+                            {
+                                ASTracerouteHop hop = result.PathsStep1[(byte)algorithm, flow, attempt].Hops[ttl];
+
+                                switch (hop.IpData.State)
+                                {
+                                    case MultipathTracerouteData.DataState.NotSet:
+                                        Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkRed, "Not set".PadRight(22));
+                                        break;
+                                    case MultipathTracerouteData.DataState.RequestSent:
+                                        Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkRed, "Timeout".PadRight(22));
+                                        break;
+                                    case MultipathTracerouteData.DataState.ResponseReceived:
+                                        {
+                                            if (asIndex < hop.AsSet.Count)
+                                            {
+                                                // Skip the IP address for any index greater than zero.
+                                                if (0 == asIndex)
+                                                    Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkGray, hop.IpData.Address.ToString().PadRight(16));
+                                                else
+                                                    Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkGray, " |".PadRight(16));
+                                                
+                                                // Get the AS information.
+                                                ASInformation asInfo = hop.AsSet.ElementAt(asIndex);
+                                                
+                                                // Write the AS type for non-positive AS number.
+                                                if (asInfo.AsNumber > 0)
+                                                    Program.Write(ConsoleColor.Green, "{0}".FormatWith(asInfo.AsNumber).PadRight(6));
+                                                else
+                                                    Program.Write(ConsoleColor.Yellow, "{0}".FormatWith(asInfo.Type.GetDescription()).PadRight(6));
+                                            }
+                                            else
+                                            {
+                                                if (hop.IpData.Address.IsGlobalUnicastAddress())
+                                                    Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkRed, "No AS".PadRight(22));
+                                                else
+                                                    Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkRed, "Private".PadRight(22));
+                                            }
+                                        }
+                                        break;
+                                }
+                                // Write the flags.
+                                if (0 == asIndex)
+                                    Program.Write(hop.Flags == 0 ? ConsoleColor.Green : ConsoleColor.Yellow, "{0:X1}".FormatWith((int)hop.Flags).PadRight(5));
+                                else
+                                    Console.Write(string.Empty.PadRight(5));
+                            }
+                            Console.WriteLine();
+                        }
                     }
 
                     // Display the results footer.
                     Program.Write(ConsoleColor.White, "=====");
                     for (byte attempt = 0; attempt < result.AttemptCount; attempt++)
                     {
-                        Program.Write(ConsoleColor.White, "|=======================", attempt.ToString().PadRight(8));
+                        Program.Write(ConsoleColor.White, "|============================", attempt.ToString().PadRight(8));
                     }
                     Console.WriteLine();
 

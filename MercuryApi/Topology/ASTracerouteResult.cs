@@ -83,6 +83,14 @@ namespace Mercury.Topology
         /// </summary>
         public byte AttemptCount { get { return this.traceroute.Settings.AttemptsPerFlow; } }
         /// <summary>
+        /// The minimum hops.
+        /// </summary>
+        public byte MinimumHops { get { return this.traceroute.Settings.MinimumHops; } }
+        /// <summary>
+        /// The maximum hops.
+        /// </summary>
+        public byte MaximumHops { get { return this.traceroute.Settings.MaximumHops; } }
+        /// <summary>
         /// The multipath algorithms.
         /// </summary>
         public IEnumerable<MultipathTracerouteResult.ResultAlgorithm> Algorithms { get { return this.traceroute.Algorithms; } }
