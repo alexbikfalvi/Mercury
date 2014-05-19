@@ -162,12 +162,12 @@ namespace Mercury.Topology
         /// </summary>
         /// <param name="hop">The other hop.</param>
         /// <returns><b>True</b> if the hops are equally unique, <b>false</b> otherwise.</returns>
-        public bool IsEqualUnique(ASTracerouteHop hop)
-        {
-            if (this.asSet.Count != 1) return false;
-            if (hop.asSet.Count != 1) return false;
-            return this.asSet.First() == hop.asSet.First();
-        }
+        //public bool IsEqualUnique(ASTracerouteHop hop)
+        //{
+        //    if (this.asSet.Count != 1) return false;
+        //    if (hop.asSet.Count != 1) return false;
+        //    return this.asSet.First() == hop.asSet.First();
+        //}
 
         /*
         /// <summary>
@@ -194,54 +194,71 @@ namespace Mercury.Topology
 
             return set.Contains(info, new IEqualityComparer<ASInformation>());
         }
-
+        */
         
-        public bool isMissing(ASTracerouteHop hop2)
+        public bool isMissing(ASTracerouteHop hopLeft)
         {
-            if (candidates.Count == 0 && hop2.candidates.Count == 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            if (this.asSet.Count == 0 && hopLeft.asSet.Count == 0) return true;
+            else return false;
+
         }
 
-        public bool isMissingInMiddleSameAS(ASTracerouteHop hop2, ASTracerouteHop hop3)
+        public bool isMissingInMiddleSameAS(ASTracerouteHop hopLeft, ASTracerouteHop hopRight)
         {
-            if (candidates.Count == 0 && hop2.candidates.Count > 0 & hop3.candidates.Count > 0)
+            //Workaround to solve searches
+            Dictionary<int, ASInformation> candidatesLeft = new Dictionary<int, ASInformation>();
+            foreach (ASInformation candidate in hopLeft.asSet)
+            {
+                candidatesLeft[candidate.AsNumber] = candidate;
+            }
+            Dictionary<int, ASInformation> candidatesRight = new Dictionary<int, ASInformation>();
+            foreach (ASInformation candidate in hopRight.asSet)
+            {
+                candidatesRight[candidate.AsNumber] = candidate;
+            }
+
+            if (asSet.Count == 0 && hopLeft.asSet.Count > 0 & hopRight.asSet.Count > 0)
             {
                 int matchings = 0;
-                foreach (MercuryAsTracerouteHop hop in hop3.candidates.Values)
+                foreach (ASInformation hop in hopRight.asSet)
                 {
-                    if (hop2.candidates.ContainsKey(hop.AsNumber))
+                    if (candidatesLeft.ContainsKey(hop.AsNumber))
                     {
                         matchings++;
                     }
+                }
+                if (matchings >= 1) return true;
+                else return false;
+            }
+            else return false;
 
-                }
-                if (matchings >= 1)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
         }
 
 
+        public bool IsEqualUnique(ASTracerouteHop hopLeft, out ASInformation info)
+        {
+
+            info = null;
+            if (this.asSet.Count != 1) return false;
+            if (hopLeft.asSet.Count != 1) return false;
+
+            if (this.asSet.First() == hopLeft.asSet.First())
+            {
+                //Prioritize for IXPs
+                info = this.asSet.First();
+                if (this.asSet.First().Type == ASInformation.AsType.Ixp && this.asSet.First().AsNumber > 0) info = this.asSet.First();
+                if (hopLeft.asSet.First().Type == ASInformation.AsType.Ixp && hopLeft.asSet.First().AsNumber > 0) info = hopLeft.asSet.First();
+                return true;
+
+            }
+            else return false;
+        }
+        /*
         public bool isEqualUnique(ASTracerouteHop hop2)
         {
-            if (candidates.Count == 1 && hop2.candidates.Count == 1)
+            if (asSet.Count == 1 && hop2.asSet.Count == 1)
             {
-                if (candidates[0].AsNumber == hop2.candidates[0].AsNumber)
+                if (asSet[0].AsNumber == hop2.asSet[0].AsNumber)
                 {
                     return true;
                 }
@@ -258,29 +275,61 @@ namespace Mercury.Topology
 
         public MercuryAsTracerouteHop getEqualUnique(ASTracerouteHop hop2)
         {
-            if (candidates.Count == 1 && hop2.candidates.Count == 1)
+            if (asSet.Count == 1 && hop2.asSet.Count == 1)
             {
-                foreach (MercuryAsTracerouteHop hop in candidates.Values)
+                foreach (MercuryAsTracerouteHop hop in asSet.Values)
                 {
 
-                    if (hop2.candidates.ContainsKey(hop.AsNumber))
+                    if (hop2.asSet.ContainsKey(hop.AsNumber))
                     {
-                        return hop2.candidates[hop.AsNumber];
+                        return hop2.asSet[hop.AsNumber];
                     }
                 }
 
             }
             return null;
         }
+        */
 
+        public bool IsEqualUniqueToMultiple(ASTracerouteHop hopLeft, out ASInformation info)
+        {
+            info = null;
+            Dictionary<int, ASInformation> candidates = new Dictionary<int, ASInformation>();
+            foreach (ASInformation candidate in this.asSet)
+            {
+                candidates[candidate.AsNumber] = candidate;
+            }
+            Dictionary<int, ASInformation> candidatesLeft = new Dictionary<int, ASInformation>();
+            foreach (ASInformation candidate in hopLeft.asSet)
+            {
+                candidatesLeft[candidate.AsNumber] = candidate;
+            }
 
+            if ((this.asSet.Count == 1 && hopLeft.asSet.Count > 1) || (this.asSet.Count > 1 && hopLeft.asSet.Count == 1))
+            {
+                foreach (ASInformation hop in this.asSet)
+                {
+                    if (candidatesLeft.ContainsKey(hop.AsNumber))
+                    {
+                        //Prioritize for IXPs
+                        info = candidates[hop.AsNumber];
+                        if (candidates[hop.AsNumber].Type == ASInformation.AsType.Ixp && candidates[hop.AsNumber].AsNumber > 0) info = candidates[hop.AsNumber];
+                        if (candidatesLeft[hop.AsNumber].Type == ASInformation.AsType.Ixp && candidatesLeft[hop.AsNumber].AsNumber > 0) info = candidatesLeft[hop.AsNumber];
+                        return true;
+                    }
+                }
+                return false;
+            }
+            else return false;
+        }
+        /*
         public bool isEqualUniqueToMultiple(ASTracerouteHop hop2)
         {
-            if ((candidates.Count == 1 && hop2.candidates.Count > 1) || (candidates.Count > 1 && hop2.candidates.Count == 1))
+            if ((asSet.Count == 1 && hop2.asSet.Count > 1) || (asSet.Count > 1 && hop2.asSet.Count == 1))
             {
-                foreach (MercuryAsTracerouteHop hop in candidates.Values)
+                foreach (MercuryAsTracerouteHop hop in asSet.Values)
                 {
-                    if (hop2.candidates.ContainsKey(hop.AsNumber))
+                    if (hop2.asSet.ContainsKey(hop.AsNumber))
                     {
                         return true;
                     }
@@ -295,14 +344,14 @@ namespace Mercury.Topology
 
         public MercuryAsTracerouteHop getEqualUniqueToMultiple(ASTracerouteHop hop2)
         {
-            if ((candidates.Count == 1 && hop2.candidates.Count > 1) || (candidates.Count > 1 && hop2.candidates.Count == 1))
+            if ((asSet.Count == 1 && hop2.asSet.Count > 1) || (asSet.Count > 1 && hop2.asSet.Count == 1))
             {
-                foreach (MercuryAsTracerouteHop hop in candidates.Values)
+                foreach (MercuryAsTracerouteHop hop in asSet.Values)
                 {
 
-                    if (hop2.candidates.ContainsKey(hop.AsNumber))
+                    if (hop2.asSet.ContainsKey(hop.AsNumber))
                     {
-                        return hop2.candidates[hop.AsNumber];
+                        return hop2.asSet[hop.AsNumber];
                     }
 
                 }
@@ -310,15 +359,60 @@ namespace Mercury.Topology
             }
             return null;
         }
+        */
 
-        public bool isEqualMultipleToMultiple(ASTracerouteHop hop2)
+        public bool IsEqualMultipleToMultiple(ASTracerouteHop hopLeft, out ASInformation info)
         {
-            if (candidates.Count > 1 && hop2.candidates.Count > 1)
+            info = null;
+            HashSet<ASInformation> matches = new HashSet<ASInformation>();
+            Dictionary<int, ASInformation> candidates = new Dictionary<int, ASInformation>();
+            foreach (ASInformation candidate in this.asSet)
+            {
+                candidates[candidate.AsNumber] = candidate;
+            }
+            Dictionary<int, ASInformation> candidatesLeft = new Dictionary<int, ASInformation>();
+            foreach (ASInformation candidate in hopLeft.asSet)
+            {
+                candidatesLeft[candidate.AsNumber] = candidate;
+            }
+
+            if ((this.asSet.Count > 1 && hopLeft.asSet.Count > 1))
             {
                 int matchings = 0;
-                foreach (MercuryAsTracerouteHop hop in candidates.Values)
+                foreach (ASInformation hop in this.asSet)
                 {
-                    if (hop2.candidates.ContainsKey(hop.AsNumber))
+                    if (candidatesLeft.ContainsKey(hop.AsNumber))
+                    {
+                        matchings++;
+                        matches.Add(candidates[hop.AsNumber]);
+                    }
+                }
+                if (matchings > 1)
+                {
+                    foreach (ASInformation hop in matches)
+                    {
+                        //Prioritize for IXPs
+                        info = candidates[hop.AsNumber];
+                        if (candidates[hop.AsNumber].Type == ASInformation.AsType.Ixp && candidates[hop.AsNumber].AsNumber > 0) info = candidates[hop.AsNumber];
+                        if (candidatesLeft[hop.AsNumber].Type == ASInformation.AsType.Ixp && candidatesLeft[hop.AsNumber].AsNumber > 0) info = candidatesLeft[hop.AsNumber];
+                        return true;
+                    }
+                    return false;
+                }
+                else return false;
+            }
+            else return false;
+        }
+
+        /*
+        public bool isEqualMultipleToMultiple(ASTracerouteHop hop2)
+        {
+            if (asSet.Count > 1 && hop2.asSet.Count > 1)
+            {
+                int matchings = 0;
+                foreach (MercuryAsTracerouteHop hop in asSet.Values)
+                {
+                    if (hop2.asSet.ContainsKey(hop.AsNumber))
                     {
                         matchings++;
                     }
@@ -343,16 +437,16 @@ namespace Mercury.Topology
         {
             Dictionary<int, MercuryAsTracerouteHop> cands = new Dictionary<int, MercuryAsTracerouteHop>();
 
-            if (candidates.Count > 1 && hop2.candidates.Count > 1)
+            if (asSet.Count > 1 && hop2.asSet.Count > 1)
             {
                 int matchings = 0;
-                foreach (MercuryAsTracerouteHop hop in candidates.Values)
+                foreach (MercuryAsTracerouteHop hop in asSet.Values)
                 {
 
-                    if (hop2.candidates.ContainsKey(hop.AsNumber))
+                    if (hop2.asSet.ContainsKey(hop.AsNumber))
                     {
                         matchings++;
-                        cands[hop.AsNumber] = hop2.candidates[hop.AsNumber];
+                        cands[hop.AsNumber] = hop2.asSet[hop.AsNumber];
                     }
 
                 }
@@ -364,7 +458,7 @@ namespace Mercury.Topology
             }
             return null;
         }
-         */
+        */
 
         #endregion
     }

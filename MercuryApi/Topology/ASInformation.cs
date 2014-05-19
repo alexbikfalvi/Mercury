@@ -98,5 +98,23 @@ namespace Mercury.Topology
         public AsType Type { get; private set; }
 
         #endregion
+
+
+
+
+
+        //#region Public methods
+        //public override bool Equals(ASInformation info)
+        //{
+        //    if (this.AsNumber == info.AsNumber) return true;
+        //    else return false;
+        //}
+
+        //public override int GetHashCode()
+        //{
+        //    return this.AsNumber.GetHashCode();
+        //}
+
+        //#endregion
     }
 }

@@ -175,7 +175,7 @@ namespace Mercury.Topology
                         // Add the destination AS.
                         result.PathsStep1[(byte)algorithm, flow, attempt].AddDestination(destinationAsList);
                         // Aggregate the hops.
-                        result.PathsStep2[(byte)algorithm, flow, attempt] = this.AggregateHops(result.PathsStep1[(byte)algorithm, flow, attempt]);
+                        //result.PathsStep2[(byte)algorithm, flow, attempt] = this.AggregateHops(result.PathsStep1[(byte)algorithm, flow, attempt]);
                     }
                 }
             }
@@ -371,12 +371,15 @@ namespace Mercury.Topology
                 }
             }
 
+             */
+             
+             
             /*
              * STEP 2: Aggregate missing hops.
              */
             
 
-                /*
+                
                 // For each hop
                 for (int hop = 1; hop < path.Hops.Count - 1; hop++)
                 {
@@ -384,30 +387,25 @@ namespace Mercury.Topology
                     {
                         if (!path.Hops[hop].isMissing(result.Hops[result.Hops.Count - 1])) //We compare with the last index of the aux list
                         {
-                            if (path.Hops[hop].getEqualUnique(result.Hops[result.Hops.Count - 1]) == null)
+                            ASInformation asInformation = null;
+                            if (!path.Hops[hop].IsEqualUnique(result.Hops[result.Hops.Count - 1], out asInformation))
                             {
-                                if (path.Hops[hop].getEqualUniqueToMultiple(result.Hops[result.Hops.Count - 1]) != null)
+                                if (path.Hops[hop].IsEqualUniqueToMultiple(result.Hops[result.Hops.Count - 1], out asInformation))
                                 {
-                                    MercuryAsTracerouteHop h = path.Hops[hop].getEqualUniqueToMultiple(result.Hops[result.Hops.Count - 1]);
-
-                                    //asTraceroutePath.Hops[i].candidates.Clear(); //First we clear the list
-                                    //asTraceroutePath.Hops[i].candidates.Add( h.AsNumber, h); //then we add the hop
-                                    //asTraceroutePath.Hops.RemoveAt(i - 1); //We remove the previous hop
-
-                                    result.Hops.RemoveAt(result.Hops.Count - 1);
-                                    ASTracerouteHop hop = new ASTracerouteHop();
-                                    hop.candidates.Add(h.AsNumber, h);
-                                    result.Hops.Add(hop);
+                                    result.Hops.RemoveAt(result.Hops.Count - 1);//We remove the previous
+                                    ASTracerouteHop thop = new ASTracerouteHop();
+                                    thop.AsSet.Add(asInformation); 
+                                    result.Hops.Add(thop);
 
                                 }
                                 else
                                 {
-                                    if (path.Hops[hop].getEqualMultipleToMultiple(result.Hops[result.Hops.Count - 1]) != null)
+                                    if (path.Hops[hop].IsEqualMultipleToMultiple(result.Hops[result.Hops.Count - 1], out asInformation))
                                     {
-                                        MercuryAsTracerouteHop h = path.Hops[hop].getEqualMultipleToMultiple(result.Hops[result.Hops.Count - 1]);
-                                        ASTracerouteHop hop = new ASTracerouteHop();
-                                        hop.candidates.Add(h.AsNumber, h);
-                                        result.Hops.Add(hop);
+                                        result.Hops.RemoveAt(result.Hops.Count - 1);//We remove the previous
+                                        ASTracerouteHop thop = new ASTracerouteHop();
+                                        thop.AsSet.Add(asInformation);
+                                        result.Hops.Add(thop);
 
                                     }
                                     else //is differentes ases (AS0-AS1), different multiple ases (AS0/AS1 - AS2/AS3) or missing-AS
@@ -416,7 +414,7 @@ namespace Mercury.Topology
                                         int j = 0;
                                         for (j = hop; j < path.Hops.Count; j++)
                                         {
-                                            if (path.Hops[j].candidates.Count > 0)
+                                            if (path.Hops[j].AsSet.Count > 0)
                                             {
                                                 //z = j - i; //j is position of next hop with at least 1 AS.
                                                 break;
@@ -437,43 +435,40 @@ namespace Mercury.Topology
                         }
 
                     }
-                    else
+                    else //if we are in first hop
                     {
                         if (path.Hops[hop].isMissing(path.Hops[hop - 1]))
                         {
-                            //asTraceroutePath.Hops.RemoveAt(i-1);
                             result.Hops.Add(new ASTracerouteHop());
                         }
                         else
                         {
-                            if (path.Hops[hop].getEqualUnique(path.Hops[hop - 1]) != null)
+                            ASInformation asInformation = null;
+                            if (path.Hops[hop].IsEqualUnique(path.Hops[hop - 1], out asInformation))
                             {
-                                //asTraceroutePath.Hops.RemoveAt(i - 1);
-                                result.Hops.Add(path.Hops[hop]);
+                                //we do not need to remove cause we are in first position
+                                ASTracerouteHop thop = new ASTracerouteHop();
+                                thop.AsSet.Add(asInformation);
+                                result.Hops.Add(thop);
                             }
                             else
                             {
-                                if (path.Hops[hop].getEqualUniqueToMultiple(path.Hops[hop - 1]) != null)
+                                if (path.Hops[hop].IsEqualUniqueToMultiple(path.Hops[hop - 1], out asInformation))
                                 {
-                                    MercuryAsTracerouteHop h = path.Hops[hop].getEqualUniqueToMultiple(path.Hops[hop - 1]);
-
-                                    //asTraceroutePath.Hops[i].candidates.Clear(); //First we clear the list
-                                    //asTraceroutePath.Hops[i].candidates.Add( h.AsNumber, h); //then we add the hop
-                                    //asTraceroutePath.Hops.RemoveAt(i - 1); //We remove the previous hop
-
-                                    ASTracerouteHop hop = new ASTracerouteHop();
-                                    hop.candidates.Add(h.AsNumber, h);
-                                    result.Hops.Add(hop);
+                                    //we do not need to remove cause we are in first position
+                                    ASTracerouteHop thop = new ASTracerouteHop();
+                                    thop.AsSet.Add(asInformation);
+                                    result.Hops.Add(thop);
 
                                 }
                                 else
                                 {
-                                    if (path.Hops[hop].getEqualMultipleToMultiple(path.Hops[hop - 1]) != null)
+                                    if (path.Hops[hop].IsEqualMultipleToMultiple(path.Hops[hop - 1], out asInformation) != null)
                                     {
-                                        MercuryAsTracerouteHop h = path.Hops[hop].getEqualMultipleToMultiple(path.Hops[hop - 1]);
-                                        ASTracerouteHop hop = new ASTracerouteHop();
-                                        hop.candidates.Add(h.AsNumber, h);
-                                        result.Hops.Add(hop);
+                                        //we do not need to remove cause we are in first position
+                                        ASTracerouteHop thop = new ASTracerouteHop();
+                                        thop.AsSet.Add(asInformation);
+                                        result.Hops.Add(thop);
                                     }
                                     else //is differentes ases (AS0-AS1) or missing-AS
                                     {
@@ -485,7 +480,7 @@ namespace Mercury.Topology
                     }
 
                 }
-                 * */
+                 
 
             return result;
         }
