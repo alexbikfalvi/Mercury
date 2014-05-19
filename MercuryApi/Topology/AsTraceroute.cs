@@ -154,8 +154,11 @@ namespace Mercury.Topology
                 }
             }
 
+            /*
+             * COMMENTED BECAUSE System.ArgumentOutOfRangeException in Program.cs
+             */
             // Call the callback method.
-            result.Callback(ASTracerouteState.StateType.Step1);
+            //result.Callback(ASTracerouteState.StateType.Step1);
 
             /*
              * STEP 2: Aggregate hops for the same path.
@@ -175,21 +178,22 @@ namespace Mercury.Topology
                         // Add the destination AS.
                         result.PathsStep1[(byte)algorithm, flow, attempt].AddDestination(destinationAsList);
                         // Aggregate the hops.
-                        //result.PathsStep2[(byte)algorithm, flow, attempt] = this.AggregateHops(result.PathsStep1[(byte)algorithm, flow, attempt]);
+                        result.PathsStep2[(byte)algorithm, flow, attempt] = this.AggregateHops(result.PathsStep1[(byte)algorithm, flow, attempt]);
+                        // HERE NO!!! After aggregating FLOWS Add AS relationships
+                        //result.PathsStep3[(byte)algorithm, flow, attempt] = this.obtainASRelationships(result.PathsStep2[(byte)algorithm, flow, attempt]);
+
                     }
                 }
             }
 
+
             /*
              * STEP 3: Aggregate attempt paths for the same flow.
              */
-
-            /*
             // Create the list of flow aggregated paths.
-            ASTraceroutePath[,] pathsStep3 = new ASTraceroutePath[traceroute.Settings.FlowCount, 2];
             // Compare the paths for different attempts in the same flow.
             HashSet<ASTraceroutePath> attempts = new HashSet<ASTraceroutePath>();
-            foreach (byte algorithm in algorithms)
+            foreach (MultipathTracerouteResult.ResultAlgorithm algorithm in traceroute.Algorithms)
             {
                 for (byte flow = 0; flow < traceroute.Settings.AttemptsPerFlow; flow++)
                 {
@@ -198,37 +202,42 @@ namespace Mercury.Topology
                     for (byte attempt = 0; attempt < traceroute.Settings.AttemptsPerFlow; attempt++)
                     {
                         // Add the attempt to the list of attempts.
-                        attempts.Add(pathsStep2[flow, attempt, algorithm]);
+                        attempts.Add(result.PathsStep2[(byte)algorithm, flow, attempt]);
                     }
                     // If there is only one path.
                     if (attempts.Count == 1)
                     {
+                        //Here is where we have to call the code to solve loops
                         // Add the path to the result.
-                        pathsStep3[flow, algorithm] = attempts.First();
+                        result.PathsStep3[(byte)algorithm, flow] = removeLoops(attempts.First());
+                        
                     }
                     else
                     {
-                        pathsStep3[flow, algorithm] = new ASTraceroutePath(ASTracerouteFlags.FlowDistinctAttempts);
+                        //We have distinct attempts, so we mark it with the flag
+                        result.PathsStep3[(byte)algorithm, flow] = new ASTraceroutePath(ASTracerouteFlags.FlowDistinctAttempts); ;
+                        
                     }
                 }
             }
-             */
+             
 
             /*
              * Step 4: Save unique flows.
              */
 
-            /*
+            
             // Create the list of unique flows.
-            HashSet<ASTraceroutePath> pathsStep4 = new HashSet<ASTraceroutePath>();
-            foreach (byte algorithm in algorithms)
+            /*
+            HashSet<ASTraceroutePath> flows = new HashSet<ASTraceroutePath>();
+            foreach (MultipathTracerouteResult.ResultAlgorithm algorithm in traceroute.Algorithms)
             {
                 for (byte flow = 0; flow < traceroute.Settings.AttemptsPerFlow; flow++)
                 {
-                    pathsStep4.Add(pathsStep3[flow, algorithm]);
+                    flows.Add(result.PathsStep3[(byte)algorithm, flow, attempt]);
                 }
             }
-             */
+            */
 
                 //Finally we add the MercuryAsTraceroute(es) to the Mercury Platform
                 //String result = MercuryService.addTracerouteASes(tracerouteASes);
@@ -306,17 +315,18 @@ namespace Mercury.Topology
             // Create the resulting path.
             ASTraceroutePath result = new ASTraceroutePath();
 
+
             /*
              * STEP 1: Aggregate the hops that have the same AS number.
              */
 
             // Find the index of the first hop with an AS number.
-            int anchor = path.Hops.FindIndex(hop => hop.AsNumber.HasValue);
+     //       int anchor = path.Hops.FindIndex(hop => hop.AsNumber.HasValue);
 
             // TODO: If the anchor not found, return the path with an error flag.
 
             // Add the anchor to the result.
-            result.Hops.Add(path.Hops[anchor]);
+     //       result.Hops.Add(path.Hops[anchor]);
 
             /*
             // Start from the anchor towards the beginning.
@@ -381,7 +391,7 @@ namespace Mercury.Topology
 
                 
                 // For each hop
-                for (int hop = 1; hop < path.Hops.Count - 1; hop++)
+                for (int hop = 1; hop < path.Hops.Count; hop++)
                 {
                     if (result.Hops.Count > 0)
                     {
@@ -394,7 +404,8 @@ namespace Mercury.Topology
                                 {
                                     result.Hops.RemoveAt(result.Hops.Count - 1);//We remove the previous
                                     ASTracerouteHop thop = new ASTracerouteHop();
-                                    thop.AsSet.Add(asInformation); 
+                                    thop.AsSet.Add(asInformation);
+                                    thop.AsNumber = asInformation.AsNumber;
                                     result.Hops.Add(thop);
 
                                 }
@@ -405,6 +416,7 @@ namespace Mercury.Topology
                                         result.Hops.RemoveAt(result.Hops.Count - 1);//We remove the previous
                                         ASTracerouteHop thop = new ASTracerouteHop();
                                         thop.AsSet.Add(asInformation);
+                                        thop.AsNumber = asInformation.AsNumber;
                                         result.Hops.Add(thop);
 
                                     }
@@ -432,10 +444,18 @@ namespace Mercury.Topology
                                     }
                                 }
                             }
+                            else
+                            {
+                                result.Hops.RemoveAt(result.Hops.Count - 1);//We remove the previous
+                                ASTracerouteHop thop = new ASTracerouteHop();
+                                thop.AsSet.Add(asInformation);
+                                thop.AsNumber = asInformation.AsNumber;
+                                result.Hops.Add(thop);
+                            }
                         }
 
                     }
-                    else //if we are in first hop
+                    else //if result list is empty, we are in first hop
                     {
                         if (path.Hops[hop].isMissing(path.Hops[hop - 1]))
                         {
@@ -449,6 +469,7 @@ namespace Mercury.Topology
                                 //we do not need to remove cause we are in first position
                                 ASTracerouteHop thop = new ASTracerouteHop();
                                 thop.AsSet.Add(asInformation);
+                                thop.AsNumber = asInformation.AsNumber;
                                 result.Hops.Add(thop);
                             }
                             else
@@ -458,16 +479,18 @@ namespace Mercury.Topology
                                     //we do not need to remove cause we are in first position
                                     ASTracerouteHop thop = new ASTracerouteHop();
                                     thop.AsSet.Add(asInformation);
+                                    thop.AsNumber = asInformation.AsNumber;
                                     result.Hops.Add(thop);
 
                                 }
                                 else
                                 {
-                                    if (path.Hops[hop].IsEqualMultipleToMultiple(path.Hops[hop - 1], out asInformation) != null)
+                                    if (path.Hops[hop].IsEqualMultipleToMultiple(path.Hops[hop - 1], out asInformation))
                                     {
                                         //we do not need to remove cause we are in first position
                                         ASTracerouteHop thop = new ASTracerouteHop();
                                         thop.AsSet.Add(asInformation);
+                                        thop.AsNumber = asInformation.AsNumber;
                                         result.Hops.Add(thop);
                                     }
                                     else //is differentes ases (AS0-AS1) or missing-AS
@@ -486,7 +509,20 @@ namespace Mercury.Topology
         }
 
 
-        /*
+        private ASTraceroutePath removeLoops(ASTraceroutePath path)
+        {
+            // Create the resulting path.
+            ASTraceroutePath result = new ASTraceroutePath();
+/*
+ TO DO AN ALGORITHM FOR DETECTING LOOPs AS1-AS2-AS1-AS3-AS4 -----> AS1-AS3-AS4
+        
+ 
+ */
+
+            return path;
+        }
+
+        
         
         private ASTraceroutePath obtainASRelationships(ASTraceroutePath asTraceroutePath)
         {
@@ -515,7 +551,7 @@ namespace Mercury.Topology
             return asTraceroutePath;
         }
         
-
+        /*
         
         private MercuryAsTracerouteStats obtainTracerouteStatistics(ASTraceroutePath asTraceroutePath)
         {

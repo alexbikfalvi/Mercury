@@ -53,7 +53,7 @@ namespace Mercury.Topology
         /// <summary>
         /// Gets the flags for this AS traceroute path.
         /// </summary>
-        public ASTracerouteFlags Flags { get; private set; }
+        public ASTracerouteFlags Flags { get; set; }
         /// <summary>
         /// Returns whether this AS path is successful.
         /// </summary>
