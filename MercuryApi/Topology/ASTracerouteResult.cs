@@ -49,7 +49,7 @@ namespace Mercury.Topology
             this.PathsStep1 = new ASTraceroutePath[MultipathTracerouteResult.AlgorithmsCount, traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow];
             this.PathsStep2 = new ASTraceroutePath[MultipathTracerouteResult.AlgorithmsCount, traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow];
             this.PathsStep3 = new ASTraceroutePath[MultipathTracerouteResult.AlgorithmsCount, traceroute.Settings.FlowCount];
-            this.PathsStep4 = new ASTraceroutePath[MultipathTracerouteResult.AlgorithmsCount, traceroute.Settings.FlowCount, traceroute.Settings.AttemptsPerFlow];
+            this.PathsStep4 = null;
         }
 
         #region Public properties
@@ -69,7 +69,7 @@ namespace Mercury.Topology
         /// <summary>
         /// The step 1 AS paths.
         /// </summary>
-        public ASTraceroutePath[, ,] PathsStep4 { get; private set; }
+        public ASTraceroutePath[] PathsStep4 { get; internal set; }
         /// <summary>
         /// Gets the list of flows.
         /// </summary>

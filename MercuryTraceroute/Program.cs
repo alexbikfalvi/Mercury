@@ -847,10 +847,13 @@ namespace Mercury
                                 this.DisplayAsTracerouteStep1(result);
                                 break;
                             case ASTracerouteState.StateType.Step2:
+                                this.DisplayAsTracerouteStep2(result);
                                 break;
                             case ASTracerouteState.StateType.Step3:
+                                this.DisplayAsTracerouteStep3(result);
                                 break;
                             case ASTracerouteState.StateType.Step4:
+                                this.DisplayAsTracerouteStep4(result);
                                 break;
                         }
                     });
@@ -863,15 +866,14 @@ namespace Mercury
         /// <param name="result">The result.</param>
         private void DisplayAsTracerouteStep1(ASTracerouteResult result)
         {
+            Console.WriteLine();
+            Program.WriteLine(ConsoleColor.Gray, "Step...................................", ConsoleColor.Magenta, "1");
+
             // For each algorithm.
             foreach (MultipathTracerouteResult.ResultAlgorithm algorithm in result.Algorithms)
             {
                 Console.WriteLine();
                 Program.WriteLine(ConsoleColor.Gray, "Protocol...............................", ConsoleColor.Yellow, algorithm.GetDescription());
-                //Console.WriteLine();
-                //Program.WriteLine(ConsoleColor.Gray, "Flow index.............................", ConsoleColor.Cyan, flow.ToString());
-                //Program.WriteLine(ConsoleColor.Gray, "Flow identifier........................", ConsoleColor.Cyan, result.Flows[flow].Id.ToString());
-                //Program.WriteLine(ConsoleColor.Gray, "Flow short identifier..................", ConsoleColor.Cyan, "0x{0:X4}", result.Flows[flow].ShortId);
 
                 // For each flow.
                 for (byte flow = 0; flow < result.FlowCount; flow++)
@@ -973,30 +975,38 @@ namespace Mercury
                         Program.Write(ConsoleColor.White, "|============================", attempt.ToString().PadRight(8));
                     }
                     Console.WriteLine();
-
-                    /*
-                    // Display the results statistics.
-                    Program.Write(ConsoleColor.White, "     ");
-                    for (byte attempt = 0; attempt < this.settingsIp.AttemptsPerFlow; attempt++)
-                    {
-                        switch (result.Statistics[(byte)MultipathTracerouteResult.ResultAlgorithm.Icmp, flow, attempt].State)
-                        {
-                            case MultipathTracerouteStatistics.StatisticsState.Completed:
-                                Program.Write(ConsoleColor.White, "| ", ConsoleColor.Green, "Completed".PadRight(22));
-                                break;
-                            case MultipathTracerouteStatistics.StatisticsState.Unreachable:
-                                Program.Write(ConsoleColor.White, "| ", ConsoleColor.Red, "Unreachable".PadRight(22));
-                                break;
-                            default:
-                                Program.Write(ConsoleColor.White, "| ", ConsoleColor.Yellow, "Unknown".PadRight(22));
-                                break;
-                        }
-                    }
-                    Console.WriteLine();
-                     */
                 }
-
             }
+        }
+
+        /// <summary>
+        /// Displays the step 2 for the AS level traceroute.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        private void DisplayAsTracerouteStep2(ASTracerouteResult result)
+        {
+            Console.WriteLine();
+            Program.WriteLine(ConsoleColor.Gray, "Step...................................", ConsoleColor.Magenta, "2");
+        }
+
+        /// <summary>
+        /// Displays the step 3 for the AS level traceroute.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        private void DisplayAsTracerouteStep3(ASTracerouteResult result)
+        {
+            Console.WriteLine();
+            Program.WriteLine(ConsoleColor.Gray, "Step...................................", ConsoleColor.Magenta, "3");
+        }
+
+        /// <summary>
+        /// Displays the step 4 for the AS level traceroute.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        private void DisplayAsTracerouteStep4(ASTracerouteResult result)
+        {
+            Console.WriteLine();
+            Program.WriteLine(ConsoleColor.Gray, "Step...................................", ConsoleColor.Magenta, "4");
         }
 
 		/// <summary>

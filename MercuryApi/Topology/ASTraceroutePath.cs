@@ -27,6 +27,54 @@ namespace Mercury.Topology
     /// </summary>
     public class ASTraceroutePath
     {
+        /// <summary>
+        /// The equality comparer for an AS traceroute path.
+        /// </summary>
+        public class EqualityComparer : IEqualityComparer<ASTraceroutePath>
+        {  
+            /// <summary>
+            /// Determines whether the specified objects are equal.
+            /// </summary>
+            /// <param name="first">The first path.</param>
+            /// <param name="second">The second path.</param>
+            /// <returns><b>True</b> if the specified objects are equal; otherwise, <b>false</b>.</returns>
+            public bool Equals(ASTraceroutePath first, ASTraceroutePath second)
+            {
+                if (first.hops.Count != second.hops.Count) return false;
+                if (first.IsSuccessful != second.IsSuccessful) return false;
+                for (int index = 0; index < first.hops.Count; index++)
+                    if (first.hops[index] != second.hops[index]) return false;
+                return true;
+            }
+
+            /// <summary>
+            /// Returns a hash code for the specified object.
+            /// </summary>
+            /// <param name="path">The path.</param>
+            /// <returns>A hash code for the specified path.</returns>
+            public int GetHashCode(ASTraceroutePath path)
+            {
+                int hashCode = path.IsSuccessful.GetHashCode();
+                foreach (ASTracerouteHop hop in path.hops)
+                    hashCode ^= hop.GetHashCode();
+                return hashCode;
+            }
+        }
+
+        /// <summary>
+        /// A hash set for AS traceroute path.
+        /// </summary>
+        public class HashSet : HashSet<ASTraceroutePath>
+        {
+            /// <summary>
+            /// Creates a new hash set instance.
+            /// </summary>
+            public HashSet()
+                : base(new EqualityComparer())
+            {
+            }
+        }
+
         private readonly List<ASTracerouteHop> hops = new List<ASTracerouteHop>();
 
         public List<MercuryAsTracerouteRelationship> relationships = new List<MercuryAsTracerouteRelationship>();

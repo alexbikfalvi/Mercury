@@ -154,11 +154,8 @@ namespace Mercury.Topology
                 }
             }
 
-            /*
-             * COMMENTED BECAUSE System.ArgumentOutOfRangeException in Program.cs
-             */
             // Call the callback method.
-            //result.Callback(ASTracerouteState.StateType.Step1);
+            result.Callback(ASTracerouteState.StateType.Step1);
 
             /*
              * STEP 2: Aggregate hops for the same path.
@@ -179,20 +176,19 @@ namespace Mercury.Topology
                         result.PathsStep1[(byte)algorithm, flow, attempt].AddDestination(destinationAsList);
                         // Aggregate the hops.
                         result.PathsStep2[(byte)algorithm, flow, attempt] = this.AggregateHops(result.PathsStep1[(byte)algorithm, flow, attempt]);
-                        // HERE NO!!! After aggregating FLOWS Add AS relationships
-                        //result.PathsStep3[(byte)algorithm, flow, attempt] = this.obtainASRelationships(result.PathsStep2[(byte)algorithm, flow, attempt]);
-
                     }
                 }
             }
 
+            // Call the callback method.
+            result.Callback(ASTracerouteState.StateType.Step2);
 
             /*
              * STEP 3: Aggregate attempt paths for the same flow.
              */
-            // Create the list of flow aggregated paths.
+
             // Compare the paths for different attempts in the same flow.
-            HashSet<ASTraceroutePath> attempts = new HashSet<ASTraceroutePath>();
+            ASTraceroutePath.HashSet attempts = new ASTraceroutePath.HashSet();
             foreach (MultipathTracerouteResult.ResultAlgorithm algorithm in traceroute.Algorithms)
             {
                 for (byte flow = 0; flow < traceroute.Settings.AttemptsPerFlow; flow++)
@@ -207,102 +203,98 @@ namespace Mercury.Topology
                     // If there is only one path.
                     if (attempts.Count == 1)
                     {
-                        //Here is where we have to call the code to solve loops
                         // Add the path to the result.
-                        result.PathsStep3[(byte)algorithm, flow] = removeLoops(attempts.First());
-                        
+                        result.PathsStep3[(byte)algorithm, flow] = this.IdentifyLoops(attempts.First());                       
                     }
                     else
                     {
-                        //We have distinct attempts, so we mark it with the flag
-                        result.PathsStep3[(byte)algorithm, flow] = new ASTraceroutePath(ASTracerouteFlags.FlowDistinctAttempts); ;
-                        
+                        // We have distinct attempts, so we mark it with the flag.
+                        result.PathsStep3[(byte)algorithm, flow] = new ASTraceroutePath(ASTracerouteFlags.FlowDistinctAttempts);                       
                     }
                 }
             }
-             
+
+            // Call the callback method.
+            result.Callback(ASTracerouteState.StateType.Step3);
 
             /*
              * Step 4: Save unique flows.
              */
-
             
             // Create the list of unique flows.
-            /*
-            HashSet<ASTraceroutePath> flows = new HashSet<ASTraceroutePath>();
+            ASTraceroutePath.HashSet flows = new ASTraceroutePath.HashSet();
             foreach (MultipathTracerouteResult.ResultAlgorithm algorithm in traceroute.Algorithms)
             {
                 for (byte flow = 0; flow < traceroute.Settings.AttemptsPerFlow; flow++)
                 {
-                    flows.Add(result.PathsStep3[(byte)algorithm, flow, attempt]);
+                    flows.Add(result.PathsStep3[(byte)algorithm, flow]);
                 }
             }
+            result.PathsStep4 = flows.ToArray();
+
+            // Call the callback method.
+            result.Callback(ASTracerouteState.StateType.Step4);
+
+            //Finally we add the MercuryAsTraceroute(es) to the Mercury Platform
+            //String result = MercuryService.addTracerouteASes(tracerouteASes);
+
+            /*
+            //LocalInformation localInformation = MercuryService.GetLocalInformation();
+            MercuryLocalInformation myInfo = MercuryService.GetLocalInformation();
+
+            List<MercuryIpToAsMapping> map = MercuryService.GetIpToAsMappings(IPAddress.Parse("8.8.8.85"));
+
+            //An example for obtaining the IP2ASN mappings in BULK max 1000 ips
+            List<List<MercuryIpToAsMapping>> ip2asMappings = MercuryService.GetIpToAsMappings(new IPAddress[]
+                {
+                    IPAddress.Parse("193.145.48.3"), IPAddress.Parse("8.8.8.85")
+                });
+
+            //An example for obtaining the IP2GEO in BULK mode max 1000 ips
+            List<MercuryIpToGeoMapping> ip2geoMappings = MercuryService.GetIp2GeoMappings(new IPAddress[]
+                {
+                    IPAddress.Parse("193.145.48.3"), IPAddress.Parse("8.8.8.85")
+                });
+
+            //An example for obtaining the AS rels in BULK mode
+            List<MercuryAsTracerouteRelationship> asRels = MercuryService.GetAsRelationships(new Tuple<int, int>[]
+                {
+                    new Tuple<int, int>(2, 3),
+                    new Tuple<int, int>(766, 3356),
+                    new Tuple<int, int>(2589, 6985)
+                });
+
+            //An example for obtaining the AS rel betwenn AS2 and AS3
+            MercuryAsTracerouteRelationship asRel = MercuryService.GetAsRelationship(2, 3);
+
+            //Alex you don't need this... but just in case...
+            //An example for obtaining TracerouteASes by destination domain
+            String dst = "yimg.com";
+            List<MercuryAsTraceroute> tases = MercuryService.GetTracerouteASesByDst(dst);
+
+            //An example for uploading a MercuryAsTraceroute
+            //First we generate a dummy object. Then this must be obtained from the result of the algorithm
+            MercuryAsTraceroute tas = MercuryService.generateTracerouteAS();
+            String result1 = MercuryService.addTracerouteAS(tas);
+            //An example for uploading many TracerouteASes in BULK mode
+            //First we generate dummy objects. Then this must be obtained from the result of the processing algorithm
+            List<MercuryAsTraceroute> tases2 = new List<MercuryAsTraceroute>();
+            tases2.Add(tas);
+            tases2.Add(tas);
+            tases2.Add(tas);
+            String result2 = MercuryService.addTracerouteASes(tases2);
+
+            //An example for uploading TracerouteSettings. 
+            //It returns the same ID if is new, it returns the existing ID if it already exists
+            Mercury.Api.MercuryTracerouteSettings tset = MercuryService.generateTracerouteSettings();
+            String result3 = MercuryService.addTracerouteSettings(tset);
+
+            //An example for uploading a TracerouteIp. Then this must be obtained from the result of the alogrithm
+            TracerouteIp tip = MercuryService.generateTracerouteIp();
+            String result4 = MercuryService.addTracerouteIp(tip);
             */
 
-                //Finally we add the MercuryAsTraceroute(es) to the Mercury Platform
-                //String result = MercuryService.addTracerouteASes(tracerouteASes);
-
-
-                /*
-
-                //LocalInformation localInformation = MercuryService.GetLocalInformation();
-                MercuryLocalInformation myInfo = MercuryService.GetLocalInformation();
-
-                List<MercuryIpToAsMapping> map = MercuryService.GetIpToAsMappings(IPAddress.Parse("8.8.8.85"));
-
-                //An example for obtaining the IP2ASN mappings in BULK max 1000 ips
-                List<List<MercuryIpToAsMapping>> ip2asMappings = MercuryService.GetIpToAsMappings(new IPAddress[]
-                    {
-                        IPAddress.Parse("193.145.48.3"), IPAddress.Parse("8.8.8.85")
-                    });
-
-                //An example for obtaining the IP2GEO in BULK mode max 1000 ips
-                List<MercuryIpToGeoMapping> ip2geoMappings = MercuryService.GetIp2GeoMappings(new IPAddress[]
-                    {
-                        IPAddress.Parse("193.145.48.3"), IPAddress.Parse("8.8.8.85")
-                    });
-
-                //An example for obtaining the AS rels in BULK mode
-                List<MercuryAsTracerouteRelationship> asRels = MercuryService.GetAsRelationships(new Tuple<int, int>[]
-                    {
-                        new Tuple<int, int>(2, 3),
-                        new Tuple<int, int>(766, 3356),
-                        new Tuple<int, int>(2589, 6985)
-                    });
-
-                //An example for obtaining the AS rel betwenn AS2 and AS3
-                MercuryAsTracerouteRelationship asRel = MercuryService.GetAsRelationship(2, 3);
-
-                //Alex you don't need this... but just in case...
-                //An example for obtaining TracerouteASes by destination domain
-                String dst = "yimg.com";
-                List<MercuryAsTraceroute> tases = MercuryService.GetTracerouteASesByDst(dst);
-
-                //An example for uploading a MercuryAsTraceroute
-                //First we generate a dummy object. Then this must be obtained from the result of the algorithm
-                MercuryAsTraceroute tas = MercuryService.generateTracerouteAS();
-                String result1 = MercuryService.addTracerouteAS(tas);
-                //An example for uploading many TracerouteASes in BULK mode
-                //First we generate dummy objects. Then this must be obtained from the result of the processing algorithm
-                List<MercuryAsTraceroute> tases2 = new List<MercuryAsTraceroute>();
-                tases2.Add(tas);
-                tases2.Add(tas);
-                tases2.Add(tas);
-                String result2 = MercuryService.addTracerouteASes(tases2);
-
-                //An example for uploading TracerouteSettings. 
-                //It returns the same ID if is new, it returns the existing ID if it already exists
-                Mercury.Api.MercuryTracerouteSettings tset = MercuryService.generateTracerouteSettings();
-                String result3 = MercuryService.addTracerouteSettings(tset);
-
-                //An example for uploading a TracerouteIp. Then this must be obtained from the result of the alogrithm
-                TracerouteIp tip = MercuryService.generateTracerouteIp();
-                String result4 = MercuryService.addTracerouteIp(tip);
-                */
-
-
-
-                return null;
+            return null;
 		}
 
         /// <summary>
@@ -314,93 +306,29 @@ namespace Mercury.Topology
         {
             // Create the resulting path.
             ASTraceroutePath result = new ASTraceroutePath();
-
-
-            /*
-             * STEP 1: Aggregate the hops that have the same AS number.
-             */
-
-            // Find the index of the first hop with an AS number.
-     //       int anchor = path.Hops.FindIndex(hop => hop.AsNumber.HasValue);
-
-            // TODO: If the anchor not found, return the path with an error flag.
-
-            // Add the anchor to the result.
-     //       result.Hops.Add(path.Hops[anchor]);
-
-            /*
-            // Start from the anchor towards the beginning.
-            for (int index = anchor - 1; index >= 0; index--)
-            {
-                ASTracerouteHop hopOld = path.Hops[index + 1];
-                ASTracerouteHop hopNew = path.Hops[index];
-                ASInformation info = null;
-
-                if (hopNew.IsEqualUniqueToMultiple(hopOld, out info))
-                {
-
-                }
-                else if (hopNew.IsEqualMultipleToMultiple(hopOld, out info))
-                {
-
-                }
-                else if (hopNew.IsEqualToMissing(hopNew))
-                {
-
-                }
-                else
-                {
-                    // Add the hop AS IS to the beggining of the path.
-                    result.Hops.Insert(0, hopNew);
-                }
-            }
-
-            // Start from the anchor towards the end.
-            for (int index = anchor + 1; index < path.Hops.Count; index++)
-            {
-                ASTracerouteHop hopOld = path.Hops[index - 1];
-                ASTracerouteHop hopNew = path.Hops[index];
-                ASInformation info = null;
-
-                if (hopNew.IsEqualUniqueToMultiple(hopOld, out info))
-                {
-                    // Do not add the hop, but set the multiple flag.
-                    hopOld.Flags |= ASTracerouteFlags.MultipleEqualNeighborPair
-                }
-                else if (hopNew.IsEqualMultipleToMultiple(hopOld, out info))
-                {
-                    // Do not add the hop, but set the multiple flag.
-                }
-                else if (hopNew.IsEqualToMissing(hopNew))
-                {
-
-                }
-                else
-                {
-                    // Add the hop AS IS to the end of the path.
-                }
-            }
-
-             */
-             
-             
-            /*
-             * STEP 2: Aggregate missing hops.
-             */
-            
-
                 
-                // For each hop
-                for (int hop = 1; hop < path.Hops.Count; hop++)
+            // For each hop
+            for (int hop = 1; hop < path.Hops.Count; hop++)
+            {
+                if (result.Hops.Count > 0)
                 {
-                    if (result.Hops.Count > 0)
+                    if (!path.Hops[hop].IsMissing(result.Hops[result.Hops.Count - 1])) //We compare with the last index of the aux list
                     {
-                        if (!path.Hops[hop].isMissing(result.Hops[result.Hops.Count - 1])) //We compare with the last index of the aux list
+                        ASInformation asInformation = null;
+                        if (!path.Hops[hop].IsEqualUnique(result.Hops[result.Hops.Count - 1], out asInformation))
                         {
-                            ASInformation asInformation = null;
-                            if (!path.Hops[hop].IsEqualUnique(result.Hops[result.Hops.Count - 1], out asInformation))
+                            if (path.Hops[hop].IsEqualUniqueToMultiple(result.Hops[result.Hops.Count - 1], out asInformation))
                             {
-                                if (path.Hops[hop].IsEqualUniqueToMultiple(result.Hops[result.Hops.Count - 1], out asInformation))
+                                result.Hops.RemoveAt(result.Hops.Count - 1);//We remove the previous
+                                ASTracerouteHop thop = new ASTracerouteHop();
+                                thop.AsSet.Add(asInformation);
+                                thop.AsNumber = asInformation.AsNumber;
+                                result.Hops.Add(thop);
+
+                            }
+                            else
+                            {
+                                if (path.Hops[hop].IsEqualMultipleToMultiple(result.Hops[result.Hops.Count - 1], out asInformation))
                                 {
                                     result.Hops.RemoveAt(result.Hops.Count - 1);//We remove the previous
                                     ASTracerouteHop thop = new ASTracerouteHop();
@@ -409,116 +337,99 @@ namespace Mercury.Topology
                                     result.Hops.Add(thop);
 
                                 }
-                                else
+                                else //is differentes ases (AS0-AS1), different multiple ases (AS0/AS1 - AS2/AS3) or missing-AS
                                 {
-                                    if (path.Hops[hop].IsEqualMultipleToMultiple(result.Hops[result.Hops.Count - 1], out asInformation))
+                                    //We check for missings in the middle of same AS
+                                    int j = 0;
+                                    for (j = hop; j < path.Hops.Count; j++)
                                     {
-                                        result.Hops.RemoveAt(result.Hops.Count - 1);//We remove the previous
-                                        ASTracerouteHop thop = new ASTracerouteHop();
-                                        thop.AsSet.Add(asInformation);
-                                        thop.AsNumber = asInformation.AsNumber;
-                                        result.Hops.Add(thop);
-
+                                        if (path.Hops[j].AsSet.Count > 0)
+                                        {
+                                            //z = j - i; //j is position of next hop with at least 1 AS.
+                                            break;
+                                        }
                                     }
-                                    else //is differentes ases (AS0-AS1), different multiple ases (AS0/AS1 - AS2/AS3) or missing-AS
+                                    if (path.Hops[hop].IsMissingInMiddleSameAS(result.Hops[result.Hops.Count - 1], path.Hops[j]))
                                     {
-                                        //We check for missings in the middle of same AS
-                                        int j = 0;
-                                        for (j = hop; j < path.Hops.Count; j++)
-                                        {
-                                            if (path.Hops[j].AsSet.Count > 0)
-                                            {
-                                                //z = j - i; //j is position of next hop with at least 1 AS.
-                                                break;
-                                            }
-                                        }
-                                        if (path.Hops[hop].isMissingInMiddleSameAS(result.Hops[result.Hops.Count - 1], path.Hops[j]))
-                                        {
-                                            hop = j;
-                                        }
-                                        else //No missing in the middle of same AS
-                                        {
-                                            result.Hops.Add(path.Hops[hop]);
-                                        }
-
+                                        hop = j;
                                     }
+                                    else //No missing in the middle of same AS
+                                    {
+                                        result.Hops.Add(path.Hops[hop]);
+                                    }
+
                                 }
                             }
-                            else
-                            {
-                                result.Hops.RemoveAt(result.Hops.Count - 1);//We remove the previous
-                                ASTracerouteHop thop = new ASTracerouteHop();
-                                thop.AsSet.Add(asInformation);
-                                thop.AsNumber = asInformation.AsNumber;
-                                result.Hops.Add(thop);
-                            }
-                        }
-
-                    }
-                    else //if result list is empty, we are in first hop
-                    {
-                        if (path.Hops[hop].isMissing(path.Hops[hop - 1]))
-                        {
-                            result.Hops.Add(new ASTracerouteHop());
                         }
                         else
                         {
-                            ASInformation asInformation = null;
-                            if (path.Hops[hop].IsEqualUnique(path.Hops[hop - 1], out asInformation))
+                            result.Hops.RemoveAt(result.Hops.Count - 1);//We remove the previous
+                            ASTracerouteHop thop = new ASTracerouteHop();
+                            thop.AsSet.Add(asInformation);
+                            thop.AsNumber = asInformation.AsNumber;
+                            result.Hops.Add(thop);
+                        }
+                    }
+
+                }
+                else //if result list is empty, we are in first hop
+                {
+                    if (path.Hops[hop].IsMissing(path.Hops[hop - 1]))
+                    {
+                        result.Hops.Add(new ASTracerouteHop());
+                    }
+                    else
+                    {
+                        ASInformation asInformation = null;
+                        if (path.Hops[hop].IsEqualUnique(path.Hops[hop - 1], out asInformation))
+                        {
+                            //we do not need to remove cause we are in first position
+                            ASTracerouteHop thop = new ASTracerouteHop();
+                            thop.AsSet.Add(asInformation);
+                            thop.AsNumber = asInformation.AsNumber;
+                            result.Hops.Add(thop);
+                        }
+                        else
+                        {
+                            if (path.Hops[hop].IsEqualUniqueToMultiple(path.Hops[hop - 1], out asInformation))
                             {
                                 //we do not need to remove cause we are in first position
                                 ASTracerouteHop thop = new ASTracerouteHop();
                                 thop.AsSet.Add(asInformation);
                                 thop.AsNumber = asInformation.AsNumber;
                                 result.Hops.Add(thop);
+
                             }
                             else
                             {
-                                if (path.Hops[hop].IsEqualUniqueToMultiple(path.Hops[hop - 1], out asInformation))
+                                if (path.Hops[hop].IsEqualMultipleToMultiple(path.Hops[hop - 1], out asInformation))
                                 {
                                     //we do not need to remove cause we are in first position
                                     ASTracerouteHop thop = new ASTracerouteHop();
                                     thop.AsSet.Add(asInformation);
                                     thop.AsNumber = asInformation.AsNumber;
                                     result.Hops.Add(thop);
-
                                 }
-                                else
+                                else //is differentes ases (AS0-AS1) or missing-AS
                                 {
-                                    if (path.Hops[hop].IsEqualMultipleToMultiple(path.Hops[hop - 1], out asInformation))
-                                    {
-                                        //we do not need to remove cause we are in first position
-                                        ASTracerouteHop thop = new ASTracerouteHop();
-                                        thop.AsSet.Add(asInformation);
-                                        thop.AsNumber = asInformation.AsNumber;
-                                        result.Hops.Add(thop);
-                                    }
-                                    else //is differentes ases (AS0-AS1) or missing-AS
-                                    {
-                                        result.Hops.Add(path.Hops[hop]);
-                                    }
+                                    result.Hops.Add(path.Hops[hop]);
                                 }
                             }
                         }
                     }
-
                 }
-                 
-
+            }
             return result;
         }
 
-
-        private ASTraceroutePath removeLoops(ASTraceroutePath path)
+        /// <summary>
+        /// Identifies loops in the current path.
+        /// </summary>
+        /// <param name="path">The AS path.</param>
+        /// <returns>The AS path.</returns>
+        private ASTraceroutePath IdentifyLoops(ASTraceroutePath path)
         {
-            // Create the resulting path.
-            ASTraceroutePath result = new ASTraceroutePath();
-/*
- TO DO AN ALGORITHM FOR DETECTING LOOPs AS1-AS2-AS1-AS3-AS4 -----> AS1-AS3-AS4
-        
- 
- */
-
+            // Return the path.
             return path;
         }
 
