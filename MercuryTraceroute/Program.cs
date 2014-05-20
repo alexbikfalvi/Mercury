@@ -835,11 +835,11 @@ namespace Mercury
             // Show the destination.
             Console.WriteLine();
             Program.WriteLine(ConsoleColor.Gray, "AS Traceroute ", ConsoleColor.Magenta, "{0} <--> {1}", resultIp.LocalAddress, resultIp.RemoteAddress);
-
+           
             using (CancellationTokenSource cancel = new CancellationTokenSource())
             {
                 // Run an AS-level traceroute.
-                ASTracerouteResult resultAs = this.tracerouteAs.Run(resultIp, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
+                ASTracerouteResult resultAs = this.tracerouteAs.Run(this.destination, resultIp, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
                     {
                         switch (state.Type)
                         {
@@ -903,9 +903,12 @@ namespace Mercury
                     // Display the hops data.
                     for (byte ttl = 0; ttl < maximumTtl; ttl++)
                     {
+
                         byte maximumAs = 1;
                         for (byte attempt = 0; attempt < result.AttemptCount; attempt++)
                         {
+                            if (ttl >= (byte)result.PathsStep1[(byte)algorithm, flow, attempt].Hops.Count) continue;
+
                             ASTracerouteHop hop = result.PathsStep1[(byte)algorithm, flow, attempt].Hops[ttl];
 
                             maximumAs = maximumAs < (byte)hop.AsSet.Count ? (byte)hop.AsSet.Count : maximumAs;
@@ -919,6 +922,12 @@ namespace Mercury
                                 Console.Write(string.Empty.PadLeft(5));
                             for (byte attempt = 0; attempt < result.AttemptCount; attempt++)
                             {
+                                if (ttl >= (byte)result.PathsStep1[(byte)algorithm, flow, attempt].Hops.Count)
+                                {
+                                    Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkRed, string.Empty.PadRight(27));
+                                    continue;
+                                }
+
                                 ASTracerouteHop hop = result.PathsStep1[(byte)algorithm, flow, attempt].Hops[ttl];
 
                                 switch (hop.IpData.State)
@@ -951,7 +960,7 @@ namespace Mercury
                                             else
                                             {
                                                 if (hop.IpData.Address.IsGlobalUnicastAddress())
-                                                    Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkRed, "No AS".PadRight(22));
+                                                    Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkRed, string.Empty.PadRight(22));
                                                 else
                                                     Program.Write(ConsoleColor.White, "| ", ConsoleColor.DarkRed, "Private".PadRight(22));
                                             }

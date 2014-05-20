@@ -58,8 +58,11 @@ namespace Mercury.Topology
 		/// <param name="cancel">The cancellation token.</param>
 		/// <param name="callback">The callback methods.</param>
 		/// <returns>The AS-level traceroute.</returns>
-		public ASTracerouteResult Run(MultipathTracerouteResult traceroute, CancellationToken cancel, ASTracerouteCallback callback)
+		public ASTracerouteResult Run(String destination, MultipathTracerouteResult traceroute, CancellationToken cancel, ASTracerouteCallback callback)
 		{
+            // Create the AS traceroute result.
+            ASTracerouteResult result = new ASTracerouteResult(traceroute, callback);
+
             // Create a list of IP addresses.
             HashSet<IPAddress> addresses = new HashSet<IPAddress>();
 
@@ -81,40 +84,22 @@ namespace Mercury.Topology
                 }
             }
 
+
+            //Get the destination URL
+            destination = "example.com";//traceroute.Stat
+
             // Add the public address and remote address. 
             MercuryLocalInformation localInformation = MercuryService.GetLocalInformation();
             addresses.Add(localInformation.Address);
             addresses.Add(traceroute.RemoteAddress);
 
-            // Create the AS traceroute result.
-            ASTracerouteResult result = new ASTracerouteResult(traceroute, callback);
+            // We pre-load the list of IP addresses to AS information and we stored it in cache.
+            this.cache.Update(addresses);
 
-            // Get the local AS information.
+            // Get the local public AS information.
             List<ASInformation> sourceAsList = this.cache.Get(localInformation.Address);
             // Get the remote AS information.
             List<ASInformation> destinationAsList = this.cache.Get(traceroute.RemoteAddress);
-
-            // Solve the list of IP addresses to AS information and we stored it in cache.
-            //List<List<MercuryIpToAsMapping>> mappings = this.cache.Get(addresses);
-
-
-            /*
-            //We pre-load the publicIp and the dstIp mappings
-            //public src
-            List<MercuryIpToAsMapping> publicMaps = this.cache.Get(localInformation.Address);
-            List<MercuryAsTracerouteHop> publicHops = new List<MercuryAsTracerouteHop>();
-            foreach (MercuryIpToAsMapping map in publicMaps)
-            {
-                publicHops.Add(new MercuryAsTracerouteHop(0, map.AsNumber, map.AsName, map.IxpName, map.Type, false));
-            }
-            //remote dst
-            List<MercuryIpToAsMapping> remoteMaps = this.cache.Get(traceroute.RemoteAddress);
-            List<MercuryAsTracerouteHop> remoteHops = new List<MercuryAsTracerouteHop>();
-
-
-            //We preload the src and dst geoMappings
-            String[] geoMappings = getGeoMappings(localInformation.Address, traceroute.RemoteAddress);
-            */
 
 
             /*
@@ -170,9 +155,9 @@ namespace Mercury.Topology
                     // For each attempt.
                     for (byte attempt = 0; attempt < traceroute.Settings.AttemptsPerFlow; attempt++)
                     {
-                        // Add the source AS.
+                        // Add the public source AS to the first position.
                         result.PathsStep1[(byte)algorithm, flow, attempt].AddSource(sourceAsList);
-                        // Add the destination AS.
+                        // Add the destination AS to the last position.
                         result.PathsStep1[(byte)algorithm, flow, attempt].AddDestination(destinationAsList);
                         // Aggregate the hops.
                         result.PathsStep2[(byte)algorithm, flow, attempt] = this.AggregateHops(result.PathsStep1[(byte)algorithm, flow, attempt]);
@@ -181,7 +166,7 @@ namespace Mercury.Topology
             }
 
             // Call the callback method.
-            result.Callback(ASTracerouteState.StateType.Step2);
+//            result.Callback(ASTracerouteState.StateType.Step2);
 
             /*
              * STEP 3: Aggregate attempt paths for the same flow.
@@ -215,7 +200,7 @@ namespace Mercury.Topology
             }
 
             // Call the callback method.
-            result.Callback(ASTracerouteState.StateType.Step3);
+//          result.Callback(ASTracerouteState.StateType.Step3);
 
             /*
              * Step 4: Save unique flows.
@@ -233,72 +218,28 @@ namespace Mercury.Topology
             result.PathsStep4 = flows.ToArray();
 
             // Call the callback method.
-            result.Callback(ASTracerouteState.StateType.Step4);
+//            result.Callback(ASTracerouteState.StateType.Step4);
 
-            //Finally we add the MercuryAsTraceroute(es) to the Mercury Platform
-            //String result = MercuryService.addTracerouteASes(tracerouteASes);
 
             /*
-            //LocalInformation localInformation = MercuryService.GetLocalInformation();
-            MercuryLocalInformation myInfo = MercuryService.GetLocalInformation();
+             * Step 5: Finally we generate and upload the MercuryAsTraceroute(es) to the Mercury Platform
+             */
+            List<MercuryAsTraceroute> tracerouteASes = new List<MercuryAsTraceroute>();
+            foreach (ASTraceroutePath path in result.PathsStep4)
+            {
+                tracerouteASes.Add( generateTracerouteAS(path, destination, localInformation.Address, traceroute.LocalAddress, traceroute.RemoteAddress) );
+            }
+            String mercuryPlatformResponse = MercuryService.addTracerouteASes(tracerouteASes);
 
-            List<MercuryIpToAsMapping> map = MercuryService.GetIpToAsMappings(IPAddress.Parse("8.8.8.85"));
-
-            //An example for obtaining the IP2ASN mappings in BULK max 1000 ips
-            List<List<MercuryIpToAsMapping>> ip2asMappings = MercuryService.GetIpToAsMappings(new IPAddress[]
-                {
-                    IPAddress.Parse("193.145.48.3"), IPAddress.Parse("8.8.8.85")
-                });
-
-            //An example for obtaining the IP2GEO in BULK mode max 1000 ips
-            List<MercuryIpToGeoMapping> ip2geoMappings = MercuryService.GetIp2GeoMappings(new IPAddress[]
-                {
-                    IPAddress.Parse("193.145.48.3"), IPAddress.Parse("8.8.8.85")
-                });
-
-            //An example for obtaining the AS rels in BULK mode
-            List<MercuryAsTracerouteRelationship> asRels = MercuryService.GetAsRelationships(new Tuple<int, int>[]
-                {
-                    new Tuple<int, int>(2, 3),
-                    new Tuple<int, int>(766, 3356),
-                    new Tuple<int, int>(2589, 6985)
-                });
-
-            //An example for obtaining the AS rel betwenn AS2 and AS3
-            MercuryAsTracerouteRelationship asRel = MercuryService.GetAsRelationship(2, 3);
-
-            //Alex you don't need this... but just in case...
-            //An example for obtaining TracerouteASes by destination domain
-            String dst = "yimg.com";
-            List<MercuryAsTraceroute> tases = MercuryService.GetTracerouteASesByDst(dst);
-
-            //An example for uploading a MercuryAsTraceroute
-            //First we generate a dummy object. Then this must be obtained from the result of the algorithm
-            MercuryAsTraceroute tas = MercuryService.generateTracerouteAS();
-            String result1 = MercuryService.addTracerouteAS(tas);
-            //An example for uploading many TracerouteASes in BULK mode
-            //First we generate dummy objects. Then this must be obtained from the result of the processing algorithm
-            List<MercuryAsTraceroute> tases2 = new List<MercuryAsTraceroute>();
-            tases2.Add(tas);
-            tases2.Add(tas);
-            tases2.Add(tas);
-            String result2 = MercuryService.addTracerouteASes(tases2);
-
-            //An example for uploading TracerouteSettings. 
-            //It returns the same ID if is new, it returns the existing ID if it already exists
-            Mercury.Api.MercuryTracerouteSettings tset = MercuryService.generateTracerouteSettings();
-            String result3 = MercuryService.addTracerouteSettings(tset);
-
-            //An example for uploading a TracerouteIp. Then this must be obtained from the result of the alogrithm
-            TracerouteIp tip = MercuryService.generateTracerouteIp();
-            String result4 = MercuryService.addTracerouteIp(tip);
-            */
+            
 
             return null;
 		}
 
+        #region Private methods
+
         /// <summary>
-        /// Aggregates equals AS hops for the specified AS path.
+        /// Aggregates equals AS hops for the specified AS path. It also adds flags to hops
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns>The aggregated AS path.</returns>
@@ -323,6 +264,8 @@ namespace Mercury.Topology
                                 ASTracerouteHop thop = new ASTracerouteHop();
                                 thop.AsSet.Add(asInformation);
                                 thop.AsNumber = asInformation.AsNumber;
+                                thop.Flags |= ASTracerouteFlags.MultipleAs;
+                                result.Flags |= thop.Flags | ASTracerouteFlags.MultipleAsEqualNeighbor; //We scale up the hop flag to the path
                                 result.Hops.Add(thop);
 
                             }
@@ -334,10 +277,12 @@ namespace Mercury.Topology
                                     ASTracerouteHop thop = new ASTracerouteHop();
                                     thop.AsSet.Add(asInformation);
                                     thop.AsNumber = asInformation.AsNumber;
+                                    thop.Flags |= ASTracerouteFlags.MultipleAs;
+                                    result.Flags |= thop.Flags | ASTracerouteFlags.MultipleAsEqualNeighbor; //We scale up the hop flag to the path
                                     result.Hops.Add(thop);
 
                                 }
-                                else //is differentes ases (AS0-AS1), different multiple ases (AS0/AS1 - AS2/AS3) or missing-AS
+                                else //if different ases (AS0-AS1), different multiple ases (AS0/AS1 - AS2/AS3) or missing-AS
                                 {
                                     //We check for missings in the middle of same AS
                                     int j = 0;
@@ -345,16 +290,19 @@ namespace Mercury.Topology
                                     {
                                         if (path.Hops[j].AsSet.Count > 0)
                                         {
-                                            //z = j - i; //j is position of next hop with at least 1 AS.
                                             break;
                                         }
                                     }
-                                    if (path.Hops[hop].IsMissingInMiddleSameAS(result.Hops[result.Hops.Count - 1], path.Hops[j]))
+                                    if (path.Hops[hop].IsMissingInMiddleSameAS(result.Hops[result.Hops.Count - 1], path.Hops[j])) //If missing in the middle of same as
                                     {
                                         hop = j;
+                                        result.Flags |= ASTracerouteFlags.MissingHopInsideAs;
                                     }
                                     else //No missing in the middle of same AS
                                     {
+                                        if (path.Hops[hop].AsSet.Count > 1) result.Flags = result.Flags | ASTracerouteFlags.MultipleAsDifferentNeighbor;
+                                        //if (path.Hops[hop].AsSet.Count == 1) result.Flags = result.Flags | ASTracerouteFlags.None;
+                                        if (path.Hops[hop].AsSet.Count == 1) result.Flags = result.Flags | ASTracerouteFlags.MissingHopEdgeAs;
                                         result.Hops.Add(path.Hops[hop]);
                                     }
 
@@ -367,6 +315,7 @@ namespace Mercury.Topology
                             ASTracerouteHop thop = new ASTracerouteHop();
                             thop.AsSet.Add(asInformation);
                             thop.AsNumber = asInformation.AsNumber;
+                            thop.Flags = ASTracerouteFlags.None;
                             result.Hops.Add(thop);
                         }
                     }
@@ -387,6 +336,7 @@ namespace Mercury.Topology
                             ASTracerouteHop thop = new ASTracerouteHop();
                             thop.AsSet.Add(asInformation);
                             thop.AsNumber = asInformation.AsNumber;
+                            thop.Flags = ASTracerouteFlags.None;
                             result.Hops.Add(thop);
                         }
                         else
@@ -397,6 +347,8 @@ namespace Mercury.Topology
                                 ASTracerouteHop thop = new ASTracerouteHop();
                                 thop.AsSet.Add(asInformation);
                                 thop.AsNumber = asInformation.AsNumber;
+                                thop.Flags = ASTracerouteFlags.MultipleAs;
+                                result.Flags = result.Flags | thop.Flags | ASTracerouteFlags.MultipleAsEqualNeighbor; //We scale up the hop flag to the path
                                 result.Hops.Add(thop);
 
                             }
@@ -408,10 +360,15 @@ namespace Mercury.Topology
                                     ASTracerouteHop thop = new ASTracerouteHop();
                                     thop.AsSet.Add(asInformation);
                                     thop.AsNumber = asInformation.AsNumber;
+                                    thop.Flags = ASTracerouteFlags.MultipleAs;
+                                    result.Flags = result.Flags | thop.Flags | ASTracerouteFlags.MultipleAsEqualNeighbor; //We scale up the hop flag to the path
                                     result.Hops.Add(thop);
                                 }
                                 else //is differentes ases (AS0-AS1) or missing-AS
                                 {
+                                    if (path.Hops[hop].AsSet.Count > 1) result.Flags = result.Flags | ASTracerouteFlags.MultipleAsDifferentNeighbor;
+                                    if (path.Hops[hop].AsSet.Count == 1) result.Flags = result.Flags | ASTracerouteFlags.None;
+                                    if (path.Hops[hop].AsSet.Count == 0) result.Flags = result.Flags | ASTracerouteFlags.MissingSource;
                                     result.Hops.Add(path.Hops[hop]);
                                 }
                             }
@@ -422,31 +379,45 @@ namespace Mercury.Topology
             return result;
         }
 
+
         /// <summary>
-        /// Identifies loops in the current path.
+        /// Identifies loops in the current path and activates flags if it finds it
         /// </summary>
         /// <param name="path">The AS path.</param>
         /// <returns>The AS path.</returns>
         private ASTraceroutePath IdentifyLoops(ASTraceroutePath path)
         {
+            for (int hop = 1; hop < path.Hops.Count-1; hop++)
+            {
+                //If loop found, we add the Flag
+                if (path.Hops[hop].IsOtherAsInMiddleSameAs(path.Hops[hop - 1], path.Hops[hop + 1]))
+                {
+                    path.Flags = path.Flags | ASTracerouteFlags.LoopPath;
+                    break;
+                }
+            }
             // Return the path.
             return path;
         }
 
-        
-        
-        private ASTraceroutePath obtainASRelationships(ASTraceroutePath asTraceroutePath)
+
+        /// <summary>
+        /// Processes all the AS Relationships in a path
+        /// </summary>
+        /// <param name="path">The AS path.</param>
+        /// <returns>The AS path.</returns>
+        private ASTraceroutePath obtainASRelationships(ASTraceroutePath path)
         {
-            for (byte i = 0; i < asTraceroutePath.Hops.Count() - 1; i++) //We end before the last hop
+            for (byte i = 0; i < path.Hops.Count() - 1; i++) //We end before the last hop
             {
-                if (asTraceroutePath.Hops.ElementAt(i).AsSet.Count() != 0 && asTraceroutePath.Hops.ElementAt(i + 1).AsSet.Count() != 0) //If NOT missing hops
+                if (path.Hops.ElementAt(i).AsSet.Count() != 0 && path.Hops.ElementAt(i + 1).AsSet.Count() != 0) //If NOT missing hops
                 {
                     MercuryAsTracerouteRelationship rel = null;
-                    int as0 = (int)asTraceroutePath.Hops.ElementAt(i).AsNumber;
-                    int as1 = (int)asTraceroutePath.Hops.ElementAt(i+1).AsNumber;
+                    int as0 = (int)path.Hops.ElementAt(i).AsNumber;
+                    int as1 = (int)path.Hops.ElementAt(i + 1).AsNumber;
 
                     //If is IXP
-                    if (asTraceroutePath.Hops.ElementAt(i + 1).AsSet.First().Type == ASInformation.AsType.Ixp)
+                    if (path.Hops.ElementAt(i + 1).AsSet.First().Type == ASInformation.AsType.Ixp)
                     {
                         rel = new MercuryAsTracerouteRelationship(MercuryAsTracerouteRelationship.RelationshipType.InternerExchangePoint, as0, as1, i);
                     }
@@ -455,29 +426,56 @@ namespace Mercury.Topology
                         rel = MercuryService.GetAsRelationship(as0, as1);
                         rel.Hop = i;
                     }
+                    path.relationships.Add(rel);
+                }
+                /*THIS IS NEW!! GUESSING RELs with MISSING HOPs in the MIDDLE*/
+                if (path.Hops.ElementAt(i).AsSet.Count() != 0 && path.Hops.ElementAt(i + 1).AsSet.Count() == 0) //Here we try to guess relationships with a missing hop in the middle
+                {
+                    if (i + 2 < path.Hops.Count()) //We check that we not overpass the limit
+                    {
+                        MercuryAsTracerouteRelationship rel = null;
+                        int as0 = (int)path.Hops.ElementAt(i).AsNumber;
+                        int as1 = (int)path.Hops.ElementAt(i + 2).AsNumber;
 
-                    asTraceroutePath.relationships.Add(rel);
+                        //If is IXP
+                        if (path.Hops.ElementAt(i + 2).AsSet.First().Type == ASInformation.AsType.Ixp)
+                        {
+                            rel = new MercuryAsTracerouteRelationship(MercuryAsTracerouteRelationship.RelationshipType.InternerExchangePoint, as0, as1, i);
+                        }
+                        else
+                        {
+                            rel = MercuryService.GetAsRelationship(as0, as1);
+                            rel.Hop = i;
+                        }
+                        path.relationships.Add(rel);
+                        i++; //we increment index because we jump a missing hop
+                    }
                 }
             }
-            return asTraceroutePath;
+            return path;
         }
-        
-        /*
-        
-        private MercuryAsTracerouteStats obtainTracerouteStatistics(ASTraceroutePath asTraceroutePath)
+
+
+        /// <summary>
+        /// Generates the statistics of a path
+        /// </summary>
+        /// <param name="path">The AS path.</param>
+        /// <returns>The AS Traceroute Stats.</returns>
+        private MercuryAsTracerouteStats obtainTracerouteStatistics(ASTraceroutePath path)
         {
             int asHops = 0;
             int c2pRels = 0,p2pRels = 0,p2cRels = 0,s2sRels = 0,ixpRels = 0,nfRels = 0;
             bool completed = false;
-            int flags = 0x0; //asTraceroutePath.flags.
+            int flags = (int)path.Flags;
 
-            //We count the asHops
-            asHops=asTraceroutePath.Hops.Count();
+            //We set completed to true if Flags is...
+            if (flags > 0x0) completed = true;
 
+            //We count the asHops - 1
+            asHops = path.Hops.Count() - 1;
 
             //We count the asRelationships
-            
-            foreach (MercuryAsTracerouteRelationship rel in asTraceroutePath.relationships)
+            foreach (MercuryAsTracerouteRelationship rel in path.relationships)
             {
                 if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.CustomerToProvider) {c2pRels++;}
                 else if(rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.PeerToPeer) {p2pRels++;}
@@ -491,8 +489,14 @@ namespace Mercury.Topology
 
             return new MercuryAsTracerouteStats(asHops,c2pRels,p2pRels,p2cRels,s2sRels,ixpRels,nfRels,completed,flags);
         }
-        
 
+
+        /// <summary>
+        /// Obtains the geomapping for the source and destination IP Address of a path
+        /// </summary>
+        /// <param name="srcIp">The source IP address.</param>
+        /// <param name="dstIp">The destination IP address.</param>
+        /// <returns>The an array with 4 positions. [0] srcCity [1]srcCountry [2]dstCity [3] dstCountry</returns>
         private String[] getGeoMappings(IPAddress srcIp, IPAddress dstIp)
         {
             //Geo
@@ -518,26 +522,39 @@ namespace Mercury.Topology
 
             return new string[] { srcCity, srcCountry, dstCity, dstCountry };
         }
-         
 
 
-        
-        private MercuryAsTraceroute generateTracerouteAS(ASTraceroutePath asTraceroutePath, String dst,
-                                                    IPAddress publicIP, IPAddress srcIp, IPAddress dstIp, String srcCity, String srcCountry, String dstCity, String dstCountry )
+
+        /// <summary>
+        /// Generates the Traceroute AS object to be sent to the Mercury Platform
+        /// </summary>
+        /// <param name="path">The AS path.</param>
+        /// <param name="dst">The URL destination (e.g. upf.edu).</param>
+        /// <param name="publicIP">The public IP address.</param>
+        /// <param name="srcIp">The source IP address of the host (usually a private IP address).</param>
+        /// <param name="dstIp">The destination IP address of the URL destination.</param>
+        /// <returns>The AS path.</returns>
+        private MercuryAsTraceroute generateTracerouteAS(ASTraceroutePath path, String dst,
+                                                    IPAddress publicIP, IPAddress srcIp, IPAddress dstIp )
         {
-
-            MercuryAsTracerouteStats tracerouteASStats = obtainTracerouteStatistics(asTraceroutePath);
-            //List<MercuryAsTracerouteRelationship> tracerouteASRelationships = new List<MercuryAsTracerouteRelationship>(asTraceroutePath.relationships.Values);
 
             //Let's play with hops!
             List<MercuryAsTracerouteHop> asHopsAux = new List<MercuryAsTracerouteHop>();
             byte hopCount = 0;
-            foreach (ASTracerouteHop asHop in asTraceroutePath.Hops)
+            foreach (ASTracerouteHop asHop in path.Hops)
             {
-                foreach (ASInformation info in asHop.AsSet)
+                if (asHop.AsSet.Count > 0)
                 {
-                    MercuryAsTracerouteHop hop = new MercuryAsTracerouteHop(hopCount, info, true);
-                    asHopsAux.Add(hop);
+                    foreach (ASInformation info in asHop.AsSet)
+                    {
+                        MercuryAsTracerouteHop hop = new MercuryAsTracerouteHop(hopCount, info);
+                        asHopsAux.Add(hop);
+                    }
+                }
+                else
+                {
+                    //Here we add missing hops
+                    asHopsAux.Add(new MercuryAsTracerouteHop(hopCount));
                 }
                 hopCount++;
             }
@@ -545,35 +562,43 @@ namespace Mercury.Topology
             //Now we search the src and the dst hops
             int srcAs = -1, dstAs = -1;
             String srcAsName = null, dstAsName = null;
-            if (asTraceroutePath.Hops.Count() > 0)
+            if (path.Hops.Count() > 0)
             {
-
-                if (asTraceroutePath.Hops.First().AsSet.Count() > 0)
+                if (path.Hops.First().AsSet.Count() > 0)
                 {
-
-                    srcAs = (int)asTraceroutePath.Hops.First().AsNumber;
-                    srcAsName = asTraceroutePath.Hops.First().AsSet.First().AsName;
+                    srcAs = (int)path.Hops.First().AsNumber;
+                    srcAsName = path.Hops.First().AsSet.First().AsName;
                 }
 
-                if (asTraceroutePath.Hops.Last().AsSet.Count() > 0)
+                if (path.Hops.Last().AsSet.Count() > 0)
                 {
-                    dstAs = (int) asTraceroutePath.Hops.Last().AsSet.First().AsNumber;
-                    dstAsName = asTraceroutePath.Hops.Last().AsSet.First().AsName;
+                    dstAs = (int)path.Hops.Last().AsSet.First().AsNumber;
+                    dstAsName = path.Hops.Last().AsSet.First().AsName;
                 }
-
             }
 
+            //Now we obtain the geomappings
+            String[] geoMappings = getGeoMappings(publicIP, dstIp);
+            String srcCity = geoMappings[0]; String srcCountry = geoMappings[1]; String dstCity = geoMappings[2]; String dstCountry = geoMappings[3];
 
+            //We obtain the traceroute AS Relationship before processing Stats
+            path = obtainASRelationships(path);
+            //We obtain the traceroute Stats
+            MercuryAsTracerouteStats tracerouteASStats = obtainTracerouteStatistics(path);
+
+            //We create the tracerouteAS object
             MercuryAsTraceroute tracerouteAS = new MercuryAsTraceroute(srcAs, srcAsName, srcIp.ToString(), publicIP.ToString(), srcCity, srcCountry,
                 dstAs, dstAsName, dstIp.ToString(), dst, dstCity, dstCountry, DateTime.UtcNow, tracerouteASStats);
 
+            //We add the hops
             tracerouteAS.Hops = asHopsAux;
-            //tracerouteAS.Relationships = tracerouteASRelationships;
+            //We add the relationships
+            tracerouteAS.Relationships = path.relationships;
 
             return tracerouteAS;
         }
-        
-        */
+
+        #endregion
 
     }
 }

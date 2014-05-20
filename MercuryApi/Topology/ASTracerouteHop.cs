@@ -91,7 +91,7 @@ namespace Mercury.Topology
         /// <summary>
         /// Returns the flags for this AS hop.
         /// </summary>
-        public ASTracerouteFlags Flags { get; private set; }
+        public ASTracerouteFlags Flags { get; set; }
         /// <summary>
         /// Returns true if this hop can be successfully solved to an AS number.
         /// </summary>

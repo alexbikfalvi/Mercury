@@ -34,19 +34,28 @@ namespace Mercury.Api
         public MercuryAsTracerouteHop() { }
 
         /// <summary>
+        /// Creates a new traceroute hop instance for missing hops.
+        /// </summary>
+        /// <param name="hop">The hop index.</param>
+        public MercuryAsTracerouteHop(byte hop) 
+        {
+            this.Hop = hop;
+        }
+
+        /// <summary>
         /// Creates a new traceroute hop instance.
         /// </summary>
         /// <param name="hop">The hop index.</param>
         /// <param name="infos">The AS information.</param>
-        /// <param name="isInferred">Indicates whether the hop AS is inferred.</param>
-        public MercuryAsTracerouteHop(byte hop, ASInformation info, bool isInferred)
+ //       /// <param name="isInferred">Indicates whether the hop AS is inferred.</param>
+        public MercuryAsTracerouteHop(byte hop, ASInformation info/*, bool isInferred*/)
         {
             this.Hop = hop;
             this.AsNumber = info.AsNumber;
             this.AsName = info.AsName;
             this.IxpName = info.IxpName;
             this.Type = info.Type;
-            this.IsInferred = isInferred;
+            //this.IsInferred = isInferred;
         }
 
         #region Public properties
@@ -77,11 +86,11 @@ namespace Mercury.Api
         [JsonConverter(typeof(JsonEnumConverter))]
         [JsonProperty("type")]
         public ASInformation.AsType Type { get; private set; }
-        /// <summary>
-        /// Indicates if we use an heuristic to determine what is the most suitable AS.
-        /// </summary>
-        [JsonProperty("inferred")]
-        public bool IsInferred { get; private set; }
+        ///// <summary>
+        ///// Indicates if we use an heuristic to determine what is the most suitable AS.
+        ///// </summary>
+        //[JsonProperty("inferred")]
+        //public bool IsInferred { get; private set; }
 
         #endregion
     }
