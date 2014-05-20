@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercuryApi", "MercuryApi\Me
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Newtonsoft.Json.Net40", "..\Newtonsoft.JsonNet\Newtonsoft.Json\Newtonsoft.Json.Net40.csproj", "{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercuryTool", "MercuryTool\MercuryTool.csproj", "{F96D1363-0C65-4EDE-ABF5-E5E67D4DFA76}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F96D1363-0C65-4EDE-ABF5-E5E67D4DFA76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F96D1363-0C65-4EDE-ABF5-E5E67D4DFA76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F96D1363-0C65-4EDE-ABF5-E5E67D4DFA76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F96D1363-0C65-4EDE-ABF5-E5E67D4DFA76}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

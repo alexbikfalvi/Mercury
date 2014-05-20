@@ -58,7 +58,7 @@ namespace Mercury.Topology
 		/// <param name="cancel">The cancellation token.</param>
 		/// <param name="callback">The callback methods.</param>
 		/// <returns>The AS-level traceroute.</returns>
-		public ASTracerouteResult Run(String destination, MultipathTracerouteResult traceroute, CancellationToken cancel, ASTracerouteCallback callback)
+		public ASTracerouteResult Run(MultipathTracerouteResult traceroute, CancellationToken cancel, ASTracerouteCallback callback)
 		{
             // Create the AS traceroute result.
             ASTracerouteResult result = new ASTracerouteResult(traceroute, callback);
@@ -83,10 +83,6 @@ namespace Mercury.Topology
                     }
                 }
             }
-
-
-            //Get the destination URL
-            destination = "example.com";//traceroute.Stat
 
             // Add the public address and remote address. 
             MercuryLocalInformation localInformation = MercuryService.GetLocalInformation();
@@ -224,13 +220,14 @@ namespace Mercury.Topology
             /*
              * Step 5: Finally we generate and upload the MercuryAsTraceroute(es) to the Mercury Platform
              */
+            /*
             List<MercuryAsTraceroute> tracerouteASes = new List<MercuryAsTraceroute>();
             foreach (ASTraceroutePath path in result.PathsStep4)
             {
                 tracerouteASes.Add( generateTracerouteAS(path, destination, localInformation.Address, traceroute.LocalAddress, traceroute.RemoteAddress) );
             }
             String mercuryPlatformResponse = MercuryService.addTracerouteASes(tracerouteASes);
-
+            */
             
 
             return null;

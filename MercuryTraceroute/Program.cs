@@ -839,7 +839,7 @@ namespace Mercury
             using (CancellationTokenSource cancel = new CancellationTokenSource())
             {
                 // Run an AS-level traceroute.
-                ASTracerouteResult resultAs = this.tracerouteAs.Run(this.destination, resultIp, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
+                ASTracerouteResult resultAs = this.tracerouteAs.Run(resultIp, cancel.Token, (ASTracerouteResult result, ASTracerouteState state) =>
                     {
                         switch (state.Type)
                         {
