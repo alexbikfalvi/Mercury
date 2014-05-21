@@ -159,7 +159,7 @@ namespace Mercury.Topology
                         }
 
                         // Add the address to the cache.
-                        this.ipMapping.Add(result[0].Address, list);
+                        this.ipMapping[result[0].Address] = list;
                     }
                 }
             }
