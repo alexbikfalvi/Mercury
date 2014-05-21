@@ -79,7 +79,8 @@ namespace Mercury.Topology
                     this.asMapping[info.AsNumber] = info;
                 }
                 // Add the address to the cache.
-                this.ipMapping.Add(address, list);
+                this.ipMapping[address] = list;
+                //this.ipMapping.Add(address, list);
                 // Return the mapping.
                 return list;
             }
@@ -139,7 +140,8 @@ namespace Mercury.Topology
                     }
 
                     // Add the address to the cache.
-                    this.ipMapping.Add(result[0].Address, list);
+                    //this.ipMapping.Add(result[0].Address, list);
+                    this.ipMapping[result[0].Address] = list;
                 }
             }
         }
