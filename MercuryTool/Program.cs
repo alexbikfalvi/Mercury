@@ -41,6 +41,13 @@ namespace MercuryTool
         /// <param name="args"></param>
         public Program(string[] args)
         {
+            //we can collect URLs from args[0] comma-separated URLs "facebook.com,google.com,twitter.com"
+            if (args.Length > 0)
+            {
+                Console.WriteLine("URLs to process: " + args[0]);
+                this.destinations = args[0].Split(new char[] { ',' });
+            }
+                
             // Set the source address.
             this.sourceAddress = Dns.GetHostAddresses(Dns.GetHostName()).First(ip => ip.AddressFamily == AddressFamily.InterNetwork);
 
@@ -84,15 +91,17 @@ namespace MercuryTool
         /// </summary>
         public void Run()
         {
-            // Get the current locale.
-            //using (WebClient client = new WebClient())
-            //{
-            //    this.destinations = client.DownloadString(
-            //        "http://inetanalytics.nets.upf.edu/getUrls?countryCode={0}".FormatWith(RegionInfo.CurrentRegion.TwoLetterISORegionName)).Split(
-            //        new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            //}
-
-            this.destinations = new String[]{"google.com"};
+            //If we do not have parameters, we load destinations from Server
+            if (destinations.Length == 0)
+            {
+                // Get URLs using the current locale.
+                using (WebClient client = new WebClient())
+                {
+                    this.destinations = client.DownloadString(
+                        "http://inetanalytics.nets.upf.edu/getUrls?countryCode={0}".FormatWith(RegionInfo.CurrentRegion.TwoLetterISORegionName)).Split(
+                        new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                }
+            }
 
             lock (this.sync) 
             {
