@@ -19,9 +19,10 @@ namespace MercuryTool
 
         private string[] destinations = null;
 
-        private int parallelCount = 20;
+        private int parallelCount = 8;
         private int processingCount = 0;
         private int completedCount = 0;
+        private int waitTimeBeforeInitialThreads = 2000; //in millis
 
         private readonly Dictionary<IPAddress, ASTraceroutePath[]> cacheIps = new Dictionary<IPAddress, ASTraceroutePath[]>();
 
@@ -93,7 +94,7 @@ namespace MercuryTool
         public void Run()
         {
             //If we do not have parameters, we load destinations from Server
-            if (destinations.Length == 0)
+            if (destinations == null)
             {
                 // Get URLs using the current locale.
                 using (WebClient client = new WebClient())
@@ -109,7 +110,7 @@ namespace MercuryTool
                 // Run the number of parallel destinations on the thread pool.
                 for (; (processingCount < parallelCount) && (processingCount < destinations.Length); processingCount++)
                 {
-                    Thread.Sleep(250);
+                    Thread.Sleep(waitTimeBeforeInitialThreads);
                     ThreadPool.QueueUserWorkItem((object destination) => 
                     { 
                         this.Run(destination as string); 
