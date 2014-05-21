@@ -19,8 +19,9 @@ namespace MercuryTool
 
         private string[] destinations = null;
 
-        private int parallelCount = 8;
+        private int parallelCount = 20;
         private int processingCount = 0;
+        private int completedCount = 0;
 
         private readonly Dictionary<IPAddress, ASTraceroutePath[]> cacheIps = new Dictionary<IPAddress, ASTraceroutePath[]>();
 
@@ -108,6 +109,7 @@ namespace MercuryTool
                 // Run the number of parallel destinations on the thread pool.
                 for (; (processingCount < parallelCount) && (processingCount < destinations.Length); processingCount++)
                 {
+                    Thread.Sleep(250);
                     ThreadPool.QueueUserWorkItem((object destination) => 
                     { 
                         this.Run(destination as string); 
@@ -136,12 +138,18 @@ namespace MercuryTool
                     foreach (IPAddress destinationAddress in destinationAddresses)
                     {
 
-                        if (cacheIps.ContainsKey(destinationAddress)) //If destionation IP is contained in cache, we re-use it!
+                        ASTraceroutePath[] result;
+                        bool foundInCache = false;
+                        lock (this.sync)
+                        {
+                            foundInCache = this.cacheIps.TryGetValue(destinationAddress, out result);
+                        }
+                        if (foundInCache)
                         {
                             Program.WriteLine(ConsoleColor.Magenta, "Processing URL from CACHE: " + destination + " to ip: " + destinationAddress.ToString());
                             Run(this.cacheIps[destinationAddress], destination, sourceAddress, destinationAddress);
                         }
-                        else //If destionation IP is not contained in cache we process it!
+                        else
                         {
                             Program.WriteLine(ConsoleColor.Cyan, "Processing URL: " + destination + " to ip: " + destinationAddress.ToString());
                             try
@@ -153,6 +161,25 @@ namespace MercuryTool
                                 Program.WriteLine(ConsoleColor.Red, "Traceroute failed {0} ({1} --> {2}) / {3}", destination, sourceAddress, destinationAddress, exception.Message);
                             }
                         }
+
+
+                        //if (cacheIps.ContainsKey(destinationAddress)) //If destionation IP is contained in cache, we re-use it!
+                        //{
+                        //    Program.WriteLine(ConsoleColor.Magenta, "Processing URL from CACHE: " + destination + " to ip: " + destinationAddress.ToString());
+                        //    Run(this.cacheIps[destinationAddress], destination, sourceAddress, destinationAddress);
+                        //}
+                        //else //If destionation IP is not contained in cache we process it!
+                        //{
+                        //    Program.WriteLine(ConsoleColor.Cyan, "Processing URL: " + destination + " to ip: " + destinationAddress.ToString());
+                        //    try
+                        //    {
+                        //        this.Run(ipTraceroute, destination, sourceAddress, destinationAddress);
+                        //    }
+                        //    catch (Exception exception)
+                        //    {
+                        //        Program.WriteLine(ConsoleColor.Red, "Traceroute failed {0} ({1} --> {2}) / {3}", destination, sourceAddress, destinationAddress, exception.Message);
+                        //    }
+                        //}
 
                     }
                 }
@@ -175,8 +202,10 @@ namespace MercuryTool
                     // Increment the processing count.
                     this.processingCount++;
                 }
-                else
-                {
+                this.completedCount++;    
+                
+                if(this.completedCount == destinations.Length)
+                {                    
                     // Signal the wait handle.
                     this.wait.Set();
                 }
@@ -201,8 +230,11 @@ namespace MercuryTool
             // Run the AS-level traceroute.
             ASTracerouteResult resultAs = tracerouteAs.Run(resultIp, CancellationToken.None, null);
             // We add the results to the cache to reduce the number of processes
-           cacheIps[destinationAddress] = resultAs.PathsStep4;
-            
+            lock (this.sync)
+            {
+                cacheIps[destinationAddress] = resultAs.PathsStep4;
+            }
+
             // Upload the traceroute result to Mercury.
            if (resultAs.PathsStep4 != null)
            {
