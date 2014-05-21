@@ -14,12 +14,13 @@ namespace MercuryTool
 {
     public sealed class Program : IDisposable
     {
+        private readonly object sync = new object();
+
         private string[] destinations = null;
 
-        private int workerThreadCount = 20;
-        private const int completionThreadCount = 1024;
+        private int parallelCount = 2;
+        private int processingCount = 0;
 
-        private int resultsCount = 0;
         private readonly ManualResetEvent wait = new ManualResetEvent(false);
 
         private readonly MultipathTracerouteSettings ipSettings = new MultipathTracerouteSettings();
@@ -82,15 +83,12 @@ namespace MercuryTool
                     new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             }
 
-            // Set the program thread pool.
-            ThreadPool.SetMaxThreads(this.workerThreadCount, Program.completionThreadCount);
-
-            // Run each destination on the thread pool.
-            foreach (string destination in this.destinations)
+            // Run the number of parallel destinations on the thread pool.
+            for (; (processingCount < parallelCount) && (processingCount < destinations.Length); processingCount++)
             {
                 ThreadPool.QueueUserWorkItem((object state) =>
                     {
-                        this.Run(destination);
+                        this.Run(this.destinations[processingCount]);
                     });
             }
 
@@ -116,7 +114,6 @@ namespace MercuryTool
                     {
                         try
                         {
-
                             this.Run(ipTraceroute, destination, sourceAddress, destinationAddress);
                         }
                         catch (Exception exception)
@@ -131,14 +128,24 @@ namespace MercuryTool
                 Program.WriteLine(ConsoleColor.Red, "Traceroute failed {0} / {1}", destination, exception.Message);
             }
 
-            // Increment the results count.
-            Interlocked.Increment(ref this.resultsCount);
-
-            // If all destinations are completed.
-            if (this.resultsCount == this.destinations.Length)
+            lock (this.sync)
             {
-                // Signal the wait handle.
-                this.wait.Set();
+                // If not all destinations are completed.
+                if (this.processingCount < this.destinations.Length)
+                {
+                    // Start a new thread.
+                    ThreadPool.QueueUserWorkItem((object state) =>
+                        {
+                            this.Run(this.destinations[this.processingCount]);
+                        });
+                    // Increment the processing count.
+                    this.processingCount++;
+                }
+                else
+                {
+                    // Signal the wait handle.
+                    this.wait.Set();
+                }
             }
         }
 
