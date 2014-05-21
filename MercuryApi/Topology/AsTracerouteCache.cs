@@ -31,6 +31,8 @@ namespace Mercury.Topology
 	/// </summary>
 	public sealed class ASTracerouteCache
 	{
+        private readonly object sync = new object();
+
 		private readonly ASTracerouteSettings settings;
 
         private readonly Dictionary<IPAddress, List<ASInformation>> ipMapping =
@@ -58,32 +60,39 @@ namespace Mercury.Topology
         {
             List<ASInformation> list;
 
-            // Try and get the value from the cache.
-            if (this.ipMapping.TryGetValue(address, out list))
+            lock (this.sync)
             {
-                // If the value is found, return the mapping.
-                return list;
-            }
-            else
-            {
-                // Create a new list.
-                list = new List<ASInformation>();
-                // Get the mapping using the Mercury service.
-                foreach (MercuryIpToAsMapping mapping in MercuryService.GetIpToAsMappings(address))
+                // Try and get the value from the cache.
+                if (this.ipMapping.TryGetValue(address, out list))
                 {
-                    // Create a new AS information.
-                    ASInformation info = new ASInformation(mapping);
-                    // Add the AS information to the list.
-                    list.Add(info);
+                    // If the value is found, return the mapping.
+                    return list;
+                }
+            }
+
+            // Create a new list.
+            list = new List<ASInformation>();
+            // Get the mapping using the Mercury service.
+            foreach (MercuryIpToAsMapping mapping in MercuryService.GetIpToAsMappings(address))
+            {
+                // Create a new AS information.
+                ASInformation info = new ASInformation(mapping);
+                // Add the AS information to the list.
+                list.Add(info);
+            }
+
+            lock (this.sync)
+            {
+                foreach (ASInformation info in list)
+                {
                     // Add the AS to the cache.
                     this.asMapping[info.AsNumber] = info;
                 }
                 // Add the address to the cache.
-                this.ipMapping[address] = list;
-                //this.ipMapping.Add(address, list);
-                // Return the mapping.
-                return list;
+                this.ipMapping.Add(address, list);
             }
+            // Return the mapping.
+            return list;
         }
 
         /// <summary>
@@ -96,17 +105,20 @@ namespace Mercury.Topology
             // The list of not found IP addresses.
             HashSet<IPAddress> notFoundAddresses = new HashSet<IPAddress>();
 
-            // Add the mappings found in the cache.
-            foreach (IPAddress address in addresses)
+            lock (this.sync)
             {
-                // If the IP address is private
-                if (!address.IsGlobalUnicastAddress()) continue;
-
-                // Check if the address is contained in the cache.
-                if (this.ipMapping.ContainsKey(address))
+                // Add the mappings found in the cache.
+                foreach (IPAddress address in addresses)
                 {
-                    // If the value is not found, add the address to the not found addresses list.
-                    notFoundAddresses.Add(address);
+                    // If the IP address is private
+                    if (!address.IsGlobalUnicastAddress()) continue;
+
+                    // Check if the address is contained in the cache.
+                    if (this.ipMapping.ContainsKey(address))
+                    {
+                        // If the value is not found, add the address to the not found addresses list.
+                        notFoundAddresses.Add(address);
+                    }
                 }
             }
             
@@ -121,27 +133,34 @@ namespace Mercury.Topology
                     MercuryService.maximumAddressesPerRequest : notFoundAddresses.Count - index;
 
                 // Request the IP to AS mappings.
-                foreach(List<MercuryIpToAsMapping> result in MercuryService.GetIpToAsMappings(notFoundAddressesList, index, count))
+                List<List<MercuryIpToAsMapping>> results = MercuryService.GetIpToAsMappings(notFoundAddressesList, index, count);
+
+                // Create the AS information list.
+                List<ASInformation> list = new List<ASInformation>();
+
+                lock (this.sync)
                 {
-                    if (0 == result.Count) continue;
-
-                    // Create a new list.
-                    List<ASInformation> list = new List<ASInformation>();
-
-                    // For each mapping in the result.
-                    foreach (MercuryIpToAsMapping mapping in result)
+                    foreach (List<MercuryIpToAsMapping> result in results)
                     {
-                        // Create an AS information.
-                        ASInformation info = new ASInformation(mapping);
-                        // Add the information to the list.
-                        list.Add(info);
-                        // Add the AS to the cache.
-                        this.asMapping[mapping.AsNumber] = info;
-                    }
+                        if (0 == result.Count) continue;
 
-                    // Add the address to the cache.
-                    //this.ipMapping.Add(result[0].Address, list);
-                    this.ipMapping[result[0].Address] = list;
+                        // Clear the AS information list.
+                        list.Clear();
+
+                        // For each mapping in the result.
+                        foreach (MercuryIpToAsMapping mapping in result)
+                        {
+                            // Create an AS information.
+                            ASInformation info = new ASInformation(mapping);
+                            // Add the information to the list.
+                            list.Add(info);
+                            // Add the AS to the cache.
+                            this.asMapping[mapping.AsNumber] = info;
+                        }
+
+                        // Add the address to the cache.
+                        this.ipMapping.Add(result[0].Address, list);
+                    }
                 }
             }
         }
