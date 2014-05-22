@@ -277,7 +277,11 @@ namespace Mercury.Topology
                                             break;
                                         }
                                     }
-                                    if (path.Hops[hop].IsMissingInMiddleSameAS(result.Hops[result.Hops.Count - 1], path.Hops[j])) //If missing in the middle of same as
+                                    if(j==path.Hops.Count)
+                                    {
+                                        result.Flags |= ASTracerouteFlags.MissingDestination;
+                                    }
+                                    else if (path.Hops[hop].IsMissingInMiddleSameAS(result.Hops[result.Hops.Count - 1], path.Hops[j])) //If missing in the middle of same as
                                     {
                                         hop = j;
                                         result.Flags |= ASTracerouteFlags.MissingHopInsideAs;
@@ -399,27 +403,17 @@ namespace Mercury.Topology
         /// <returns></returns>
         private ASTraceroutePath CorrectFirstLoop(ASTraceroutePath path)
         {
-            int hopsCount = path.Hops.Count();
-            if (hopsCount > 2)//If we have more that 2 hops
-            {
-                int index = 2;
-                bool found = false;
-                while (!found && index < hopsCount)
-                {
-                    //Find next NO-missing after index 2
-                    if (path.Hops[index].AsSet.Count() == 0) //If it is missing
-                    {
-                        index++;
-                    }
-                    else break;
-                }
+            if (path.Hops.Count <= 2) return path;
 
-                if(path.Hops[1].IsOtherAsInMiddleSameAs(path.Hops[0],path.Hops[index]))
+            int firstIndex = path.Hops[0].AsNumber.HasValue ? 0 : 1;
+
+            for (int index = firstIndex + 2; index < path.Hops.Count; index++)
+            {
+                if (path.Hops[index].AsNumber.HasValue ? path.Hops[index].AsNumber == path.Hops[firstIndex].AsNumber : false)
                 {
                     path.Hops.RemoveAt(index);
                 }
             }
-
             return path;
         }
         
