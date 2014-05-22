@@ -1,4 +1,22 @@
-﻿using System;
+﻿/* 
+ * Copyright (C) 2014 Alex Bikfalvi, Manuel Palacin
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or (at
+ * your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
@@ -40,9 +58,9 @@ namespace MercuryTool
         private readonly IPAddress publicAddress;
 
         /// <summary>
-        /// Constructor.
+        /// Creates a new program instance.
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">The program arguments.</param>
         public Program(string[] args)
         {
             //we can collect URLs from args[0] comma-separated URLs "facebook.com,google.com,twitter.com"
@@ -102,7 +120,8 @@ namespace MercuryTool
                 using (WebClient client = new WebClient())
                 {
                     this.destinations = client.DownloadString(
-                        "http://inetanalytics.nets.upf.edu/getUrls?countryCode={0}".FormatWith(RegionInfo.CurrentRegion.TwoLetterISORegionName)).Split(
+                        "http://inetanalytics.nets.upf.edu/getUrls?countryCode=ES").Split(
+                        //"http://inetanalytics.nets.upf.edu/getUrls?countryCode={0}".FormatWith(RegionInfo.CurrentRegion.TwoLetterISORegionName)).Split(
                         new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 }
             }
@@ -129,7 +148,6 @@ namespace MercuryTool
         /// <param name="destination">The destination.</param>
         public void Run(string destination)
         {
-            
             try
             {
                 // Create the IP level traceroute.
@@ -152,7 +170,7 @@ namespace MercuryTool
                         if (foundInCache)
                         {
                             Program.WriteLine(ConsoleColor.Magenta, "Processing URL from CACHE: " + destination + " to ip: " + destinationAddress.ToString());
-                            Run(this.cacheIps[destinationAddress], destination, sourceAddress, destinationAddress);
+                            this.Run(this.cacheIps[destinationAddress], destination, sourceAddress, destinationAddress);
                         }
                         else
                         {
@@ -225,7 +243,7 @@ namespace MercuryTool
            {
                lock (this.sync)
                {
-                   uploadTraces(resultAs.PathsStep4, destination, destinationAddress);
+                   this.UploadTraces(resultAs.PathsStep4, destination, destinationAddress);
                }
                // Write the destination.
                Program.Write(ConsoleColor.Green, "Success Traceroute to........");
@@ -244,19 +262,19 @@ namespace MercuryTool
         /// Run method that is executed because destination IP is gathered from CACHE,
         /// so we only need to upload it
         /// </summary>
-        /// <param name="Paths"></param>
+        /// <param name="paths"></param>
         /// <param name="destination"></param>
         /// <param name="sourceAddress"></param>
         /// <param name="destinationAddress"></param>
-        public void Run(ASTraceroutePath[] Paths, string destination, IPAddress sourceAddress, IPAddress destinationAddress)
+        public void Run(ASTraceroutePath[] paths, string destination, IPAddress sourceAddress, IPAddress destinationAddress)
         {
 
             // Upload the traceroute result to Mercury.
-            if (Paths != null)
+            if (paths != null)
             {
                 lock (this.sync)
                 {
-                    uploadTraces(Paths, destination, destinationAddress);
+                    this.UploadTraces(paths, destination, destinationAddress);
                 }
                 // Write the destination.
                 Program.Write(ConsoleColor.Green, "CACHE: Success Traceroute to........");
@@ -341,15 +359,12 @@ namespace MercuryTool
             Console.ResetColor();
         }
 
-
-
-
         /// <summary>
-        /// Processes all the AS Relationships in a path
+        /// Processes all the AS relationships in an AS path.
         /// </summary>
         /// <param name="path">The AS path.</param>
         /// <returns>The AS path.</returns>
-        private ASTraceroutePath obtainASRelationships(ASTraceroutePath path)
+        private ASTraceroutePath ObtainASRelationships(ASTraceroutePath path)
         {
             for (byte i = 0; i < path.Hops.Count() - 1; i++) //We end before the last hop
             {
@@ -404,7 +419,7 @@ namespace MercuryTool
         /// </summary>
         /// <param name="path">The AS path.</param>
         /// <returns>The AS Traceroute Stats.</returns>
-        private MercuryAsTracerouteStats obtainTracerouteStatistics(ASTraceroutePath path)
+        private MercuryAsTracerouteStats ComputeTracerouteStatistics(ASTraceroutePath path)
         {
             int asHops = 0;
             int c2pRels = 0, p2pRels = 0, p2cRels = 0, s2sRels = 0, ixpRels = 0, nfRels = 0;
@@ -419,15 +434,18 @@ namespace MercuryTool
             //We set completed to true if Flags is...
             if (flags > 0x0) completed = true;
 
-            //We count the asRelationships
+            // Count the AS relationships.
             foreach (MercuryAsTracerouteRelationship rel in path.relationships)
             {
-                if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.CustomerToProvider) { c2pRels++; }
-                else if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.PeerToPeer) { p2pRels++; }
-                else if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.ProviderToCustomer) { p2cRels++; }
-                else if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.SiblingToSibling) { s2sRels++; }
-                else if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.InternerExchangePoint) { ixpRels++; }
-                else if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.NotFound) { nfRels++; }
+                switch (rel.Relationship)
+                {
+                case MercuryAsTracerouteRelationship.RelationshipType.CustomerToProvider: c2pRels++; break;
+                case MercuryAsTracerouteRelationship.RelationshipType.PeerToPeer: p2pRels++; break;
+                case MercuryAsTracerouteRelationship.RelationshipType.ProviderToCustomer: p2cRels++; break;
+                case MercuryAsTracerouteRelationship.RelationshipType.SiblingToSibling: s2sRels++; break;
+                case MercuryAsTracerouteRelationship.RelationshipType.InternerExchangePoint: ixpRels++; break;
+                case MercuryAsTracerouteRelationship.RelationshipType.NotFound: nfRels++; break;
+                }
             }
 
             return new MercuryAsTracerouteStats(asHops, c2pRels, p2pRels, p2cRels, s2sRels, ixpRels, nfRels, completed, flags);
@@ -440,36 +458,18 @@ namespace MercuryTool
         /// <param name="srcIp">The source IP address.</param>
         /// <param name="dstIp">The destination IP address.</param>
         /// <returns>The an array with 4 positions. [0] srcCity [1]srcCountry [2]dstCity [3] dstCountry</returns>
-        private String[] getGeoMappings(IPAddress srcIp, IPAddress dstIp)
+        private String[] GetGeoMappings(IPAddress srcIp, IPAddress dstIp)
         {
-            //Geo
-
-            String srcCity = "", srcCountry = "", dstCity = "", dstCountry = "";
-            List<MercuryIpToGeoMapping> ip2geoMappings = MercuryService.GetIp2GeoMappings(new IPAddress[]
-                    {
-                        srcIp,dstIp
-                    });
-            foreach (MercuryIpToGeoMapping geo in ip2geoMappings)
-            {
-                if (geo.Address.ToString() == srcIp.ToString())
-                {
-                    srcCity = geo.City;
-                    srcCountry = geo.CountryName;
-                }
-                if (geo.Address.ToString() == dstIp.ToString())
-                {
-                    dstCity = geo.City;
-                    dstCountry = geo.CountryName;
-                }
-            }
-
+            List<MercuryIpToGeoMapping> mappings = MercuryService.GetIp2GeoMappings(new IPAddress[] { srcIp, dstIp });
+            string srcCity = mappings.First(mapping => mapping.Address.Equals(srcIp)).City;
+            string srcCountry = mappings.First(mapping => mapping.Address.Equals(srcIp)).CountryName;
+            string dstCity = mappings.First(mapping => mapping.Address.Equals(dstIp)).City;
+            string dstCountry = mappings.First(mapping => mapping.Address.Equals(dstIp)).CountryName;
             return new string[] { srcCity, srcCountry, dstCity, dstCountry };
         }
 
-
-
         /// <summary>
-        /// Generates the Traceroute AS object to be sent to the Mercury Platform
+        /// Generates the Traceroute AS object to be sent to the Mercury platform.
         /// </summary>
         /// <param name="path">The AS path.</param>
         /// <param name="dst">The URL destination (e.g. upf.edu).</param>
@@ -477,8 +477,8 @@ namespace MercuryTool
         /// <param name="srcIp">The source IP address of the host (usually a private IP address).</param>
         /// <param name="dstIp">The destination IP address of the URL destination.</param>
         /// <returns>The AS path.</returns>
-        private MercuryAsTraceroute generateTracerouteAS(ASTraceroutePath path, String dst,
-                                                    IPAddress publicIP, IPAddress srcIp, IPAddress dstIp)
+        private MercuryAsTraceroute GenerateAsTraceroute(ASTraceroutePath path, String dst,
+            IPAddress publicIP, IPAddress srcIp, IPAddress dstIp)
         {
 
             //Let's play with hops!
@@ -521,16 +521,16 @@ namespace MercuryTool
             }
 
             //Now we obtain the geomappings
-            String[] geoMappings = getGeoMappings(publicIP, dstIp);
+            String[] geoMappings = GetGeoMappings(publicIP, dstIp);
             String srcCity = geoMappings[0]; String srcCountry = geoMappings[1]; String dstCity = geoMappings[2]; String dstCountry = geoMappings[3];
 
             //We obtain the traceroute AS Relationship before processing Stats
             if(path.relationships.Count() == 0 ) //if not cached relationships... we process them
             {
-                path = obtainASRelationships(path);
+                path = this.ObtainASRelationships(path);
             }
             //We obtain the traceroute Stats
-            MercuryAsTracerouteStats tracerouteASStats = obtainTracerouteStatistics(path);
+            MercuryAsTracerouteStats tracerouteASStats = ComputeTracerouteStatistics(path);
 
             //We create the tracerouteAS object
             MercuryAsTraceroute tracerouteAS = new MercuryAsTraceroute(srcAs, srcAsName, srcIp.ToString(), publicIP.ToString(), srcCity, srcCountry,
@@ -544,7 +544,7 @@ namespace MercuryTool
             return tracerouteAS;
         }
 
-        private void uploadTraces(ASTraceroutePath[] Paths, String destination, IPAddress destinationAddress)
+        private void UploadTraces(ASTraceroutePath[] Paths, String destination, IPAddress destinationAddress)
         {
     
             // Here we upload the MercuryAsTraceroute(es) to the Mercury Platform
@@ -554,13 +554,11 @@ namespace MercuryTool
             {
                 //We only process paths with at least 1 hop
                 if(path.Hops.Count() > 0)
-                    tracerouteASes.Add(generateTracerouteAS(path, destination, publicAddress, sourceAddress, destinationAddress));
+                    tracerouteASes.Add(GenerateAsTraceroute(path, destination, publicAddress, sourceAddress, destinationAddress));
             }
             String mercuryPlatformResponse = MercuryService.addTracerouteASes(tracerouteASes);
             
         }
-
-
 
         #endregion
 
