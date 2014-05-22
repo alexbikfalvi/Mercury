@@ -185,7 +185,8 @@ namespace Mercury.Topology
                     if (attempts.Count == 1)
                     {
                         // Add the path to the result.
-                        result.PathsStep3[(byte)algorithm, flow] = this.IdentifyLoops(attempts.First());                       
+                        result.PathsStep3[(byte)algorithm, flow] = this.IdentifyLoops(attempts.First()); //identify loops
+                        result.PathsStep3[(byte)algorithm, flow] = this.CorrectFirstLoop(attempts.First()); //Corect the first loop
                     }
                     else
                     {
@@ -391,7 +392,36 @@ namespace Mercury.Topology
             return path;
         }
 
+        /// <summary>
+        /// It is common a loop in local ISP, so we correct it
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private ASTraceroutePath CorrectFirstLoop(ASTraceroutePath path)
+        {
+            int hopsCount = path.Hops.Count();
+            if (hopsCount > 2)//If we have more that 2 hops
+            {
+                int index = 2;
+                bool found = false;
+                while (!found && index < hopsCount)
+                {
+                    //Find next NO-missing after index 2
+                    if (path.Hops[index].AsSet.Count() == 0) //If it is missing
+                    {
+                        index++;
+                    }
+                    else break;
+                }
 
+                if(path.Hops[1].IsOtherAsInMiddleSameAs(path.Hops[0],path.Hops[index]))
+                {
+                    path.Hops.RemoveAt(index);
+                }
+            }
+
+            return path;
+        }
         
 
         #endregion
