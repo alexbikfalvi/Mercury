@@ -162,7 +162,7 @@ namespace Mercury.Topology
             }
 
             // Call the callback method.
-//            result.Callback(ASTracerouteState.StateType.Step2);
+            result.Callback(ASTracerouteState.StateType.Step2);
 
             /*
              * STEP 3: Aggregate attempt paths for the same flow.
@@ -196,7 +196,7 @@ namespace Mercury.Topology
             }
 
             // Call the callback method.
-//          result.Callback(ASTracerouteState.StateType.Step3);
+          result.Callback(ASTracerouteState.StateType.Step3);
 
             /*
              * Step 4: Save unique flows.
@@ -214,7 +214,7 @@ namespace Mercury.Topology
             result.PathsStep4 = flows.ToArray();
 
             // Call the callback method.
-//            result.Callback(ASTracerouteState.StateType.Step4);
+            result.Callback(ASTracerouteState.StateType.Step4);
 
             return result;
 		}

@@ -24,6 +24,8 @@ namespace MercuryTool
         private int completedCount = 0;
         private int waitTimeBeforeInitialThreads = 2000; //in millis
 
+        private int maxDnsIps = 3; //Maximum number of returned IPs by the DNS
+
         private readonly Dictionary<IPAddress, ASTraceroutePath[]> cacheIps = new Dictionary<IPAddress, ASTraceroutePath[]>();
 
         private readonly ManualResetEvent wait = new ManualResetEvent(false);
@@ -135,6 +137,8 @@ namespace MercuryTool
                 {
                     // TODO: Run the DNS client to get all IP addresses for the current destination.
                     IPAddress[] destinationAddresses = Dns.GetHostAddresses(destination);
+                    // We only accept at most maxDnsIps DNS IPs 
+                    if (destinationAddresses.Length > maxDnsIps) Array.Resize(ref destinationAddresses, maxDnsIps);
 
                     foreach (IPAddress destinationAddress in destinationAddresses)
                     {
@@ -162,25 +166,6 @@ namespace MercuryTool
                                 Program.WriteLine(ConsoleColor.Red, "Traceroute failed {0} ({1} --> {2}) / {3}", destination, sourceAddress, destinationAddress, exception.Message);
                             }
                         }
-
-
-                        //if (cacheIps.ContainsKey(destinationAddress)) //If destionation IP is contained in cache, we re-use it!
-                        //{
-                        //    Program.WriteLine(ConsoleColor.Magenta, "Processing URL from CACHE: " + destination + " to ip: " + destinationAddress.ToString());
-                        //    Run(this.cacheIps[destinationAddress], destination, sourceAddress, destinationAddress);
-                        //}
-                        //else //If destionation IP is not contained in cache we process it!
-                        //{
-                        //    Program.WriteLine(ConsoleColor.Cyan, "Processing URL: " + destination + " to ip: " + destinationAddress.ToString());
-                        //    try
-                        //    {
-                        //        this.Run(ipTraceroute, destination, sourceAddress, destinationAddress);
-                        //    }
-                        //    catch (Exception exception)
-                        //    {
-                        //        Program.WriteLine(ConsoleColor.Red, "Traceroute failed {0} ({1} --> {2}) / {3}", destination, sourceAddress, destinationAddress, exception.Message);
-                        //    }
-                        //}
 
                     }
                 }
@@ -223,13 +208,12 @@ namespace MercuryTool
         public void Run(MultipathTraceroute tracerouteIp, string destination, IPAddress sourceAddress, IPAddress destinationAddress)
         {
 
-            //System.Threading.Thread.Sleep(2000);
-
             // Run the IPv4 traceroute.
             MultipathTracerouteResult resultIp = tracerouteIp.RunIpv4(sourceAddress, destinationAddress, CancellationToken.None, null);
 
             // Run the AS-level traceroute.
             ASTracerouteResult resultAs = tracerouteAs.Run(resultIp, CancellationToken.None, null);
+            
             // We add the results to the cache to reduce the number of processes
             lock (this.sync)
             {
@@ -239,14 +223,17 @@ namespace MercuryTool
             // Upload the traceroute result to Mercury.
            if (resultAs.PathsStep4 != null)
            {
-               uploadTraces(resultAs.PathsStep4, destination, destinationAddress);
+               lock (this.sync)
+               {
+                   uploadTraces(resultAs.PathsStep4, destination, destinationAddress);
+               }
                // Write the destination.
-               Program.Write(ConsoleColor.White, "Success Traceroute to........");
+               Program.Write(ConsoleColor.Green, "Success Traceroute to........");
            }
            else
            {
                // Write the destination.
-               Program.Write(ConsoleColor.White, "NO Traceroute to........");
+               Program.Write(ConsoleColor.Red, "NO Traceroute (no paths) to........");
            } 
             Program.Write(ConsoleColor.Cyan, destination.PadLeft(50));
             Program.WriteLine(ConsoleColor.Yellow, "{0} --> {1}", sourceAddress, destinationAddress);
@@ -267,14 +254,17 @@ namespace MercuryTool
             // Upload the traceroute result to Mercury.
             if (Paths != null)
             {
-                uploadTraces(Paths, destination, destinationAddress);
+                lock (this.sync)
+                {
+                    uploadTraces(Paths, destination, destinationAddress);
+                }
                 // Write the destination.
-                Program.Write(ConsoleColor.White, "CACHE: Success Traceroute to........");
+                Program.Write(ConsoleColor.Green, "CACHE: Success Traceroute to........");
             }
             else
             {
                 // Write the destination.
-                Program.Write(ConsoleColor.White, "CACHE: NO Traceroute to........");
+                Program.Write(ConsoleColor.Red, "CACHE: NO Traceroute (no paths) to........");
             }
             Program.Write(ConsoleColor.Cyan, destination.PadLeft(50));
             Program.WriteLine(ConsoleColor.Yellow, "{0} --> {1}", sourceAddress, destinationAddress);
@@ -421,13 +411,13 @@ namespace MercuryTool
             bool completed = false;
             int flags = (int)path.Flags;
 
-            //We set completed to true if Flags is...
-            if (flags > 0x0) completed = true;
-
             //OLD We count the asHops - 1
             //OLD asHops = path.Hops.Count() - 1;
-            //We count the asHops as relationships -1
-            asHops = path.relationships.Count() - 1;
+            //We count the asHops as relationships
+            asHops = path.relationships.Count();
+
+            //We set completed to true if Flags is...
+            if (flags > 0x0) completed = true;
 
             //We count the asRelationships
             foreach (MercuryAsTracerouteRelationship rel in path.relationships)
@@ -439,8 +429,6 @@ namespace MercuryTool
                 else if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.InternerExchangePoint) { ixpRels++; }
                 else if (rel.Relationship == MercuryAsTracerouteRelationship.RelationshipType.NotFound) { nfRels++; }
             }
-
-            if (flags < 0x2) completed = true;
 
             return new MercuryAsTracerouteStats(asHops, c2pRels, p2pRels, p2cRels, s2sRels, ixpRels, nfRels, completed, flags);
         }
@@ -537,7 +525,10 @@ namespace MercuryTool
             String srcCity = geoMappings[0]; String srcCountry = geoMappings[1]; String dstCity = geoMappings[2]; String dstCountry = geoMappings[3];
 
             //We obtain the traceroute AS Relationship before processing Stats
-            path = obtainASRelationships(path);
+            if(path.relationships.Count() == 0 ) //if not cached relationships... we process them
+            {
+                path = obtainASRelationships(path);
+            }
             //We obtain the traceroute Stats
             MercuryAsTracerouteStats tracerouteASStats = obtainTracerouteStatistics(path);
 
