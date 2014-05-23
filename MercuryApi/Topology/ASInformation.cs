@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using Mercury.Api;
 using Mercury.Json;
@@ -28,6 +29,33 @@ namespace Mercury.Topology
     /// </summary>
     public class ASInformation
     {
+        /// <summary>
+        /// The equality comparer for an AS traceroute path.
+        /// </summary>
+        public class EqualityComparer : IEqualityComparer<ASInformation>
+        {
+            /// <summary>
+            /// Determines whether the specified objects are equal.
+            /// </summary>
+            /// <param name="first">The first info.</param>
+            /// <param name="second">The second info.</param>
+            /// <returns><b>True</b> if the specified objects are equal; otherwise, <b>false</b>.</returns>
+            public bool Equals(ASInformation first, ASInformation second)
+            {
+                return first.AsNumber == second.AsNumber;
+            }
+
+            /// <summary>
+            /// Returns a hash code for the specified object.
+            /// </summary>
+            /// <param name="info">The info.</param>
+            /// <returns>A hash code for the specified info.</returns>
+            public int GetHashCode(ASInformation info)
+            {
+                return info.AsNumber.GetHashCode();
+            }
+        }
+
         /// <summary>
         /// The AS type.
         /// </summary>
@@ -99,22 +127,37 @@ namespace Mercury.Topology
 
         #endregion
 
+        #region
 
+        public static bool operator ==(ASInformation first, ASInformation second)
+        {
+            if ((null == first) && (null == second)) return true;
+            if (null == first) return false;
+            if (null == second) return false;
+            return first.AsNumber == second.AsNumber;
+        }
 
+        public static bool operator !=(ASInformation first, ASInformation second)
+        {
+            return !(first == second);
+        }
 
+        #endregion
 
-        //#region Public methods
-        //public override bool Equals(ASInformation info)
-        //{
-        //    if (this.AsNumber == info.AsNumber) return true;
-        //    else return false;
-        //}
+        #region Public methods
 
-        //public override int GetHashCode()
-        //{
-        //    return this.AsNumber.GetHashCode();
-        //}
+        public override bool Equals(object obj)
+        {
+            ASInformation info = obj as ASInformation;
+            if (null == info) return false;
+            return this.AsNumber == info.AsNumber;
+        }
 
-        //#endregion
+        public override int GetHashCode()
+        {
+            return this.AsNumber.GetHashCode();
+        }
+
+        #endregion
     }
 }

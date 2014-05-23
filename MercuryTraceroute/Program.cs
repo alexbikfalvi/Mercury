@@ -952,10 +952,13 @@ namespace Mercury
                                                 ASInformation asInfo = hop.AsSet.ElementAt(asIndex);
                                                 
                                                 // Write the AS type for non-positive AS number.
-                                                if (asInfo.AsNumber > 0)
-                                                    Program.Write(ConsoleColor.Green, "{0}".FormatWith(asInfo.AsNumber).PadRight(6));
-                                                else
-                                                    Program.Write(ConsoleColor.Yellow, "{0}".FormatWith(asInfo.Type.GetDescription()).PadRight(6));
+                                                switch (asInfo.Type)
+                                                {
+                                                    case ASInformation.AsType.As:
+                                                        Program.Write(ConsoleColor.Green, "{0}".FormatWith(asInfo.AsNumber).PadRight(6)); break;
+                                                    case ASInformation.AsType.Ixp:
+                                                        Program.Write(ConsoleColor.Yellow, "*{0}".FormatWith(asInfo.AsNumber).PadRight(6)); break;
+                                                }
                                             }
                                             else
                                             {

@@ -29,7 +29,7 @@ namespace Mercury.Topology
     /// </summary>
     public class ASTracerouteHop
     {
-        private readonly HashSet<ASInformation> asSet = new HashSet<ASInformation>();
+        private readonly HashSet<ASInformation> asSet = new HashSet<ASInformation>(new ASInformation.EqualityComparer());
 
         /// <summary>
         /// Creates a new AS traceroute hop for a missing AS.
@@ -49,7 +49,10 @@ namespace Mercury.Topology
             // Set the list of ASes.
             foreach (ASInformation info in list)
             {
-                this.asSet.Add(info);
+                if (info.AsNumber > 0)
+                {
+                    this.asSet.Add(info);
+                }
             }
             if (0 == this.asSet.Count)
             {

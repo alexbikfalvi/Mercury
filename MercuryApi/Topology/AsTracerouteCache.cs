@@ -32,6 +32,7 @@ namespace Mercury.Topology
 	public sealed class ASTracerouteCache
 	{
         private readonly object sync = new object();
+        private static readonly List<ASInformation> empty = new List<ASInformation>(0);
 
 		private readonly ASTracerouteSettings settings;
 
@@ -58,6 +59,9 @@ namespace Mercury.Topology
 		/// <returns>The address information.</returns>
         public List<ASInformation> Get(IPAddress address)
         {
+            // If the IP address is private.
+            if (!address.IsGlobalUnicastAddress()) return ASTracerouteCache.empty;
+
             List<ASInformation> list;
 
             lock (this.sync)
@@ -110,7 +114,7 @@ namespace Mercury.Topology
                 // Add the mappings found in the cache.
                 foreach (IPAddress address in addresses)
                 {
-                    // If the IP address is private
+                    // If the IP address is private.
                     if (!address.IsGlobalUnicastAddress()) continue;
 
                     // Check if the address is contained in the cache.
