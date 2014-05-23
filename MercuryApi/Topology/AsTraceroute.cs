@@ -372,7 +372,18 @@ namespace Mercury.Topology
                     }
                 }
             }
-            return result;
+
+            //BUG TO SOLVE. There are some traces that the dstAS is equal to srcAS and is not Akamai servers
+            //If the processed dstAS number does not correspond with the dstAS 
+            if (result.Hops.Last().AsNumber.HasValue && path.Hops.Last().AsNumber.HasValue)
+            {
+                if (result.Hops.Last().AsNumber != path.Hops.Last().AsNumber)
+                {
+                    result.Hops.Clear();
+                }
+            }
+            return result; 
+
         }
 
 
