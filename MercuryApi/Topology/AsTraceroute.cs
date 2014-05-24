@@ -229,8 +229,22 @@ namespace Mercury.Topology
         /// <returns>The aggregated AS path.</returns>
         private ASTraceroutePath AggregateHops(ASTraceroutePath path)
         {
+
             // Create the resulting path.
             ASTraceroutePath result = new ASTraceroutePath();
+
+            //There are some traces that the dstAS is equal to srcAS (Akamai, Google servers)
+            //If the srcAS number correspond with the dstAS we create a path with only ONE hop
+            if (path.Hops.Last().AsNumber.HasValue && path.Hops.Last().AsNumber.HasValue)
+            {
+                if (path.Hops.First().AsNumber == path.Hops.Last().AsNumber)
+                {
+                    result.Hops.Add(path.Hops.First());
+                    return result;
+                }
+            }
+
+
                 
             // For each hop
             for (int hop = 1; hop < path.Hops.Count; hop++)
@@ -373,15 +387,7 @@ namespace Mercury.Topology
                 }
             }
 
-            //BUG TO SOLVE. There are some traces that the dstAS is equal to srcAS and is not Akamai servers
-            //If the processed dstAS number does not correspond with the dstAS 
-            if (result.Hops.Last().AsNumber.HasValue && path.Hops.Last().AsNumber.HasValue)
-            {
-                if (result.Hops.Last().AsNumber != path.Hops.Last().AsNumber)
-                {
-                    result.Hops.Clear();
-                }
-            }
+
             return result; 
 
         }
