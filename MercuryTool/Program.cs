@@ -346,12 +346,12 @@ namespace MercuryTool
             if (paths != null)
             {
                 // Upload the traceroute.
-                //this.UploadTraces(paths, destination, destinationAddress);
+                this.Upload(paths, destination, destinationAddress);
             }
             else
             {
                 // Write the destination.
-                //Program.Write(ConsoleColor.Red, "CACHE: NO Traceroute (no paths) to........");
+                Program.Write(ConsoleColor.Red, "NO Traceroute upload (because no paths) for........"+destination);
             }
         }
 
@@ -424,7 +424,7 @@ namespace MercuryTool
             asHops = path.relationships.Count();
 
             //We set completed to true if Flags is...
-            if (flags > 0x0) completed = true;
+            if (path.Flags.IsSuccessful()) completed = true;
 
             // Count the AS relationships.
             foreach (MercuryAsTracerouteRelationship rel in path.relationships)

@@ -35,7 +35,7 @@ namespace Mercury.Topology
         MultipleEqualNeighborPair = 0x8, // [AS0] - [AS0 AS?] - [AS0 AS?] - [AS?]
         MultipleDifferentNeighborPair = 0x20000, // [AS?] - [AS? AS?] - [AS? AS?] - [AS?]
         MissingHopInsideAs = 0x10,
-        MissingHopEdgeAs = 0x40000,
+        MissingHopEdgeAs = 0x400, //Temporary change the level (0x40000) for (0x400)
         MissingSource = 0x80000,
         MissingDestination = 0x100000,
         LoopPath = 0x200000,

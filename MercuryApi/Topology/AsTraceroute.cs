@@ -199,10 +199,25 @@ namespace Mercury.Topology
                         result.PathsStep3[(byte)algorithm, flow] = this.IdentifyLoops(attempts.First()); //identify loops
                         result.PathsStep3[(byte)algorithm, flow] = this.CorrectFirstLoop(attempts.First()); //Corect the first loop
                     }
+                    else if (attempts.Count == 2) // Temporary solution... we choose the attempt with the best flags
+                    {
+                        ASTraceroutePath tempPath = null;
+                        if (attempts.First().Flags > attempts.Last().Flags)
+                        {
+                            tempPath = attempts.Last();
+                        }
+                        else
+                        {
+                            tempPath = attempts.First();
+                        }
+                        // Add the path to the result.
+                        result.PathsStep3[(byte)algorithm, flow] = this.IdentifyLoops(tempPath); //identify loops
+                        result.PathsStep3[(byte)algorithm, flow] = this.CorrectFirstLoop(tempPath); //Corect the first loop
+                    }
                     else
                     {
                         // We have distinct attempts, so we mark it with the flag.
-                        result.PathsStep3[(byte)algorithm, flow] = new ASTraceroutePath(ASTracerouteFlags.FlowDistinctAttempts);                       
+                        result.PathsStep3[(byte)algorithm, flow] = new ASTraceroutePath(ASTracerouteFlags.FlowDistinctAttempts);   
                     }
                 }
             }
@@ -244,7 +259,29 @@ namespace Mercury.Topology
         {
             // Create the resulting path.
             ASTraceroutePath result = new ASTraceroutePath();
-                
+
+            //If dstAS is equal to srcAS we have servers inside AS (Google/Akamai)
+            if (path.Hops.First().AsNumber.HasValue && path.Hops.Last().AsNumber.HasValue)
+            {
+                if (path.Hops.First().AsNumber == path.Hops.Last().AsNumber)
+                {
+                    result.Hops.Add(path.Hops.First());
+                    return result;
+                }
+            }
+    
+            //SPECIAL CASE: If there are only two valid hops in path
+            if (path.Hops.Count() == 2)
+            {
+                if (path.Hops.First().AsNumber.HasValue && path.Hops.Last().AsNumber.HasValue)
+                {
+                    if (path.Hops.First().AsNumber != path.Hops.Last().AsNumber)
+                    {
+                        return path;
+                    }
+                }
+            }
+
             // For each hop
             for (int hop = 1; hop < path.Hops.Count; hop++)
             {
@@ -386,15 +423,7 @@ namespace Mercury.Topology
                 }
             }
 
-            //BUG TO SOLVE. There are some traces that the dstAS is equal to srcAS and is not Akamai servers
-            //If the processed dstAS number does not correspond with the dstAS 
-            if (result.Hops.Last().AsNumber.HasValue && path.Hops.Last().AsNumber.HasValue)
-            {
-                if (result.Hops.Last().AsNumber != path.Hops.Last().AsNumber)
-                {
-                    result.Hops.Clear();
-                }
-            }
+
             return result; 
 
         }
@@ -407,17 +436,34 @@ namespace Mercury.Topology
         /// <returns>The AS path.</returns>
         private ASTraceroutePath IdentifyLoops(ASTraceroutePath path)
         {
-            for (int hop = 1; hop < path.Hops.Count-1; hop++)
-            {
-                //If loop found, we add the Flag
-                if (path.Hops[hop].IsOtherAsInMiddleSameAs(path.Hops[hop - 1], path.Hops[hop + 1]))
+            HashSet<int> asNumbers = new HashSet<int>();
+            foreach(ASTracerouteHop hop in path.Hops ){
+                if (hop.AsNumber.HasValue)
                 {
-                    path.Flags = path.Flags | ASTracerouteFlags.LoopPath;
-                    break;
+                    if(asNumbers.Contains((int)hop.AsNumber))
+                    {
+                        path.Flags = path.Flags | ASTracerouteFlags.LoopPath;
+                        break;
+                    }
+                    else
+                    {
+                        asNumbers.Add((int)hop.AsNumber);
+                    }
                 }
             }
-            // Return the path.
             return path;
+
+            //for (int hop = 1; hop < path.Hops.Count-1; hop++)
+            //{
+            //    //If loop found, we add the Flag
+            //    if (path.Hops[hop].IsOtherAsInMiddleSameAs(path.Hops[hop - 1], path.Hops[hop + 1]))
+            //    {
+            //        path.Flags = path.Flags | ASTracerouteFlags.LoopPath;
+            //        break;
+            //    }
+            //}
+            //// Return the path.
+            //return path;
         }
 
         /// <summary>
