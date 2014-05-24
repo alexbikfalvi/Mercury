@@ -51,7 +51,18 @@ namespace Mercury.Topology
             this.cache = new ASTracerouteCache(this.settings);
 		}
 
-		/// <summary>
+        #region Public properties
+
+        /// <summary>
+        /// Gets the AS traceroute cache.
+        /// </summary>
+        public ASTracerouteCache Cache { get { return this.cache; } }
+
+        #endregion
+
+        #region Public methods
+
+        /// <summary>
 		/// Runs an AS-level traceroute starting from the specified IP-level multipath traceroute.
 		/// </summary>
 		/// <param name="traceroute">The IP-level multipath traceroute.</param>
@@ -93,9 +104,9 @@ namespace Mercury.Topology
             this.cache.Update(addresses);
 
             // Get the local public AS information.
-            List<ASInformation> sourceAsList = this.cache.Get(localInformation.Address);
+            List<ASInformation> sourceAsList = this.cache.GetUpdate(localInformation.Address);
             // Get the remote AS information.
-            List<ASInformation> destinationAsList = this.cache.Get(traceroute.RemoteAddress);
+            List<ASInformation> destinationAsList = this.cache.GetUpdate(traceroute.RemoteAddress);
 
 
             /*
@@ -120,7 +131,7 @@ namespace Mercury.Topology
                             if (traceroute.Data[(byte)algorithm, flow, attempt, ttl].State == MultipathTracerouteData.DataState.ResponseReceived)
                             {
                                 // Get the list of corresponding ASes.
-                                List<ASInformation> ases = this.cache.Get(traceroute.Data[(byte)algorithm, flow, attempt, ttl].Address);
+                                List<ASInformation> ases = this.cache.GetCache(traceroute.Data[(byte)algorithm, flow, attempt, ttl].Address);
 
                                 // Add a new hop for the list of ASes.
                                 result.PathsStep1[(byte)algorithm, flow, attempt].AddHop(ases).IpData = traceroute.Data[(byte)algorithm, flow, attempt, ttl];
@@ -197,7 +208,7 @@ namespace Mercury.Topology
             }
 
             // Call the callback method.
-          result.Callback(ASTracerouteState.StateType.Step3);
+            result.Callback(ASTracerouteState.StateType.Step3);
 
             /*
              * Step 4: Save unique flows.
@@ -220,6 +231,8 @@ namespace Mercury.Topology
             return result;
 		}
 
+        #endregion
+
         #region Private methods
 
         /// <summary>
@@ -229,22 +242,8 @@ namespace Mercury.Topology
         /// <returns>The aggregated AS path.</returns>
         private ASTraceroutePath AggregateHops(ASTraceroutePath path)
         {
-
             // Create the resulting path.
             ASTraceroutePath result = new ASTraceroutePath();
-
-            //There are some traces that the dstAS is equal to srcAS (Akamai, Google servers)
-            //If the srcAS number correspond with the dstAS we create a path with only ONE hop
-            if (path.Hops.Last().AsNumber.HasValue && path.Hops.Last().AsNumber.HasValue)
-            {
-                if (path.Hops.First().AsNumber == path.Hops.Last().AsNumber)
-                {
-                    result.Hops.Add(path.Hops.First());
-                    return result;
-                }
-            }
-
-
                 
             // For each hop
             for (int hop = 1; hop < path.Hops.Count; hop++)
@@ -387,7 +386,15 @@ namespace Mercury.Topology
                 }
             }
 
-
+            //BUG TO SOLVE. There are some traces that the dstAS is equal to srcAS and is not Akamai servers
+            //If the processed dstAS number does not correspond with the dstAS 
+            if (result.Hops.Last().AsNumber.HasValue && path.Hops.Last().AsNumber.HasValue)
+            {
+                if (result.Hops.Last().AsNumber != path.Hops.Last().AsNumber)
+                {
+                    result.Hops.Clear();
+                }
+            }
             return result; 
 
         }
@@ -434,8 +441,6 @@ namespace Mercury.Topology
             return path;
         }
         
-
         #endregion
-
     }
 }

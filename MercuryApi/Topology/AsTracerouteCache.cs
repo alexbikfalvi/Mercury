@@ -32,9 +32,9 @@ namespace Mercury.Topology
 	public sealed class ASTracerouteCache
 	{
         private readonly object sync = new object();
-        private static readonly List<ASInformation> empty = new List<ASInformation>(0);
-
 		private readonly ASTracerouteSettings settings;
+
+        private static readonly List<ASInformation> empty = new List<ASInformation>();
 
         private readonly Dictionary<IPAddress, List<ASInformation>> ipMapping =
             new Dictionary<IPAddress, List<ASInformation>>();
@@ -52,14 +52,14 @@ namespace Mercury.Topology
 
 		#region Public methods
 
-		/// <summary>
-		/// Gets from the cache the information for the specified IP address.
-		/// </summary>
-		/// <param name="address">The IP address.</param>
-		/// <returns>The address information.</returns>
-        public List<ASInformation> Get(IPAddress address)
+        /// <summary>
+        /// Gets from the cache only the information for the specified IP address.
+        /// </summary>
+        /// <param name="address">The IP address.</param>
+        /// <returns>The address information or <b>null</b> if no information is found.</returns>
+        public List<ASInformation> GetCache(IPAddress address)
         {
-            // If the IP address is private.
+            // If the IP address is not a global unicast, return an empty list.
             if (!address.IsGlobalUnicastAddress()) return ASTracerouteCache.empty;
 
             List<ASInformation> list;
@@ -72,31 +72,62 @@ namespace Mercury.Topology
                     // If the value is found, return the mapping.
                     return list;
                 }
+                else
+                {
+                    return ASTracerouteCache.empty;
+                }
             }
+        }
 
-            // Create a new list.
-            list = new List<ASInformation>();
-            // Get the mapping using the Mercury service.
-            foreach (MercuryIpToAsMapping mapping in MercuryService.GetIpToAsMappings(address))
-            {
-                // Create a new AS information.
-                ASInformation info = new ASInformation(mapping);
-                // Add the AS information to the list.
-                list.Add(info);
-            }
+		/// <summary>
+		/// Gets from the cache the information for the specified IP address.
+		/// </summary>
+		/// <param name="address">The IP address.</param>
+		/// <returns>The address information.</returns>
+        public List<ASInformation> GetUpdate(IPAddress address)
+        {
+            // If the IP address is not a global unicast, return null.
+            if (!address.IsGlobalUnicastAddress()) return ASTracerouteCache.empty;
 
             lock (this.sync)
             {
-                foreach (ASInformation info in list)
+                List<ASInformation> list;
+                // Try and get the value from the cache.
+                if (this.ipMapping.TryGetValue(address, out list))
                 {
-                    // Add the AS to the cache.
-                    this.asMapping[info.AsNumber] = info;
+                    // If the value is found, return the mapping.
+                    return list;
                 }
-                // Add the address to the cache.
-                this.ipMapping[address] = list;
             }
-            // Return the mapping.
-            return list;
+
+            // Get the address mappings using the Mercury service.
+            List<MercuryIpToAsMapping> mappings = MercuryService.GetIpToAsMappings(address);
+
+            // If the mappings are not empty.
+            if (mappings.Count > 0)
+            {
+                // Create a new list.
+                List<ASInformation> list = new List<ASInformation>(from mapping in mappings select new ASInformation(mapping));
+
+                // Update the cache.
+                lock (this.sync)
+                {
+                    foreach (ASInformation info in list)
+                    {
+                        // Add the AS to the cache.
+                        this.asMapping[info.AsNumber] = info;
+                    }
+                    // Add the address to the cache.
+                    this.ipMapping[address] = list;
+                }
+
+                // Return the list.
+                return list;
+            }
+            else
+            {
+                return ASTracerouteCache.empty;
+            }
         }
 
         /// <summary>
@@ -114,11 +145,14 @@ namespace Mercury.Topology
                 // Add the mappings found in the cache.
                 foreach (IPAddress address in addresses)
                 {
+                    if (address.GetAddressBytes()[0] == 2)
+                        System.Diagnostics.Debugger.Break();
+
                     // If the IP address is private.
                     if (!address.IsGlobalUnicastAddress()) continue;
 
                     // Check if the address is contained in the cache.
-                    if (this.ipMapping.ContainsKey(address))
+                    if (!this.ipMapping.ContainsKey(address))
                     {
                         // If the value is not found, add the address to the not found addresses list.
                         notFoundAddresses.Add(address);
