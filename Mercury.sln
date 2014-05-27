@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercuryClient", "MercuryClient\MercuryClient.csproj", "{04F0F123-C2F0-4785-B8AD-2C4672B1F02A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercuryTraceroute", "MercuryTraceroute\MercuryTraceroute.csproj", "{C413660D-88F9-46FF-90BE-F2064F996DF6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InetApi", "..\InetAnalytics\InetApi\InetApi.csproj", "{6E2D7303-FFAB-4732-86F5-8BB0F7CD8276}"
@@ -29,10 +27,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{04F0F123-C2F0-4785-B8AD-2C4672B1F02A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{04F0F123-C2F0-4785-B8AD-2C4672B1F02A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{04F0F123-C2F0-4785-B8AD-2C4672B1F02A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{04F0F123-C2F0-4785-B8AD-2C4672B1F02A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C413660D-88F9-46FF-90BE-F2064F996DF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C413660D-88F9-46FF-90BE-F2064F996DF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C413660D-88F9-46FF-90BE-F2064F996DF6}.Release|Any CPU.ActiveCfg = Release|Any CPU

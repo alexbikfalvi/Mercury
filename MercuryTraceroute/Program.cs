@@ -1019,6 +1019,20 @@ namespace Mercury
         {
             Console.WriteLine();
             Program.WriteLine(ConsoleColor.Gray, "Step...................................", ConsoleColor.Magenta, "4");
+
+            //Here we show the processed AS path
+            Program.WriteLine(ConsoleColor.Cyan, "PROCESSED AS PATH(s):");
+            foreach (ASTraceroutePath path in result.PathsStep4)
+            {
+                Console.Write("FLAGS: {0:X8} ---> PATH: ", (uint)path.Flags);
+                foreach (ASTracerouteHop hop in path.Hops)
+                {
+                    if (hop.AsNumber.HasValue) Console.Write("AS{0} ", hop.AsNumber.Value);
+                    else Console.Write("AS? ");
+                }
+                Console.WriteLine();
+            }
+
         }
 
 		/// <summary>

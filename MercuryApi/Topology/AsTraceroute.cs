@@ -344,7 +344,8 @@ namespace Mercury.Topology
                                             path.Hops[hop].AsNumber = path.Hops[hop].AsSet.First().AsNumber; //We set the AsNumber with the first candidate. We must improve this :-(
                                         }
                                         //if (path.Hops[hop].AsSet.Count == 1) result.Flags = result.Flags | ASTracerouteFlags.None;
-                                        if (path.Hops[hop].AsSet.Count == 1) result.Flags = result.Flags | ASTracerouteFlags.MissingHopEdgeAs;
+                                        if (path.Hops[hop].AsSet.Count == 0) //if missing at the edge
+                                            result.Flags = result.Flags | ASTracerouteFlags.MissingHopEdgeAs;
                                         result.Hops.Add(path.Hops[hop]);
                                     }
 

@@ -174,7 +174,7 @@ namespace Mercury.Topology
                 List<List<MercuryIpToAsMapping>> results = MercuryService.GetIpToAsMappings(notFoundAddressesList, index, count);
 
                 // Create the AS information list.
-                List<ASInformation> list = new List<ASInformation>();
+                //List<ASInformation> list = new List<ASInformation>();
 
                 lock (this.sync)
                 {
@@ -183,6 +183,7 @@ namespace Mercury.Topology
                         if (0 == result.Count) continue;
 
                         // Clear the AS information list.
+                        List<ASInformation> list = new List<ASInformation>();
                         list.Clear();
 
                         // For each mapping in the result.
