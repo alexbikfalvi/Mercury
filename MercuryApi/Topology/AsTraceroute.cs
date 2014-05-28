@@ -162,6 +162,23 @@ namespace Mercury.Topology
                     // For each attempt.
                     for (byte attempt = 0; attempt < traceroute.Settings.AttemptsPerFlow; attempt++)
                     {
+
+                        //If source is null, we assume the first AS found of the first path.
+                        if (sourceAsList.Count() == 0) 
+                        {
+                            if (result.PathsStep1[(byte)algorithm, flow, attempt].Hops.Count() > 0)
+                            {
+                                foreach (ASTracerouteHop hop in result.PathsStep1[0, 0, 0].Hops)
+                                {
+                                    if (hop.AsNumber.HasValue)
+                                    {
+                                        sourceAsList = hop.AsSet.ToList();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
                         // Add the public source AS to the first position.
                         result.PathsStep1[(byte)algorithm, flow, attempt].AddSource(sourceAsList);
                         // Add the destination AS to the last position.

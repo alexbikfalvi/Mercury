@@ -92,7 +92,8 @@ namespace MercuryTool
                 using (Program program = new Program(args))
                 {
                     // Run the program.
-                    program.Run();
+                    //program.Run();
+                    program.RunSeq();
                 }
             }
             catch (Exception exception)
@@ -141,6 +142,30 @@ namespace MercuryTool
             }
             // Wait for the threads to complete.
             this.wait.WaitOne();
+        }
+        
+        /// <summary>
+        /// Sequencial Run
+        /// </summary>
+        public void RunSeq()
+        {
+            //If we do not have parameters, we load destinations from Server
+            if (destinations == null)
+            {
+                // Get URLs using the current locale.
+                using (WebClient client = new WebClient())
+                {
+                    this.destinations = client.DownloadString(
+                        "http://inetanalytics.nets.upf.edu/getUrls?countryCode=ES").Split(
+                        //"http://inetanalytics.nets.upf.edu/getUrls?countryCode={0}".FormatWith(RegionInfo.CurrentRegion.TwoLetterISORegionName)).Split(
+                        new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                }
+            }
+
+            foreach (String destination in destinations)
+            {
+                this.RunSeq(destination);
+            }
         }
 
         /// <summary>
@@ -275,6 +300,102 @@ namespace MercuryTool
         }
 
         /// <summary>
+        /// Sequencial Run
+        /// </summary>
+        /// <param name="destination"></param>
+        public void RunSeq(string destination)
+        {
+            try
+            {
+                // Create the IP level traceroute.
+                using (MultipathTraceroute ipTraceroute = new MultipathTraceroute(this.ipSettings))
+                {
+                    // TODO: Run the DNS client to get all IP addresses for the current destination.
+                    IPAddress[] destinationAddresses = Dns.GetHostAddresses(destination);
+
+                    // Request from Mercury the AS corresponding to the destination addresses.
+                    this.tracerouteAs.Cache.Update(destinationAddresses);
+
+                    HashSet<int> uniqueAses = new HashSet<int>();
+                    List<IPAddress> uniqueAddresses = new List<IPAddress>();
+
+                    // For each destination address.
+                    foreach (IPAddress destinationAddress in destinationAddresses)
+                    {
+                        HashSet<ASInformation> ases = new HashSet<ASInformation>(this.tracerouteAs.Cache.GetCache(destinationAddress), new ASInformation.EqualityComparer());
+                        if ((ases.Count == 0) || (ases.Count > 1))
+                        {
+                            uniqueAddresses.Add(destinationAddress);
+                        }
+                        else if (ases.First().AsNumber <= 0)
+                        {
+                            uniqueAddresses.Add(destinationAddress);
+                        }
+                        else if (!uniqueAses.Contains(ases.First().AsNumber))
+                        {
+                            uniqueAddresses.Add(destinationAddress);
+                            uniqueAses.Add(ases.First().AsNumber);
+                        }
+                    }
+
+                    lock (this.sync)
+                    {
+                        // Show the destinations for the current traceroute.
+                        Program.WriteLine(ConsoleColor.Green, "START ", ConsoleColor.Cyan, destination);
+                        Console.Write("\t");
+                        foreach (IPAddress address in uniqueAddresses)
+                        {
+                            HashSet<ASInformation> ases = new HashSet<ASInformation>(this.tracerouteAs.Cache.GetCache(address), new ASInformation.EqualityComparer());
+                            Program.Write(ConsoleColor.White, "{0} ", address);
+                            Program.Write(ConsoleColor.Yellow, "[ ");
+                            foreach (ASInformation asInfo in ases)
+                            {
+                                Program.Write(ConsoleColor.Yellow, "AS{0} ", asInfo.AsNumber);
+                            }
+                            Program.Write(ConsoleColor.Yellow, "] ");
+                        }
+                        Console.WriteLine();
+                    }
+
+                    // For all addresses with unique ASes.
+                    foreach (IPAddress destinationAddress in uniqueAddresses)
+                    {
+                        ASTraceroutePath[] result;
+                        bool foundInCache = false;
+                        lock (this.sync)
+                        {
+                            foundInCache = this.cache.TryGetValue(destinationAddress, out result);
+                        }
+                        if (foundInCache)
+                        {
+                            this.Complete(this.cache[destinationAddress], destination, sourceAddress, destinationAddress, true);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                this.Run(ipTraceroute, destination, sourceAddress, destinationAddress);
+                            }
+                            catch (Exception exception)
+                            {
+                                lock (this.sync)
+                                {
+                                    Program.WriteLine(ConsoleColor.Red, "ERROR", ConsoleColor.Gray, "{0} ({1}) {2}", destination, destinationAddress, exception.Message);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Program.WriteLine(ConsoleColor.Red, "ERROR", ConsoleColor.Gray, "{0} {1}", destination, exception.Message);
+            }
+
+        }
+
+
+        /// <summary>
         /// Run method that processes the destination IP
         /// </summary>
         /// <param name="tracerouteIp">The IP-level traceroute.</param>
@@ -346,7 +467,7 @@ namespace MercuryTool
             if (paths != null)
             {
                 // Upload the traceroute.
-                this.Upload(paths, destination, destinationAddress);
+                //this.Upload(paths, destination, destinationAddress);
             }
             else
             {
