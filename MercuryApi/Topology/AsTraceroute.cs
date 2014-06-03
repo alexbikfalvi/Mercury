@@ -299,6 +299,26 @@ namespace Mercury.Topology
                 }
             }
 
+            //we check for too many missing hops. 
+            //we consider "too many" when we have more than 8 hops and >50% are missing hops
+            if (path.Hops.Count() >= 8)
+            {
+                int missings = 0;
+                foreach(ASTracerouteHop hop in path.Hops)
+                {
+                    if (!hop.AsNumber.HasValue) missings++;
+                }
+
+                float missingRate = missings / path.Hops.Count();
+                if (missingRate > 0.5) 
+                { 
+                    path.Flags = ASTracerouteFlags.TooManyMissingHops; 
+                    return path; 
+                }
+
+            }
+
+
             // For each hop
             for (int hop = 1; hop < path.Hops.Count; hop++)
             {
@@ -357,8 +377,24 @@ namespace Mercury.Topology
                                     {
                                         if (path.Hops[hop].AsSet.Count > 1)
                                         {
-                                            result.Flags = result.Flags | ASTracerouteFlags.MultipleAsDifferentNeighbor;
-                                            path.Hops[hop].AsNumber = path.Hops[hop].AsSet.First().AsNumber; //We set the AsNumber with the first candidate. We must improve this :-(
+                                            bool foundIxp = false;
+                                            //now we check for IXPs
+                                            foreach(ASInformation asInfo in path.Hops[hop].AsSet)
+                                            {
+                                                if (asInfo.Type == ASInformation.AsType.Ixp)
+                                                {
+                                                    foundIxp = true;
+                                                    result.Flags = result.Flags | ASTracerouteFlags.MultipleAsDifferentNeighborIXP;
+                                                    path.Hops[hop].AsNumber = asInfo.AsNumber;
+                                                    break; // we choose the first IXP matching :-(
+                                                }
+                                            }
+                                            if(!foundIxp)
+                                            {
+                                                result.Flags = result.Flags | ASTracerouteFlags.MultipleAsDifferentNeighbor;
+                                                path.Hops[hop].AsNumber = path.Hops[hop].AsSet.First().AsNumber; //We set the AsNumber with the first candidate. We must improve this :-(
+                                            }
+
                                         }
                                         //if (path.Hops[hop].AsSet.Count == 1) result.Flags = result.Flags | ASTracerouteFlags.None;
                                         if (path.Hops[hop].AsSet.Count == 0) //if missing at the edge
@@ -428,8 +464,24 @@ namespace Mercury.Topology
                                 {
                                     if (path.Hops[hop-1].AsSet.Count > 1)
                                     {
-                                        result.Flags = result.Flags | ASTracerouteFlags.MultipleAsDifferentNeighbor;
-                                        path.Hops[hop - 1].AsNumber = path.Hops[hop - 1].AsSet.First().AsNumber; //We set the AsNumber with the first candidate . We must improve this :-(
+
+                                        bool foundIxp = false;
+                                        //now we check for IXPs
+                                        foreach (ASInformation asInfo in path.Hops[hop -1].AsSet)
+                                        {
+                                            if (asInfo.Type == ASInformation.AsType.Ixp)
+                                            {
+                                                foundIxp = true;
+                                                result.Flags = result.Flags | ASTracerouteFlags.MultipleAsDifferentNeighborIXP;
+                                                path.Hops[hop - 1].AsNumber = asInfo.AsNumber;
+                                                break; // we choose the first IXP matching :-(
+                                            }
+                                        }
+                                        if (!foundIxp)
+                                        {
+                                            result.Flags = result.Flags | ASTracerouteFlags.MultipleAsDifferentNeighbor;
+                                            path.Hops[hop - 1].AsNumber = path.Hops[hop - 1].AsSet.First().AsNumber; //We set the AsNumber with the first candidate. We must improve this :-(
+                                        }
                                     }
                                     //if (path.Hops[hop-1].AsSet.Count == 1) result.Flags = result.Flags | ASTracerouteFlags.None;
                                     if (path.Hops[hop-1].AsSet.Count == 0) result.Flags = result.Flags | ASTracerouteFlags.MissingSource;

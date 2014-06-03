@@ -32,6 +32,7 @@ namespace Mercury.Topology
         // Attempt traceroute
         MultipleAsEqualNeighbor = 0x4, // [AS0] - [AS0 AS1] - [AS?]
         MultipleAsDifferentNeighbor = 0x10000, // [AS0] - [AS1 AS2] - [AS3]
+        MultipleAsDifferentNeighborIXP = 0x1000, // [AS0] - [AS1 AS2]<IXP> - [AS3]
         MultipleEqualNeighborPair = 0x8, // [AS0] - [AS0 AS?] - [AS0 AS?] - [AS?]
         MultipleDifferentNeighborPair = 0x20000, // [AS?] - [AS? AS?] - [AS? AS?] - [AS?]
         MissingHopInsideAs = 0x10,
@@ -39,6 +40,7 @@ namespace Mercury.Topology
         MissingSource = 0x80000,
         MissingDestination = 0x100000,
         LoopPath = 0x200000,
+        TooManyMissingHops = 0x40000,
         // Flow traceroute
         FlowNotEnoughAttempts = 0x400000,
         FlowDistinctAttempts = 0x800000,

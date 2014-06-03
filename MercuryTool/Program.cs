@@ -467,7 +467,7 @@ namespace MercuryTool
             if (paths != null)
             {
                 // Upload the traceroute.
-                //this.Upload(paths, destination, destinationAddress);
+                this.Upload(paths, destination, destinationAddress);
             }
             else
             {
