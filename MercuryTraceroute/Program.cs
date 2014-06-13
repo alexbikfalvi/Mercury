@@ -52,6 +52,7 @@ namespace Mercury
 
 		private MultipathTraceroute tracerouteIp;
 		private MultipathTracerouteSettings settingsIp;
+        private PacketCapture packetCapture;
 
 		private ASTraceroute tracerouteAs;
 		private ASTracerouteSettings settingsAs;
@@ -78,8 +79,13 @@ namespace Mercury
 			// Create the IP-level traceroute settings.
 			this.settingsIp = new MultipathTracerouteSettings();
 
+            // Create the packet capture
+            IPAddress localAddress = NetworkConfiguration.GetLocalUnicastAddress(AddressFamily.InterNetwork);
+            IPEndPoint localEndPoint = new IPEndPoint(localAddress, 0);
+            this.packetCapture = new PacketCapture(localEndPoint, CancellationToken.None );
+
 			// Create the IP-level traceroute.
-			this.tracerouteIp = new MultipathTraceroute(this.settingsIp);
+			this.tracerouteIp = new MultipathTraceroute(this.settingsIp, this.packetCapture);
 
 			// Create the AS-level traceroute settings.
 			this.settingsAs = new ASTracerouteSettings();
