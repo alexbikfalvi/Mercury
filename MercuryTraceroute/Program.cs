@@ -79,14 +79,6 @@ namespace Mercury
 			// Create the IP-level traceroute settings.
 			this.settingsIp = new MultipathTracerouteSettings();
 
-            // Create the packet capture
-            IPAddress localAddress = NetworkConfiguration.GetLocalUnicastAddress(AddressFamily.InterNetwork);
-            IPEndPoint localEndPoint = new IPEndPoint(localAddress, 0);
-            this.packetCapture = new PacketCapture(localEndPoint, CancellationToken.None );
-
-			// Create the IP-level traceroute.
-			this.tracerouteIp = new MultipathTraceroute(this.settingsIp, this.packetCapture);
-
 			// Create the AS-level traceroute settings.
 			this.settingsAs = new ASTracerouteSettings();
 
@@ -242,6 +234,12 @@ namespace Mercury
 
             // Show the local IP address.
             Program.WriteLine(ConsoleColor.Gray, "Local address..........................", ConsoleColor.Cyan, localAddress.ToString());
+
+            // Create the packet capture
+            this.packetCapture = new PacketCapture(localAddress, CancellationToken.None);
+
+            // Create the IP-level traceroute.
+            this.tracerouteIp = new MultipathTraceroute(this.settingsIp, this.packetCapture);
 
             // Get the DNS server.
             IPAddress dnsAddress = this.dnsServer != null ? this.dnsServer : this.iface != null ? NetworkConfiguration.GetDnsServer(this.interfaces[this.iface.Value]) : NetworkConfiguration.GetDnsServer(this.interfaces);

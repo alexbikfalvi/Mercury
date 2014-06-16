@@ -52,6 +52,8 @@ namespace MercuryTool
         private readonly MultipathTracerouteSettings ipSettings = new MultipathTracerouteSettings();
         private readonly ASTracerouteSettings asSettings = new ASTracerouteSettings();
 
+        private readonly PacketCapture packetCapture;
+
         private readonly ASTraceroute tracerouteAs;
 
         private readonly IPAddress sourceAddress;
@@ -74,6 +76,9 @@ namespace MercuryTool
             // Set the source address.
             this.sourceAddress = Dns.GetHostAddresses(Dns.GetHostName()).First(ip => ip.AddressFamily == AddressFamily.InterNetwork);
 
+            // Create the packet capture
+            this.packetCapture = new PacketCapture(this.sourceAddress, CancellationToken.None);
+
             // Set the public address.
             MercuryLocalInformation localInformation = MercuryService.GetLocalInformation();
             this.publicAddress = localInformation.Address;
@@ -92,8 +97,8 @@ namespace MercuryTool
                 using (Program program = new Program(args))
                 {
                     // Run the program.
-                    //program.Run();
-                    program.RunSeq();
+                    program.Run();
+                    //program.RunSeq();
                 }
             }
             catch (Exception exception)
@@ -192,7 +197,7 @@ namespace MercuryTool
             try
             {
                 // Create the IP level traceroute.
-                using (MultipathTraceroute ipTraceroute = new MultipathTraceroute(this.ipSettings))
+                using (MultipathTraceroute ipTraceroute = new MultipathTraceroute(this.ipSettings, packetCapture))
                 {
                     // TODO: Run the DNS client to get all IP addresses for the current destination.
                     IPAddress[] destinationAddresses = Dns.GetHostAddresses(destination);
@@ -308,7 +313,7 @@ namespace MercuryTool
             try
             {
                 // Create the IP level traceroute.
-                using (MultipathTraceroute ipTraceroute = new MultipathTraceroute(this.ipSettings))
+                using (MultipathTraceroute ipTraceroute = new MultipathTraceroute(this.ipSettings, packetCapture))
                 {
                     // TODO: Run the DNS client to get all IP addresses for the current destination.
                     IPAddress[] destinationAddresses = Dns.GetHostAddresses(destination);
@@ -668,7 +673,7 @@ namespace MercuryTool
                 );
             if (traceroutes.Count > 0)
             {
-                MercuryService.UploadAsTraceroute(traceroutes);
+                //MercuryService.UploadAsTraceroute(traceroutes);
             }
         }
 
