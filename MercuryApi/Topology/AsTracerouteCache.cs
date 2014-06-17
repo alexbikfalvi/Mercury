@@ -145,8 +145,6 @@ namespace Mercury.Topology
                 // Add the mappings found in the cache.
                 foreach (IPAddress address in addresses)
                 {
-                    if (address.GetAddressBytes()[0] == 2)
-                        System.Diagnostics.Debugger.Break();
 
                     // If the IP address is private.
                     if (!address.IsGlobalUnicastAddress()) continue;

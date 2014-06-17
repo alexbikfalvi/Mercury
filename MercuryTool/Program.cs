@@ -109,6 +109,9 @@ namespace MercuryTool
 
             // Reset the console.
             Console.ResetColor();
+
+            Console.WriteLine("Press the any key to quit: \n");
+            ConsoleKeyInfo cki = Console.ReadKey();
         }
 
         #endregion

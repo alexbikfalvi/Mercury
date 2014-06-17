@@ -185,6 +185,11 @@ namespace Mercury.Topology
                         result.PathsStep1[(byte)algorithm, flow, attempt].AddDestination(destinationAsList);
                         // Aggregate the hops.
                         result.PathsStep2[(byte)algorithm, flow, attempt] = this.AggregateHops(result.PathsStep1[(byte)algorithm, flow, attempt]);
+                        //We activate FLAG for those IP traces that do not have IP hops. e.g. This happens with UDP
+                        if (traceroute.Statistics[(byte)algorithm, flow, attempt].MaximumTimeToLive == 0)
+                        {
+                            result.PathsStep2[(byte)algorithm, flow, attempt].Flags = ASTracerouteFlags.TooManyMissingHops;
+                        }
                     }
                 }
             }

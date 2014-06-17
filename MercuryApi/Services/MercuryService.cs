@@ -26,11 +26,15 @@ using Mercury.Api;
 
 namespace Mercury.Services
 {
+
+
+
     /// <summary>
     /// A static class with methods for the Mercury API.
     /// </summary>
     public static class MercuryService
     {
+        public const int maxRetries = 4;
         public const int maximumAddressesPerRequest = 1000;
 
         /// <summary>
@@ -90,17 +94,46 @@ namespace Mercury.Services
         /// <returns>The list of AS mappings.</returns>
         public static List<List<MercuryIpToAsMapping>> GetIpToAsMappings(IList<IPAddress> addresses, int start, int length)
         {
-            using (WebClient client = new WebClient())
+            //using (WebClient client = new WebClient())
+            //{
+            //    StringBuilder builder = new StringBuilder("ips=");
+            //    for (int index = start; index < start + length; index++)
+            //    {
+            //        builder.AppendFormat("{0},", addresses[index]);
+            //    }
+            //    client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+            //    return JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(
+            //        client.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST", builder.ToString()));
+            //}
+
+            List<List<MercuryIpToAsMapping>> result = null;
+            bool success = false;
+            int attempt = 0;
+            Exception ex = null;
+            while ((attempt < maxRetries) && (!success))
             {
-                StringBuilder builder = new StringBuilder("ips=");
-                for (int index = start; index < start + length; index++)
-                {
-                    builder.AppendFormat("{0},", addresses[index]);
+                attempt++;
+                try{
+                   using (WebClient client = new WebClient())
+                   {
+                        StringBuilder builder = new StringBuilder("ips=");
+                        for (int index = start; index < start + length; index++)
+                        {
+                            builder.AppendFormat("{0},", addresses[index]);
+                        }
+                        client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                        result = JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(
+                            client.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST", builder.ToString()));
+                        success = true;
+                   }
+
+                } catch(Exception exception){
+                    ex = exception;
                 }
-                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                return JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(
-                    client.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST", builder.ToString()));
             }
+            if (!success) throw new Exception("Problem(s) connecting with the Mercury server", ex);
+
+            return result;
         }
 
         /// <summary>
