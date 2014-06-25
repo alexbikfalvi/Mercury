@@ -43,11 +43,34 @@ namespace Mercury.Services
         /// <returns>An object with the local information.</returns>
         public static MercuryLocalInformation GetLocalInformation()
         {
-            using (WebClient client = new WebClient())
+            //using (WebClient client = new WebClient())
+            //{
+            //    return JsonConvert.DeserializeObject<MercuryLocalInformation>(
+            //        client.DownloadString("http://mercury.upf.edu/mercury/api/services/myInfo"));
+            //}
+
+
+            MercuryLocalInformation result = null;
+            bool success = false;
+            int attempt = 0;
+            Exception ex = null;
+            while ((attempt < maxRetries) && (!success))
             {
-                return JsonConvert.DeserializeObject<MercuryLocalInformation>(
-                    client.DownloadString("http://mercury.upf.edu/mercury/api/services/myInfo"));
+                attempt++;
+                try{
+                   using (WebClient client = new WebClient())
+                   {
+                        result = JsonConvert.DeserializeObject<MercuryLocalInformation>(
+                            client.DownloadString("http://mercury.upf.edu/mercury/api/services/myInfo"));
+                        success = true;
+                   }
+                } catch(Exception exception){
+                    ex = exception;
+                }
             }
+            if (!success) throw new Exception("Problem(s) connecting with the Mercury server", ex);
+
+            return result;
         }
 
         /// <summary>
@@ -57,13 +80,40 @@ namespace Mercury.Services
         /// <returns>The list of AS mappings.</returns>
         public static List<MercuryIpToAsMapping> GetIpToAsMappings(IPAddress address)
         {
-            using (WebClient client = new WebClient())
+            //using (WebClient client = new WebClient())
+            //{
+            //    client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+            //    return JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(
+            //        client.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST",
+            //        string.Format("ips={0}", address)))[0];
+            //}
+
+
+            List<MercuryIpToAsMapping> result = null;
+            bool success = false;
+            int attempt = 0;
+            Exception ex = null;
+            while ((attempt < maxRetries) && (!success))
             {
-                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                return JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(
-                    client.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST",
-                    string.Format("ips={0}", address)))[0];
+                attempt++;
+                try
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        result = JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(
+                            client.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST",
+                            string.Format("ips={0}", address)))[0];
+                        success = true;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ex = exception;
+                }
             }
+            if (!success) throw new Exception("Problem(s) connecting with the Mercury server", ex);
+
+            return result;
         }
 
         /// <summary>
@@ -73,17 +123,48 @@ namespace Mercury.Services
         /// <returns>The list of AS mappings.</returns>
         public static List<List<MercuryIpToAsMapping>> GetIpToAsMappings(IEnumerable<IPAddress> addresses)
         {
-            using (WebClient client = new WebClient())
+            //using (WebClient client = new WebClient())
+            //{
+            //    StringBuilder builder = new StringBuilder("ips=");
+            //    foreach (IPAddress address in addresses)
+            //    {
+            //        builder.AppendFormat("{0},", address);
+            //    }
+            //    client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+            //    return JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(
+            //        client.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST", builder.ToString()));
+            //}
+
+            List<List<MercuryIpToAsMapping>> result = null;
+            bool success = false;
+            int attempt = 0;
+            Exception ex = null;
+            while ((attempt < maxRetries) && (!success))
             {
-                StringBuilder builder = new StringBuilder("ips=");
-                foreach (IPAddress address in addresses)
+                attempt++;
+                try
                 {
-                    builder.AppendFormat("{0},", address);
+                    using (WebClient client = new WebClient())
+                    {
+                        StringBuilder builder = new StringBuilder("ips=");
+                        foreach (IPAddress address in addresses)
+                        {
+                            builder.AppendFormat("{0},", address);
+                        }
+                        client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                        result = JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(
+                            client.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST", builder.ToString()));
+                        success = true;
+                    }
                 }
-                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                return JsonConvert.DeserializeObject<List<List<MercuryIpToAsMapping>>>(
-                    client.UploadString("http://mercury.upf.edu/mercury/api/services/getIp2AsnMappingsByIpsPOST", builder.ToString()));
+                catch (Exception exception)
+                {
+                    ex = exception;
+                }
             }
+            if (!success) throw new Exception("Problem(s) connecting with the Mercury server", ex);
+
+            return result;
         }
 
         /// <summary>
@@ -143,18 +224,50 @@ namespace Mercury.Services
         /// <returns>The list of geo mappings.</returns>
         public static List<MercuryIpToGeoMapping> GetIp2GeoMappings(IEnumerable<IPAddress> addresses)
         {
-            using (WebClient client = new WebClient())
-            {
-                StringBuilder builder = new StringBuilder("ips=");
-                foreach (IPAddress address in addresses)
-                {
-                    builder.AppendFormat("{0},", address);
-                }
-                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+            //using (WebClient client = new WebClient())
+            //{
+            //    StringBuilder builder = new StringBuilder("ips=");
+            //    foreach (IPAddress address in addresses)
+            //    {
+            //        builder.AppendFormat("{0},", address);
+            //    }
+            //    client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
 
-                return JsonConvert.DeserializeObject<List<MercuryIpToGeoMapping>>(
-                    client.UploadString("http://mercury.upf.edu/mercury/api/services/getIps2GeoPOST", builder.ToString()));
+            //    return JsonConvert.DeserializeObject<List<MercuryIpToGeoMapping>>(
+            //        client.UploadString("http://mercury.upf.edu/mercury/api/services/getIps2GeoPOST", builder.ToString()));
+            //}
+
+            List<MercuryIpToGeoMapping> result = null;
+            bool success = false;
+            int attempt = 0;
+            Exception ex = null;
+            while ((attempt < maxRetries) && (!success))
+            {
+                attempt++;
+                try
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        StringBuilder builder = new StringBuilder("ips=");
+                        foreach (IPAddress address in addresses)
+                        {
+                            builder.AppendFormat("{0},", address);
+                        }
+                        client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                        result = JsonConvert.DeserializeObject<List<MercuryIpToGeoMapping>>(
+                            client.UploadString("http://mercury.upf.edu/mercury/api/services/getIps2GeoPOST", builder.ToString()));
+                        success = true;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ex = exception;
+                }
             }
+            if (!success) throw new Exception("Problem(s) connecting with the Mercury server", ex);
+
+            return result;
+
         }
 
         /// <summary>
@@ -165,11 +278,37 @@ namespace Mercury.Services
         /// <returns>The relationship object.</returns>
         public static MercuryAsTracerouteRelationship GetAsRelationship(int asFirst, int asSecond)
         {
-            using (WebClient client = new WebClient())
+            //using (WebClient client = new WebClient())
+            //{
+            //    return JsonConvert.DeserializeObject<MercuryAsTracerouteRelationship>(
+            //        client.DownloadString(string.Format("http://mercury.upf.edu/mercury/api/services/getASRelationship/{0}/{1}", asFirst, asSecond)));
+            //}
+
+            MercuryAsTracerouteRelationship result = null;
+            bool success = false;
+            int attempt = 0;
+            Exception ex = null;
+            while ((attempt < maxRetries) && (!success))
             {
-                return JsonConvert.DeserializeObject<MercuryAsTracerouteRelationship>(
-                    client.DownloadString(string.Format("http://mercury.upf.edu/mercury/api/services/getASRelationship/{0}/{1}", asFirst, asSecond)));
+                attempt++;
+                try
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        result = JsonConvert.DeserializeObject<MercuryAsTracerouteRelationship>(
+                            client.DownloadString(string.Format("http://mercury.upf.edu/mercury/api/services/getASRelationship/{0}/{1}", asFirst, asSecond)));
+                        success = true;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ex = exception;
+                }
             }
+            if (!success) throw new Exception("Problem(s) connecting with the Mercury server", ex);
+
+            return result;
+
         }
 
         /// <summary>
@@ -179,17 +318,48 @@ namespace Mercury.Services
         /// <returns>A list of relationship objects.</returns>
         public static List<MercuryAsTracerouteRelationship> GetAsRelationships(IEnumerable<Tuple<int, int>> pairs)
         {
-            using (WebClient client = new WebClient())
+            //using (WebClient client = new WebClient())
+            //{
+            //    StringBuilder builder = new StringBuilder("pairs=");
+            //    foreach (Tuple<int, int> pair in pairs)
+            //    {
+            //        builder.AppendFormat("{0}-{1},", pair.Item1, pair.Item2);
+            //    }
+            //    client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+            //    return JsonConvert.DeserializeObject<List<MercuryAsTracerouteRelationship>>(
+            //        client.UploadString("http://mercury.upf.edu/mercury/api/services/getASRelationshipsPOST", builder.ToString()));
+            //}
+
+            List<MercuryAsTracerouteRelationship> result = null;
+            bool success = false;
+            int attempt = 0;
+            Exception ex = null;
+            while ((attempt < maxRetries) && (!success))
             {
-                StringBuilder builder = new StringBuilder("pairs=");
-                foreach (Tuple<int, int> pair in pairs)
+                attempt++;
+                try
                 {
-                    builder.AppendFormat("{0}-{1},", pair.Item1, pair.Item2);
+                    using (WebClient client = new WebClient())
+                    {
+                        StringBuilder builder = new StringBuilder("pairs=");
+                        foreach (Tuple<int, int> pair in pairs)
+                        {
+                            builder.AppendFormat("{0}-{1},", pair.Item1, pair.Item2);
+                        }
+                        client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                        result = JsonConvert.DeserializeObject<List<MercuryAsTracerouteRelationship>>(
+                            client.UploadString("http://mercury.upf.edu/mercury/api/services/getASRelationshipsPOST", builder.ToString()));
+                        success = true;
+                    }
                 }
-                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                return JsonConvert.DeserializeObject<List<MercuryAsTracerouteRelationship>>(
-                    client.UploadString("http://mercury.upf.edu/mercury/api/services/getASRelationshipsPOST", builder.ToString()));
+                catch (Exception exception)
+                {
+                    ex = exception;
+                }
             }
+            if (!success) throw new Exception("Problem(s) connecting with the Mercury server", ex);
+
+            return result;
         }
 
         /// <summary>
@@ -199,11 +369,37 @@ namespace Mercury.Services
         /// <returns>The list of AS-level traceroutes.</returns>
         public static List<MercuryAsTraceroute> GetAsTraceroute(string destination)
         {
-            using (WebClient client = new WebClient())
+            //using (WebClient client = new WebClient())
+            //{
+            //    var json = client.DownloadString("http://mercury.upf.edu/mercury/api/services/getTracerouteASesByDst/{0}".FormatWith(destination));
+            //    return JsonConvert.DeserializeObject<List<MercuryAsTraceroute>>(json);
+            //}
+
+            List<MercuryAsTraceroute> result = null;
+            bool success = false;
+            int attempt = 0;
+            Exception ex = null;
+            while ((attempt < maxRetries) && (!success))
             {
-                var json = client.DownloadString("http://mercury.upf.edu/mercury/api/services/getTracerouteASesByDst/{0}".FormatWith(destination));
-                return JsonConvert.DeserializeObject<List<MercuryAsTraceroute>>(json);
+                attempt++;
+                try
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        var json = client.DownloadString("http://mercury.upf.edu/mercury/api/services/getTracerouteASesByDst/{0}".FormatWith(destination));
+                        result = JsonConvert.DeserializeObject<List<MercuryAsTraceroute>>(json);
+                        success = true;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ex = exception;
+                }
             }
+            if (!success) throw new Exception("Problem(s) connecting with the Mercury server", ex);
+
+            return result;
+
         }
 
         /// <summary>
@@ -213,12 +409,38 @@ namespace Mercury.Services
         /// <returns>The upload result.</returns>
         public static String UploadIpTraceroute(TracerouteIp traceroute)
         {
-            using (WebClient client = new WebClient())
+            //using (WebClient client = new WebClient())
+            //{
+            //    client.Headers[HttpRequestHeader.ContentType] = "application/json";
+            //    return client.UploadString("http://mercury.upf.edu/mercury/api/services/addTracerouteIpPOST",
+            //        JsonConvert.SerializeObject(traceroute));
+            //}
+
+            String result = null;
+            bool success = false;
+            int attempt = 0;
+            Exception ex = null;
+            while ((attempt < maxRetries) && (!success))
             {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                return client.UploadString("http://mercury.upf.edu/mercury/api/services/addTracerouteIpPOST",
-                    JsonConvert.SerializeObject(traceroute));
+                attempt++;
+                try
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                        result = client.UploadString("http://mercury.upf.edu/mercury/api/services/addTracerouteIpPOST",
+                            JsonConvert.SerializeObject(traceroute));
+                        success = true;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ex = exception;
+                }
             }
+            if (!success) throw new Exception("Problem(s) connecting with the Mercury server", ex);
+
+            return result;
         }
 
         /// <summary>
@@ -228,12 +450,38 @@ namespace Mercury.Services
         /// <returns>The upload result.</returns>
         public static string UploadAsTraceroute(MercuryAsTraceroute traceroute)
         {
-            using (WebClient client = new WebClient())
+            //using (WebClient client = new WebClient())
+            //{
+            //    client.Headers[HttpRequestHeader.ContentType] = "application/json";
+            //    return client.UploadString("http://mercury.upf.edu/mercury/api/services/addTracerouteASPOST",
+            //        JsonConvert.SerializeObject(traceroute));
+            //}
+
+            String result = null;
+            bool success = false;
+            int attempt = 0;
+            Exception ex = null;
+            while ((attempt < maxRetries) && (!success))
             {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                return client.UploadString("http://mercury.upf.edu/mercury/api/services/addTracerouteASPOST",
-                    JsonConvert.SerializeObject(traceroute));
+                attempt++;
+                try
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                        result = client.UploadString("http://mercury.upf.edu/mercury/api/services/addTracerouteASPOST",
+                            JsonConvert.SerializeObject(traceroute));
+                        success = true;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ex = exception;
+                }
             }
+            if (!success) throw new Exception("Problem(s) connecting with the Mercury server", ex);
+
+            return result;
         }
 
         /// <summary>
@@ -243,12 +491,38 @@ namespace Mercury.Services
         /// <returns>The upload result.</returns>
         public static string UploadAsTraceroute(List<MercuryAsTraceroute> traceroutes)
         {
-            using (WebClient client = new WebClient())
+            //using (WebClient client = new WebClient())
+            //{
+            //    client.Headers[HttpRequestHeader.ContentType] = "application/json";
+            //    return client.UploadString("http://mercury.upf.edu/mercury/api/services/addTracerouteASesPOST",
+            //        JsonConvert.SerializeObject(traceroutes));
+            //}
+
+            String result = null;
+            bool success = false;
+            int attempt = 0;
+            Exception ex = null;
+            while ((attempt < maxRetries) && (!success))
             {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                return client.UploadString("http://mercury.upf.edu/mercury/api/services/addTracerouteASesPOST",
-                    JsonConvert.SerializeObject(traceroutes));
+                attempt++;
+                try
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                        result = client.UploadString("http://mercury.upf.edu/mercury/api/services/addTracerouteASesPOST",
+                            JsonConvert.SerializeObject(traceroutes));
+                        success = true;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ex = exception;
+                }
             }
+            if (!success) throw new Exception("Problem(s) connecting with the Mercury server", ex);
+
+            return result;
         }
 
         /// <summary>
@@ -258,12 +532,38 @@ namespace Mercury.Services
         /// <returns>The upload result.</returns>
         public static String UploadTracerouteSettings(MercuryTracerouteSettings tracerouteSettings)
         {
-            using (WebClient client = new WebClient())
+            //using (WebClient client = new WebClient())
+            //{
+            //    client.Headers[HttpRequestHeader.ContentType] = "application/json";
+            //    return client.UploadString("http://mercury.upf.edu/mercury/api/services/addTracerouteSettingsPOST",
+            //        JsonConvert.SerializeObject(tracerouteSettings));
+            //}
+
+            String result = null;
+            bool success = false;
+            int attempt = 0;
+            Exception ex = null;
+            while ((attempt < maxRetries) && (!success))
             {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                return client.UploadString("http://mercury.upf.edu/mercury/api/services/addTracerouteSettingsPOST",
-                    JsonConvert.SerializeObject(tracerouteSettings));
+                attempt++;
+                try
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                        result = client.UploadString("http://mercury.upf.edu/mercury/api/services/addTracerouteSettingsPOST",
+                            JsonConvert.SerializeObject(tracerouteSettings));
+                        success = true;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ex = exception;
+                }
             }
+            if (!success) throw new Exception("Problem(s) connecting with the Mercury server", ex);
+
+            return result;
         }
     }
 }
