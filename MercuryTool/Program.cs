@@ -110,6 +110,7 @@ namespace MercuryTool
             // Reset the console.
             Console.ResetColor();
 
+            Console.WriteLine("Finished at "+ DateTime.Now +"\n");
             Console.WriteLine("Press the any key to quit: \n");
             ConsoleKeyInfo cki = Console.ReadKey();
         }

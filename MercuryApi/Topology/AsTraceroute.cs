@@ -205,7 +205,7 @@ namespace Mercury.Topology
             ASTraceroutePath.HashSet attempts = new ASTraceroutePath.HashSet();
             foreach (MultipathTracerouteResult.ResultAlgorithm algorithm in traceroute.Algorithms)
             {
-                for (byte flow = 0; flow < traceroute.Settings.AttemptsPerFlow; flow++)
+                for (byte flow = 0; flow < traceroute.Settings.FlowCount; flow++)
                 {
                     // Clear the attempt.
                     attempts.Clear();
@@ -255,7 +255,7 @@ namespace Mercury.Topology
             ASTraceroutePath.HashSet flows = new ASTraceroutePath.HashSet();
             foreach (MultipathTracerouteResult.ResultAlgorithm algorithm in traceroute.Algorithms)
             {
-                for (byte flow = 0; flow < traceroute.Settings.AttemptsPerFlow; flow++)
+                for (byte flow = 0; flow < traceroute.Settings.FlowCount; flow++)
                 {
                     flows.Add(result.PathsStep3[(byte)algorithm, flow]);
                 }
