@@ -72,7 +72,7 @@ namespace MercuryTool
                 Console.WriteLine("URLs to process: " + args[0]);
                 this.destinations = args[0].Split(new char[] { ',' });
             }
-                
+
             // Set the source address.
             this.sourceAddress = Dns.GetHostAddresses(Dns.GetHostName()).First(ip => ip.AddressFamily == AddressFamily.InterNetwork);
 
@@ -109,7 +109,7 @@ namespace MercuryTool
             // Reset the console.
             Console.ResetColor();
 
-            Console.WriteLine("Finished at "+ DateTime.Now +"\n");
+            Console.WriteLine("Finished at " + DateTime.Now + "\n");
             Console.WriteLine("Press the any key to quit: \n");
             ConsoleKeyInfo cki = Console.ReadKey();
         }
@@ -136,22 +136,22 @@ namespace MercuryTool
                 }
             }
 
-            lock (this.sync) 
+            lock (this.sync)
             {
                 // Run the number of parallel destinations on the thread pool.
                 for (; (processingCount < parallelCount) && (processingCount < destinations.Length); processingCount++)
                 {
                     //Thread.Sleep(waitTimeBeforeInitialThreads);
-                    ThreadPool.QueueUserWorkItem((object destination) => 
-                    { 
-                        this.Run(destination as string); 
+                    ThreadPool.QueueUserWorkItem((object destination) =>
+                    {
+                        this.Run(destination as string);
                     }, this.destinations[processingCount]);
                 }
             }
             // Wait for the threads to complete.
             this.wait.WaitOne();
         }
-        
+
 
         /// <summary>
         /// Disposes the current object.
@@ -364,7 +364,7 @@ namespace MercuryTool
             else
             {
                 // Write the destination.
-                Program.Write(ConsoleColor.Red, "NO Traceroute upload (because no paths) for........"+destination);
+                Program.Write(ConsoleColor.Red, "NO Traceroute upload (because no paths) for........" + destination);
             }
         }
 
