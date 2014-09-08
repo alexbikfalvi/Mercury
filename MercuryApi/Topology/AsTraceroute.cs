@@ -221,17 +221,34 @@ namespace Mercury.Topology
                         result.PathsStep3[(byte)algorithm, flow] = this.IdentifyLoops(attempts.First()); //identify loops
                         result.PathsStep3[(byte)algorithm, flow] = this.CorrectFirstLoop(attempts.First()); //Corect the first loop
                     }
-                    else if (attempts.Count == 2) // Temporary solution... we choose the attempt with the best flags
+                    //else if (attempts.Count == 2) // Temporary solution... we choose the attempt with the best flags
+                    //{
+                    //    ASTraceroutePath tempPath = null;
+                    //    if (attempts.First().Flags > attempts.Last().Flags)
+                    //    {
+                    //        tempPath = attempts.Last();
+                    //    }
+                    //    else
+                    //    {
+                    //        tempPath = attempts.First();
+                    //    }
+                    //    // Add the path to the result.
+                    //    result.PathsStep3[(byte)algorithm, flow] = this.IdentifyLoops(tempPath); //identify loops
+                    //    result.PathsStep3[(byte)algorithm, flow] = this.CorrectFirstLoop(tempPath); //Corect the first loop
+                    //}
+                    else if (attempts.Count > 1) // Temporary solution... we choose the attempt with the best flags
                     {
-                        ASTraceroutePath tempPath = null;
-                        if (attempts.First().Flags > attempts.Last().Flags)
+                        //we load the tempPath with the 0 position
+                        ASTraceroutePath tempPath = attempts.First();
+                        foreach (ASTraceroutePath currentPath in attempts)
                         {
-                            tempPath = attempts.Last();
+                            if (currentPath.Flags < tempPath.Flags)
+                            {
+                                tempPath = currentPath;
+                            }
                         }
-                        else
-                        {
-                            tempPath = attempts.First();
-                        }
+
+
                         // Add the path to the result.
                         result.PathsStep3[(byte)algorithm, flow] = this.IdentifyLoops(tempPath); //identify loops
                         result.PathsStep3[(byte)algorithm, flow] = this.CorrectFirstLoop(tempPath); //Corect the first loop
