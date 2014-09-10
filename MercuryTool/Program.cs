@@ -130,8 +130,8 @@ namespace MercuryTool
                 using (WebClient client = new WebClient())
                 {
                     this.destinations = client.DownloadString(
-                        "http://inetanalytics.nets.upf.edu/getUrls?countryCode=ES").Split(
-                        //"http://inetanalytics.nets.upf.edu/getUrls?countryCode={0}".FormatWith(RegionInfo.CurrentRegion.TwoLetterISORegionName)).Split(
+                        //"http://inetanalytics.nets.upf.edu/getUrls?countryCode=ES").Split(
+                        "http://inetanalytics.nets.upf.edu/getUrls?countryCode={0}".FormatWith(RegionInfo.CurrentRegion.TwoLetterISORegionName)).Split(
                         new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 }
             }
